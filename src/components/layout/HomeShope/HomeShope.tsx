@@ -16,6 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
 import { useAllpstockQuery } from "@/redux/features/product/product.api";
 
+
+const CATEGORIES = ["All", "Pet Supplies", "Automotive", "Musical Instruments","Other"];
 /* ================== Skeleton Card ================== */
 const ProductSkeleton = () => (
   <div className="space-y-3">
@@ -30,26 +32,33 @@ export default function HomeShope() {
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("default");
-
+  const [selectedCategory, setSelectedCategory] = useState("All");
   /* ================== API ================== */
   const { data, isLoading, isFetching } = useAllpstockQuery({
     page,
-    limit: 20,
+    limit: 40,
     search: searchTerm,
+
+    category: selectedCategory === "All" ? undefined : selectedCategory,
   });
 
+  useEffect(() => {
+    setAllProducts([]);
+    setPage(1);
+  }, [searchTerm, selectedCategory]);
+
 useEffect(() => {
-  if (data?.data) {
-    setAllProducts((prev) => {
-      if (page === 1) return data.data;
-      const existingIds = new Set(prev.map((p) => p._id));
-      const newUniqueProducts = data.data.filter(
-        (product: any) => !existingIds.has(product._id)
-      );
-      return [...prev, ...newUniqueProducts];
-    });
-  }
-}, [data, page]);
+    if (data?.data) {
+      setAllProducts((prev) => {
+        if (page === 1) return data.data;
+        const existingIds = new Set(prev.map((p) => p._id));
+        const newUniqueProducts = data.data.filter(
+          (product: any) => !existingIds.has(product._id)
+        );
+        return [...prev, ...newUniqueProducts];
+      });
+    }
+  }, [data, page]);
 
   /* ================== Search ================== */
   const handleSearch = (val: string) => {
@@ -69,6 +78,19 @@ useEffect(() => {
 
   return (
     <div className="container mx-auto px-4 md:py-10 py-5">
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar">
+        {CATEGORIES.map((cat) => (
+          <Button
+            key={cat}
+            variant={selectedCategory === cat ? "default" : "outline"}
+            size="sm"
+            className="rounded-full whitespace-nowrap"
+            onClick={() => setSelectedCategory(cat)}
+          >
+            {cat}
+          </Button>
+        ))}
+      </div>
       {/* ================== Search + Sort ================== */}
       <div className="flex flex-1 items-center justify-between gap-3  w-full md:mb-10 mb-5">
         <div className="relative flex-1 md:max-w-2xl">
@@ -117,7 +139,7 @@ useEffect(() => {
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
                 <ProductCard
-                key={product._id}
+                  key={product._id}
                   id={product._id}
                   name={product["*Product Name(English)"]}
                   price={product.SpecialPrice || product["*Price"]}

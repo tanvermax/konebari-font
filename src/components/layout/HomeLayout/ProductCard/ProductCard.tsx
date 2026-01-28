@@ -158,3 +158,125 @@ export default function ProductCard({ id, name, price, SpecialPrice, image, isLo
         </div>
     );
 }
+
+
+
+
+
+
+
+
+
+// $project: {
+//                 _id: 1,
+//                 "Product ID": 1,
+//                 "*Product Name(English)": 1,
+//                 "Product Name(Bengali) look function": "$basicInfo.Product Name(Bengali) look function",
+//                 "*Price": 1,
+//                 "SpecialPrice Start": 1,
+//                 "SpecialPrice End": 1,
+//                 "*Quantity": 1,
+//                 "Shop SKU": 1,
+//                 "currenczyCode": 1,
+//                 "SpecialPrice": 1,
+//                 // Bring the image from basic collection to the top level
+//                 "images": "$basicInfo.*Product Images1",
+//                 "description": "$basicInfo.Main Description"
+//             }
+// const getAllPStock = async (query: Record<string, string>) => {
+//     const { page: queryPage, limit: queryLimit, search, category, ...filterData } = query;
+
+//     const page = Number(queryPage) || 1;
+//     const limit = Number(queryLimit) || 20; 
+//     const skip = (page - 1) * limit;
+
+//     const searchCondition = search 
+//         ? { "*Product Name(English)": { $regex: search, $options: "i" } } 
+//         : {};
+
+//     // --- CATEGORY FILTER LOGIC ---
+//     // Note: Since category is calculated in $project, 
+//     // we use the same regex logic in $match to filter before pagination.
+//     let categoryCondition = {};
+//     if (category === "PC") {
+//         categoryCondition = { "*Product Name(English)": { $regex: /computer|wheel/i } };
+//     } else if (category === "Pet Supplies") {
+//         categoryCondition = { "*Product Name(English)": { $regex: /cat|kitten/i } };
+//     }
+//     // Add other categories here...
+
+//     const product = await PriceStockModel.aggregate([
+//         {
+//             $match: { 
+//                 ...filterData, 
+//                 ...searchCondition, 
+//                 ...categoryCondition // Apply the filter here
+//             }
+//         },
+//         { $skip: skip },
+//         { $limit: limit }, // পরবর্তী ২০টি ডাটা নিবে
+//         {
+//             $lookup: {
+//                 from: "besic",
+//                 localField: "Product ID",
+//                 foreignField: "Product ID",
+//                 as: "basicInfo"
+//             }
+//         },
+//         {
+//             $unwind: {
+//                 path: "$basicInfo",
+//                 preserveNullAndEmptyArrays: true
+//             }
+//         },
+        
+//         {
+//             // 4. Clean up the output to match what your Frontend needs
+//             $project: {
+//         _id: 1,
+//         "Product ID": 1,
+//         "productTitle": "$*Product Name(English)",
+//         // --- NEW CATEGORIZATION LOGIC ---
+//         "category": {
+//             $switch: {
+//                 branches: [
+//                     { 
+//                         case: { $regexMatch: { input: "$*Product Name(English)", regex: /cat|kitten|feline/i } }, 
+//                         then: "Pet Supplies" 
+//                     },
+//                     { 
+//                         case: { $regexMatch: { input: "$*Product Name(English)", regex: /car|auto|bmw|vehicle|wheel/i } }, 
+//                         then: "Automotive" 
+//                     },
+//                     { 
+//                         case: { $regexMatch: { input: "$*Product Name(English)", regex: /computer|wheel/i } }, 
+//                         then: "PC" 
+//                     },
+//                     { 
+//                         case: { $regexMatch: { input: "$*Product Name(English)", regex: /guitar|acoustic|strum|strings/i } }, 
+//                         then: "Musical Instruments" 
+//                     }
+//                 ],
+//                 default: "Uncategorized"
+//             }
+//         },
+//         // --- END OF NEW LOGIC ---
+//         "Price": "$*Price",
+//         "images": "$basicInfo.*Product Images1",
+//         "description": "$basicInfo.Main Description"
+//         // ... add other fields as needed
+//     }
+//         }
+//     ]);
+
+//     const totalProduct = await PriceStockModel.countDocuments({ ...filterData, ...searchCondition });
+
+//     return {
+//         data: product,
+//         meta: {
+//             total: totalProduct,
+//             page,
+//             limit
+//         }
+//     };
+// };
