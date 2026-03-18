@@ -147,7 +147,7 @@ const CartPage = () => {
                 toast.success(`Order Confirmed!`);
                 const audio = new Audio(`${ausio}`);
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                audio.play().catch(e => console.log("Audio play blocked by browser"));
+                audio.play().catch(() => console.log("Audio play blocked by browser"));
                 navigate("/thankyou");
             }
         }
@@ -168,7 +168,7 @@ const CartPage = () => {
             if (orderconfirm) {
                 const audio = new Audio(`${ausio}`);
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                audio.play().catch(e => console.log("Audio play blocked by browser"));
+                audio.play().catch(() => console.log("Audio play blocked by browser"));
                 toast.success(`Order Confirmed!`);
                 navigate("/thankyou");
             }

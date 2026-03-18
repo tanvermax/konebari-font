@@ -54,11 +54,11 @@ export default function AdminProductCard({
                     </span>
                 </div>
                 <div className="card-actions flex justify-between mt-2">
-                    <Button 
+                    {/* <Button 
                         className="btn btn-sm btn-primary"
                     >
                         Add to Cart
-                    </Button>
+                    </Button> */}
                     <Button 
                         className="btn btn-sm btn-error"
                         onClick={handleDelete}

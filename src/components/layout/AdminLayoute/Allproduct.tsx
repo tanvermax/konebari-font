@@ -17,6 +17,7 @@ import ProductAddForm from "./AddProduct/ProductAddForm"
 import AdminProductCard from "../HomeLayout/ProductCard/AdminProductCard";
 import { useState } from "react";
 import { toast } from "sonner";
+// import ProductCard from "../HomeLayout/ProductCard/ProductCard";
 export default function Allproduct() {
 
   const { data, isLoading, error,refetch } = useAllproductQuery(undefined);
@@ -67,6 +68,7 @@ export default function Allproduct() {
           {data?.map((invoice: { title: string, _id: string, description: string, slug: string, price: string, images: string }) => (
 
             <AdminProductCard
+            // <ProductCard
               id={invoice._id}
               description={invoice.description}
               key={invoice._id}

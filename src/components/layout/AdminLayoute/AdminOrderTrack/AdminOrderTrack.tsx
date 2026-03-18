@@ -74,7 +74,7 @@ export default function AdminOrderTrack() {
 
             // Play a notification sound (optional)
             const audio = new Audio(`${ausio}`);
-            audio.play().catch(e => console.log("Audio play blocked by browser"));
+            audio.play().catch(() => console.log("Audio play blocked by browser"));
 
             toast.success(`🎉 New Order Received! Order ID: #${newOrder._id}`, {
                 duration: 5000,
@@ -88,7 +88,7 @@ export default function AdminOrderTrack() {
     useEffect(() => {
         const handleNotification = (data: any) => {
             const audio = new Audio(`${ausio}`);
-            audio.play().catch(err => console.log("Sound blocked until user interacts with page."));
+            audio.play().catch(() => console.log("Sound blocked until user interacts with page."));
             toast.success(`New Order: ${data.orderId}`);
         };
 
