@@ -17,8 +17,10 @@ import { ModeToggle } from "./ModeToggler"
 
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api"
 
-import { Link, useLocation } from "react-router"
-import { Input } from "../ui/input"
+import { Link, useLocation,
+  //  useNavigate 
+  } from "react-router"
+
 import {
   // ArrowDown,
   Heart, ShoppingCartIcon
@@ -38,6 +40,7 @@ import { useAllOrderQuery } from "@/redux/features/order/Order.api"
 import { Badge } from "../ui/badge"
 import { useEffect, useState } from "react"
 import { Spinner } from "../ui/spinner"
+// import ProductSearch from "./HomeShope/ProductSearch"
 
 
 
@@ -60,16 +63,27 @@ export default function Navber() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: response, isLoading, isFetching, refetch } = useAllOrderQuery(undefined);
 
-
+  // const [searchTerm, setSearchTerm] = useState("");
+  // ... other states
   const [cartData, setCartData] = useState({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     orderedItems: [] as any[],
     totalPrice: 0,
     status: 'Pending'
   });
+  // const [page, setPage] = useState(1);
+  // const navigate = useNavigate();
+  const location = useLocation();
 
+  // const handleSearch = (val: string) => {
+  //   setSearchTerm(val);
 
-  console.log("cartData in navber", cartData?.orderedItems.length)
+  //   // If user is NOT on the shop page, redirect them to the shop page with the search query
+  //   if (location.pathname !== "/shop") {
+  //     navigate(`/shop?search=${encodeURIComponent(val)}`);
+  //   }
+  // };
+  // console.log("cartData in navber", cartData?.orderedItems.length)
 
 
   useEffect(() => {
@@ -98,6 +112,7 @@ export default function Navber() {
       }
     };
 
+
     // Run once on mount or when API data changes
     updateCartView();
 
@@ -113,18 +128,10 @@ export default function Navber() {
     };
   }, [response, data, refetch]); // Keep data/response dependencies for logged-in updates
 
-  const location = useLocation();
 
 
-  // if (isLoading) {
-  //   return <div>Loading...</div>
-  // }
-  // console.log(response.data[0]?.orderedItems.length);
 
-  // if (location.pathname.includes("admin") || location.pathname.includes("user")) {
-  //   return null;
 
-  // }
   return (
     <header className=" mx-auto  px-4 md:px-6">
       <div className="flex h-16 items-center justify-between gap-4">
@@ -188,9 +195,12 @@ export default function Navber() {
 
           </div>
         </div>
-        <div className="w-2xl max-w-md hidden md:block">
-          <Input type="text" placeholder="Search..." />
-        </div>
+        {/* <div className="flex-1 max-w-md hidden md:block mx-4">
+          <ProductSearch
+            onSearch={handleSearch}
+            initialValue={searchTerm}
+          />
+        </div> */}
         {/* Right side */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -200,7 +210,7 @@ export default function Navber() {
               <ShoppingCartIcon className="text-[#FF781A]" />
               <Badge className="bg-primary border-none absolute top-0 -right-5   rounded-full   tabular-nums  transform -translate-x-1/2 -translate-y-1/2" variant="outline">
                 {
-                  isLoading || isFetching || cartData.status=="Shipped" ? <Spinner /> : cartData?.orderedItems.length ? cartData?.orderedItems.length : cartData?.orderedItems.length
+                  isLoading || isFetching || cartData.status == "Shipped" ? <Spinner /> : cartData?.orderedItems.length ? cartData?.orderedItems.length : cartData?.orderedItems.length
                 }
               </Badge>
             </Link>
@@ -208,9 +218,9 @@ export default function Navber() {
             {/* Info menu */}
             {
               isLoading || isFetching ? <Spinner /> : data?.data?.email && (
-              <>
-                <UserMenu userData={data?.data} />
-              </>
+                <>
+                  <UserMenu userData={data?.data} />
+                </>
               )
 
             }

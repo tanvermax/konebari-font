@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import React from "react";
 import {
   Accordion,
   AccordionContent,
@@ -6,7 +10,17 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Mail, Phone, MessageSquare, Truck, ShieldCheck, HelpCircle } from "lucide-react";
+import { 
+  Search, 
+  Mail, 
+  Phone, 
+  MessageSquare, 
+  Truck, 
+  ShieldCheck, 
+  HelpCircle, 
+  Facebook,
+  ExternalLink 
+} from "lucide-react";
 
 export default function Help() {
   const faqs = [
@@ -29,96 +43,150 @@ export default function Help() {
   ];
 
   return (
-    <div className="py-12 px-4 container mx-auto max-w-5xl">
-      {/* Header & Search */}
-      <div className="text-center mb-12">
-        <h1 className="text-3xl md:text-5xl font-bold mb-4">How can we help you?</h1>
-        <p className="text-muted-foreground mb-8 text-lg">
-          Search our knowledge base or browse frequently asked questions.
-        </p>
-        <div className="relative max-w-xl mx-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-          <Input 
-            placeholder="Search for 'installation', 'delivery'..." 
-            className="pl-10 h-12 rounded-full shadow-sm"
+    <div className="min-h-screen bg-dot-pattern py-16 px-4">
+      <div className="container mx-auto max-w-5xl">
+        
+        {/* Hero Section */}
+        <div className="text-center mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            Support Center
+          </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
+            How can we help?
+          </h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg md:text-xl">
+            From installation guides to delivery tracking, everything you need to know about your JCS Trading gear.
+          </p>
+          
+          <div className="relative max-w-2xl mx-auto mt-8 group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Input 
+              placeholder="Search for 'installation', 'shipping'..." 
+              className="pl-12 h-14 rounded-full border-muted-foreground/20 bg-background/80 backdrop-blur-sm shadow-xl focus-visible:ring-primary"
+            />
+          </div>
+        </div>
+
+        {/* Support Channels */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-20">
+          <ContactCard 
+            icon={<Phone className="w-5 h-5" />} 
+            title="Call Support" 
+            detail="+8801674986600" 
+            subDetail="Sun-Thu, 10am-8pm"
+          />
+          <ContactCard 
+            icon={<Mail className="w-5 h-5" />} 
+            title="Email Us" 
+            detail="jcstrading2022@gmail.com" 
+            subDetail="24hr response time"
+          />
+          <ContactCard 
+            icon={<MessageSquare className="w-5 h-5" />} 
+            title="WhatsApp" 
+            detail="Live Chat" 
+            subDetail="Connect instantly"
+          />
+          <a 
+            href="https://www.facebook.com/share/1SDTmgM62M/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group"
+          >
+            <Card className="h-full border-blue-500/20 hover:border-blue-500 transition-all duration-300 bg-blue-50/50 dark:bg-blue-950/10">
+              <CardHeader className="pb-2">
+                <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white mb-2 shadow-lg shadow-blue-500/20">
+                  <Facebook className="w-5 h-5 fill-current" />
+                </div>
+                <CardTitle className="text-lg flex items-center gap-2 group-hover:text-blue-600 transition-colors">
+                  Facebook <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                Follow us for updates & DM for quick queries.
+              </CardContent>
+            </Card>
+          </a>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+          <div className="lg:col-span-1 space-y-4">
+            <div className="inline-flex p-3 rounded-2xl bg-primary/10 text-primary">
+              <HelpCircle className="w-8 h-8" />
+            </div>
+            <h2 className="text-3xl font-bold">Frequently Asked Questions</h2>
+            <p className="text-muted-foreground">
+              Can't find what you're looking for? Reach out to our team and we'll get back to you within a few hours.
+            </p>
+          </div>
+
+          <div className="lg:col-span-2 bg-card border rounded-3xl p-2 shadow-sm">
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border-none px-4">
+                  <AccordionTrigger className="text-left font-semibold py-6 hover:no-underline hover:text-primary transition-colors text-base md:text-lg">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-base leading-relaxed pb-6">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+
+        {/* Bottom Categories */}
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CategoryItem 
+            icon={<Truck />} 
+            title="Order Tracking" 
+            desc="Check the real-time status of your accessory delivery." 
+          />
+          <CategoryItem 
+            icon={<ShieldCheck />} 
+            title="Warranty Info" 
+            desc="Learn about our 100% authenticity and damage protection." 
           />
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Quick Contact Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-        <Card className="hover:border-primary transition-colors cursor-pointer">
-          <CardHeader className="text-center">
-            <Phone className="mx-auto text-primary mb-2" />
-            <CardTitle className="text-lg">Call Us</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center text-sm text-muted-foreground">
-            +880 1XXX-XXXXXX <br /> Sun-Thu, 10am-8pm
-          </CardContent>
-        </Card>
+/* Helper Components */
+function ContactCard({ icon, title, detail, subDetail }: { icon: React.ReactNode, title: string, detail: string, subDetail: string }) {
+  return (
+    <Card className="hover:shadow-md transition-all duration-300 border-muted/60">
+      <CardHeader className="pb-2">
+        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2">
+          {icon}
+        </div>
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="font-semibold text-foreground truncate">{detail}</p>
+        <p className="text-xs text-muted-foreground mt-1">{subDetail}</p>
+      </CardContent>
+    </Card>
+  );
+}
 
-        <Card className="hover:border-primary transition-colors cursor-pointer">
-          <CardHeader className="text-center">
-            <Mail className="mx-auto text-primary mb-2" />
-            <CardTitle className="text-lg">Email Support</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center text-sm text-muted-foreground">
-            support@jcstrading.com <br /> 24hr response time
-          </CardContent>
-        </Card>
-
-        <Card className="hover:border-primary transition-colors cursor-pointer">
-          <CardHeader className="text-center">
-            <MessageSquare className="mx-auto text-primary mb-2" />
-            <CardTitle className="text-lg">Live Chat</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center text-sm text-muted-foreground">
-            Chat with our experts <br /> via WhatsApp
-          </CardContent>
-        </Card>
+function CategoryItem({ icon, title, desc }: { icon: React.ReactElement<any, any>, title: string, desc: string }) {
+  return (
+    <div className="group flex gap-5 p-6 border rounded-2xl items-start hover:bg-muted/50 transition-colors cursor-pointer">
+      <div className="bg-background border shadow-sm p-4 rounded-xl text-primary group-hover:scale-110 transition-transform">
+        {React.isValidElement(icon) ? React.cloneElement(icon, { className: "w-6 h-6" }) : icon}
       </div>
-
-      {/* FAQ Section */}
-      <div className="bg-muted/30 p-6 md:p-10 rounded-2xl border">
-        <div className="flex items-center gap-2 mb-6">
-          <HelpCircle className="text-primary" />
-          <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
-        </div>
-        
-        <Accordion type="single" collapsible className="w-full">
-          {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left font-medium hover:no-underline">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </div>
-
-      {/* Support Categories */}
-      <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-8">
-        <div className="flex gap-4 p-4 border rounded-xl items-start">
-          <div className="bg-primary/10 p-3 rounded-lg text-primary">
-            <Truck className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="font-bold">Order Tracking</h3>
-            <p className="text-sm text-muted-foreground">Check the real-time status of your accessory delivery.</p>
-          </div>
-        </div>
-        <div className="flex gap-4 p-4 border rounded-xl items-start">
-          <div className="bg-primary/10 p-3 rounded-lg text-primary">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="font-bold">Warranty Info</h3>
-            <p className="text-sm text-muted-foreground">Learn about our 100% authenticity and damage protection.</p>
-          </div>
-        </div>
+      <div>
+        <h3 className="font-bold text-lg mb-1">{title}</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
       </div>
     </div>
   );

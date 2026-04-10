@@ -77,7 +77,7 @@ export default function ProductAddForm() {
     await toast.promise(makeRequest(), {
       loading: 'Adding product to inventory...',
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      success: (data) => {
+      success: () => {
         form.reset();
         setImage(null);
         return 'Product added successfully! 🎉';

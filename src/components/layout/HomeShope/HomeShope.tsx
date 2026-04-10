@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -9,15 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal } from "lucide-react";
+import {  SlidersHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
 import { useAllpstockQuery } from "@/redux/features/product/product.api";
+import ProductSearch from "./ProductSearch";
 
 
-const CATEGORIES = ["All", "Pet Supplies", "Automotive", "Musical Instruments","Other"];
+const CATEGORIES = ["All", "Pet Supplies", "Automotive", "Musical Instruments", "Other"];
 /* ================== Skeleton Card ================== */
 const ProductSkeleton = () => (
   <div className="space-y-3">
@@ -47,7 +47,7 @@ export default function HomeShope() {
     setPage(1);
   }, [searchTerm, selectedCategory]);
 
-useEffect(() => {
+  useEffect(() => {
     if (data?.data) {
       setAllProducts((prev) => {
         if (page === 1) return data.data;
@@ -60,11 +60,7 @@ useEffect(() => {
     }
   }, [data, page]);
 
-  /* ================== Search ================== */
-  const handleSearch = (val: string) => {
-    setSearchTerm(val);
-    setPage(1);
-  };
+
 
   /* ================== Frontend Sorting ================== */
   const sortedProducts = [...allProducts].sort((a, b) => {
@@ -93,15 +89,13 @@ useEffect(() => {
       </div>
       {/* ================== Search + Sort ================== */}
       <div className="flex flex-1 items-center justify-between gap-3  w-full md:mb-10 mb-5">
-        <div className="relative flex-1 md:max-w-2xl">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search products..."
-            className="pl-10 h-11"
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-          />
-        </div>
+       <ProductSearch
+          onSearch={(val) => {
+            setSearchTerm(val);
+            setPage(1);
+          }} 
+          initialValue={searchTerm}
+        />
 
         <Select onValueChange={setSortBy}>
           <SelectTrigger className=" h-11">
@@ -169,3 +163,42 @@ useEffect(() => {
     </div>
   );
 }
+
+
+// export const SearchBar = () => {
+//   const [page, setPage] = useState(1);
+//   const [allProducts, setAllProducts] = useState<any[]>([]);
+
+//   const { data, isLoading, isFetching } = useAllpstockQuery({
+//     page,
+//     limit: 40,
+//     search: searchTerm,
+
+//     category: selectedCategory === "All" ? undefined : selectedCategory,
+//   });
+//   const [searchTerm, setSearchTerm] = useState("");
+//   useEffect(() => {
+//     setAllProducts([]);
+//     setPage(1);
+//   }, [searchTerm, selectedCategory]);
+
+//   /* ================== Search ================== */
+//   const handleSearch = (val: string) => {
+//     setSearchTerm(val);
+//     setPage(1);
+//   };
+
+
+//   return (
+
+//     <div className="relative flex-1 md:max-w-2xl">
+//       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+//       <Input
+//         placeholder="Search products..."
+//         className="pl-10 h-11"
+//         value={searchTerm}
+//         onChange={(e) => handleSearch(e.target.value)}
+//       />
+//     </div>
+//   );
+// };
