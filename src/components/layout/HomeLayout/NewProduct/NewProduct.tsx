@@ -70,11 +70,3 @@ export default function NewProduct() {
 
 
 
-{/* <ProductCard
-                            key={product._id}
-                            id={product._id}
-                            SpecialPrice={product["*Price"]}
-                            name={product["*Product Name(English)"]}
-                            price={parseFloat(product["SpecialPrice"]) || 0}
-                            image={product.images || "https://via.placeholder.com/300"}
-                        /> */}

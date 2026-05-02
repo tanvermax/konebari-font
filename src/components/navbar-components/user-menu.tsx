@@ -105,7 +105,7 @@ export default function UserMenu({ userData }: UserMenuProps) {
             { */}
             {/* userData.role === "USER" ? (<> */}
             <BoltIcon size={16} className="opacity-60" aria-hidden="true" />
-            <Link to={"admin/add-product"}>Dashboard</Link>
+            <Link to={"admin/users"}>Dashboard</Link>
             {/* </>) : ""
             } */}
           </DropdownMenuItem>
