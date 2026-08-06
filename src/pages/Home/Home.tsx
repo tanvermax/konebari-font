@@ -1,30 +1,26 @@
-import Banners from "@/components/layout/HomeLayout/Banners";
+import HomePage from "@/components/layout/home/HomePage";
+import LookbookReviews from "@/components/layout/HomeLayout/LookbookReviews/LookbookReviews";
+import RoutineBundles from "@/components/layout/HomeLayout/RoutineBundles/RoutineBundles";
+import SkinGoals from "@/components/layout/HomeLayout/SkinGoals/SkinGoals";
+import SkinPhilosophy from "@/components/layout/HomeLayout/SkinPhilosophy/SkinPhilosophy";
+import TrendingOffers from "@/components/layout/HomeLayout/TrendingOffers/TrendingOffers";
 // import Flashsale from "@/components/layout/HomeLayout/FlashSale/Flashsale";
-import NewProduct from "@/components/layout/HomeLayout/NewProduct/NewProduct";
-// import TopBrands from "@/components/layout/HomeLayout/Topbrands/TopBrands";
+import FeaturedCatalog from "@/components/layout/HomeLayout/FeaturedCatalog/FeaturedCatalog";
 // import TopCategroy from "@/components/layout/HomeLayout/TopCategory/TopCategroy";
 // import TradingProduct from "@/components/layout/HomeLayout/TrandingProduct/TradingProduct";
 
-
-
-
-
-
-
 export default function Home() {
-  
-
-
   return (
     <div>
-      <Banners />
-     {/* <Flashsale/> */}
-     <NewProduct/>
-     {/* <TopBrands/>
-     <TopCategroy/> */}
-     {/* <TradingProduct/> */}
-     
-
+      <HomePage />
+      <TrendingOffers/>
+      <SkinPhilosophy/>
+      <SkinGoals/>
+<LookbookReviews/>
+<RoutineBundles/>
+     <FeaturedCatalog/>
+       {/* <TopCategroy/>  */}
+      {/* <TradingProduct/> */}
     </div>
   );
 }

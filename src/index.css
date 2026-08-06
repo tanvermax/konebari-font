@@ -49,7 +49,7 @@
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.705 0.213 47.604);
+  --primary: oklch(64.106% 0.24646 344.879);
   --primary-foreground: oklch(0.98 0.016 73.684);
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
@@ -83,7 +83,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.646 0.222 41.116);
+  --primary: oklch(63.68% 0.26378 352.175);
   --primary-foreground: oklch(0.98 0.016 73.684);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
@@ -117,4 +117,41 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+
+/* Add these beauty/feminine color utilities */
+@layer base {
+  .bg-beauty-gradient {
+    background: linear-gradient(135deg, #FF6B8A 0%, #F5A080 100%);
+  }
+  .bg-beauty-subtle {
+    background: linear-gradient(180deg, #FFF5F7 0%, #FFFFFF 100%);
+  }
+  .text-beauty-gradient {
+    background: linear-gradient(135deg, #FF6B8A, #F5A080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .border-beauty {
+    border-color: rgba(255, 107, 138, 0.2);
+  }
+  .shadow-beauty {
+    box-shadow: 0 8px 32px rgba(255, 107, 138, 0.15);
+  }
+  .shadow-beauty-hover:hover {
+    box-shadow: 0 12px 40px rgba(255, 107, 138, 0.25);
+  }
+}
+
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  animation: gradient 3s ease-in-out infinite;
+  background-size: 200% 200%;
 }

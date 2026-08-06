@@ -35,6 +35,7 @@ const CartPage = () => {
     const [shippingArea, setShippingArea] = useState<"inside" | "outside">("inside");
     const [formData, setFormData] = useState({
         name: "",
+        email:"",
         address: "",
         phone: "",
         paymentMethod: "cod"
@@ -128,6 +129,7 @@ const CartPage = () => {
             const orderconfirm = await confirmOrderNonuser({
                 id: cartData._id,
                 updatedData: {
+                    email: formData.email,
                     name: formData.name,
                     phone: formData.phone,
                     address: formData.address,
@@ -343,6 +345,36 @@ const CartPage = () => {
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     />
                                 </div>
+                                {
+                                    userInfo?.data?.email ? (
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-medium">Email</label>
+                                            <Input
+                                                placeholder="your.email@example.com"
+                                                value={userInfo.data.email}
+                                                disabled
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-medium">Email</label>
+                                            <Input
+                                                placeholder="your.email@example.com"
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            />
+                                        </div>
+                                    )
+
+                                }
+                                {/* <div className="space-y-1">
+                                    <label className="text-sm font-medium">Email</label>
+                                    <Input
+                                        placeholder="your.email@example.com"
+                                        value={formData.emeail}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    />
+                                </div> */}
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium">Full Address</label>
                                     <Input

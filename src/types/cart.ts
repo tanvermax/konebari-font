@@ -7,10 +7,10 @@ export type OrderStatus =
 
 export interface Product {
   _id: string;
-  title: string;
-  price: number;
+  "*Product Name(English)": string;
+  "*Price": number;
   images: string;
-  category: string;
+  "Variations Combo"?: string;
 }
 
 export interface OrderedItem {

@@ -4,11 +4,12 @@ import { toast } from "sonner";
 
 interface AddToCartParams {
     userId: string,
+    skuId: string;
     productId: string ;
     quantity: number;
     price: number;
     title: string;
-    images?: string;
+    images?: string[];
 }
 
 
@@ -30,6 +31,7 @@ export const useCart = () => {
                     productId: item.productId,
                     quantity: item.quantity,
                     user: userInfo.data._id
+                    
                 };
                 console.log("cartDetails", cartDetails)
                 const result = await addtocart(cartDetails).unwrap();

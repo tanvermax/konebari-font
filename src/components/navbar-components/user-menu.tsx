@@ -1,10 +1,9 @@
 import {
   BoltIcon,
   BookOpenIcon,
-  Layers2Icon,
+
   LogOutIcon,
 
-  UserPenIcon,
 } from "lucide-react"
 
 
@@ -105,14 +104,14 @@ export default function UserMenu({ userData }: UserMenuProps) {
             { */}
             {/* userData.role === "USER" ? (<> */}
             <BoltIcon size={16} className="opacity-60" aria-hidden="true" />
-            <Link to={"admin/users"}>Dashboard</Link>
+            <Link to={"admin/dashboard"}>Dashboard</Link>
             {/* </>) : ""
             } */}
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          {/* <DropdownMenuItem>
             <Layers2Icon size={16} className="opacity-60" aria-hidden="true" />
             <span>favorite</span>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <Link to={"ordertrack"}> <DropdownMenuItem>
             <BookOpenIcon size={16} className="opacity-60" aria-hidden="true" />
             <span>Orders History</span>
@@ -121,12 +120,12 @@ export default function UserMenu({ userData }: UserMenuProps) {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
 
-          <DropdownMenuItem>
+          {/* <DropdownMenuItem>
             <UserPenIcon size={16} className="opacity-60" aria-hidden="true" />
             <span>Account Settings</span>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
+        {/* <DropdownMenuSeparator /> */}
         <DropdownMenuItem>
 
           <Button onClick={handlelogout}>

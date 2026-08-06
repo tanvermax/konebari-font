@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,16 +7,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {  SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
 import { useAllpstockQuery } from "@/redux/features/product/product.api";
 import ProductSearch from "./ProductSearch";
+import type { IProductCard } from "@/redux/features/product/Product.types";
 
-
+// NOTE: these no longer match your real category values (see message below).
+// Replace with actual category names from the 'alldata' collection
+// (e.g. "Emblems", "GuitarBassAccessories", "CatToys" ...) or fetch them dynamically.
 const CATEGORIES = ["All", "Pet Supplies", "Automotive", "Musical Instruments", "Other"];
+
 /* ================== Skeleton Card ================== */
 const ProductSkeleton = () => (
   <div className="space-y-3">
@@ -29,16 +32,16 @@ const ProductSkeleton = () => (
 
 export default function HomeShope() {
   const [page, setPage] = useState(1);
-  const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<IProductCard[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [selectedCategory, setSelectedCategory] = useState("All");
+
   /* ================== API ================== */
   const { data, isLoading, isFetching } = useAllpstockQuery({
     page,
     limit: 40,
     search: searchTerm,
-
     category: selectedCategory === "All" ? undefined : selectedCategory,
   });
 
@@ -53,19 +56,17 @@ export default function HomeShope() {
         if (page === 1) return data.data;
         const existingIds = new Set(prev.map((p) => p._id));
         const newUniqueProducts = data.data.filter(
-          (product: any) => !existingIds.has(product._id)
+          (product: IProductCard) => !existingIds.has(product._id)
         );
         return [...prev, ...newUniqueProducts];
       });
     }
   }, [data, page]);
 
-
-
   /* ================== Frontend Sorting ================== */
   const sortedProducts = [...allProducts].sort((a, b) => {
-    const priceA = parseFloat(a.SpecialPrice) || parseFloat(a["*Price"]) || 0;
-    const priceB = parseFloat(b.SpecialPrice) || parseFloat(b["*Price"]) || 0;
+    const priceA = (a.hasDiscount ? a.specialPrice : a.minPrice) ?? 0;
+    const priceB = (b.hasDiscount ? b.specialPrice : b.minPrice) ?? 0;
 
     if (sortBy === "lowToHigh") return priceA - priceB;
     if (sortBy === "highToLow") return priceB - priceA;
@@ -87,18 +88,19 @@ export default function HomeShope() {
           </Button>
         ))}
       </div>
+
       {/* ================== Search + Sort ================== */}
-      <div className="flex flex-1 items-center justify-between gap-3  w-full md:mb-10 mb-5">
-       <ProductSearch
+      <div className="flex flex-1 items-center justify-between gap-3 w-full md:mb-10 mb-5">
+        <ProductSearch
           onSearch={(val) => {
             setSearchTerm(val);
             setPage(1);
-          }} 
+          }}
           initialValue={searchTerm}
         />
 
         <Select onValueChange={setSortBy}>
-          <SelectTrigger className=" h-11">
+          <SelectTrigger className="h-11">
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
@@ -116,15 +118,11 @@ export default function HomeShope() {
           layout
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
         >
-          {/* Initial Loading Skeleton */}
           {isLoading &&
-            Array.from({ length: 20 }).map((_, i) => (
-              <ProductSkeleton key={i} />
-            ))}
+            Array.from({ length: 20 }).map((_, i) => <ProductSkeleton key={i} />)}
 
-          {/* Products */}
           {!isLoading &&
-            sortedProducts.map((product: any) => (
+            sortedProducts.map((product) => (
               <motion.div
                 key={product._id}
                 layout
@@ -133,18 +131,23 @@ export default function HomeShope() {
                 transition={{ duration: 0.35, ease: "easeOut" }}
               >
                 <ProductCard
-                  key={product._id}
                   id={product._id}
-                  name={product["*Product Name(English)"]}
-                  price={product.SpecialPrice || product["*Price"]}
-                  SpecialPrice={
-                    product.SpecialPrice ? product["*Price"] : undefined
-                  }
-                  image={product.images || "/placeholder-image.png"}
-                  isLoading={false}
+                  name={product.name}
+                  price={product.minPrice ?? 0}
+                  specialPrice={product.specialPrice}
+                  hasDiscount={product.hasDiscount}
+                  inStock={product.inStock}
+                  image={product.mainImage || "/placeholder-image.png"}
+                  slug={product.slug}
                 />
               </motion.div>
             ))}
+
+          {!isLoading && sortedProducts.length === 0 && (
+            <p className="col-span-full text-center text-sm text-muted-foreground py-10">
+              কোনো প্রোডাক্ট পাওয়া যায়নি।
+            </p>
+          )}
         </motion.div>
       </AnimatePresence>
 
@@ -163,42 +166,3 @@ export default function HomeShope() {
     </div>
   );
 }
-
-
-// export const SearchBar = () => {
-//   const [page, setPage] = useState(1);
-//   const [allProducts, setAllProducts] = useState<any[]>([]);
-
-//   const { data, isLoading, isFetching } = useAllpstockQuery({
-//     page,
-//     limit: 40,
-//     search: searchTerm,
-
-//     category: selectedCategory === "All" ? undefined : selectedCategory,
-//   });
-//   const [searchTerm, setSearchTerm] = useState("");
-//   useEffect(() => {
-//     setAllProducts([]);
-//     setPage(1);
-//   }, [searchTerm, selectedCategory]);
-
-//   /* ================== Search ================== */
-//   const handleSearch = (val: string) => {
-//     setSearchTerm(val);
-//     setPage(1);
-//   };
-
-
-//   return (
-
-//     <div className="relative flex-1 md:max-w-2xl">
-//       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//       <Input
-//         placeholder="Search products..."
-//         className="pl-10 h-11"
-//         value={searchTerm}
-//         onChange={(e) => handleSearch(e.target.value)}
-//       />
-//     </div>
-//   );
-// };

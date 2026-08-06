@@ -1,6 +1,7 @@
 import { baseApi } from "@/redux/baseApi";
 
 export const Orderapi = baseApi.injectEndpoints({
+  
   endpoints: (builder) => ({
 
     allOrder: builder.query({
@@ -45,6 +46,13 @@ export const Orderapi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['ORDER'],
     }),
+    getAdminDashboardStats: builder.query({
+  query: () => ({
+    url: "/order/admin/dashboard-stats",
+    method: "GET",
+  }),
+  providesTags: ['ORDER'],
+}),
     deleteOrder: builder.mutation({
       query: ({ id, updatedData }) => ({
         url: `/order/${id}`,
@@ -75,4 +83,4 @@ export const Orderapi = baseApi.injectEndpoints({
 });
 
 
-export const { useDeleteOrderMutation, useAllOrderForAdminQuery, useAdminupdateOrderMutation, useAllOrderQuery, useUpdateOrderMutation, useOrderMutation, useConfirmOrderMutation, useConfirmOrdernonUserMutation } = Orderapi
+export const { useDeleteOrderMutation,useGetAdminDashboardStatsQuery, useAllOrderForAdminQuery, useAdminupdateOrderMutation, useAllOrderQuery, useUpdateOrderMutation, useOrderMutation, useConfirmOrderMutation, useConfirmOrdernonUserMutation } = Orderapi

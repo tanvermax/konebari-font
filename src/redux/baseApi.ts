@@ -5,7 +5,6 @@ export const baseApi = createApi({
     reducerPath:'baseApi',
     baseQuery: axiosBaseQuery(),
     tagTypes:["USER","PRODUCT",'Cart',"ORDER"],
-    endpoints: ()=>({
-        
-    })
+    refetchOnMountOrArgChange: true,
+    endpoints: ()=>({})
 })
