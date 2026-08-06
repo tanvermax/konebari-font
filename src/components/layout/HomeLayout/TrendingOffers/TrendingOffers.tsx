@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowUpRight, Flame, Clock } from "lucide-react";
+import {  ArrowUpRight, Flame, Clock } from "lucide-react";
 
 export default function TrendingOffers() {
   const collections = [
@@ -33,7 +33,7 @@ export default function TrendingOffers() {
     <section className="py-12 rounded-2xl sm:py-16 bg-[#FAFAFA] dark:bg-[#0A0A0A] overflow-hidden">
       <div className="container mx-auto px-4 md:px-8">
         
-        
+
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-4">
           <motion.div 

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, ShieldCheck, Truck, Clock, Heart } from "lucide-react";
+import { Sparkles, ArrowRight, ShieldCheck, Truck, Clock } from "lucide-react";
 
 const bundles = [
   {

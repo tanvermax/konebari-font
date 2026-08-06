@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Star, Instagram, Quote, CheckCircle2, ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Star, Instagram, Quote, CheckCircle2 } from "lucide-react";
 
 const reviews = [
   {

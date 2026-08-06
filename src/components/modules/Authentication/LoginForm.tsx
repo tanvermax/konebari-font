@@ -19,7 +19,7 @@ export function LoginForm({
   const [login] = useLoginMutation();
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    const date = new Date();
+
     try {
       const res = await login(data).unwrap();
       navigate("/")

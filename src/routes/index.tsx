@@ -21,7 +21,6 @@ import Help from "@/pages/Help/Help";
 import HomeShope from "@/components/layout/HomeShope/HomeShope";
 import OrderSuccessPage from "@/components/layout/OrderSuccess/OrderSuccessPage";
 import EditProduct from "@/components/layout/AdminLayoute/AddProduct/EditProduct";
-import HomePage from "@/components/layout/home/HomePage";
 
 
 const router = createBrowserRouter([
