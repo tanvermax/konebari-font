@@ -63,7 +63,7 @@ const lookbookImages = [
 
 export default function LookbookReviews() {
   return (
-    <section className="py-16 sm:py-24 bg-stone-50/60 dark:bg-stone-900/30 overflow-hidden border-t border-border/40">
+    <section className="py-16 rounded-2xl sm:py-24 bg-stone-50/60 dark:bg-stone-900/30 overflow-hidden border-t border-border/40">
       <div className="container mx-auto px-4 md:px-8">
         
         {/* SECTION HEADER */}

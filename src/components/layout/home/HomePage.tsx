@@ -87,7 +87,7 @@ export default function HomePage() {
             >
               <div className="relative rounded-2xl overflow-hidden shadow-sm bg-stone-100 dark:bg-stone-900 aspect-[16/10] sm:aspect-[16/9] lg:aspect-[4/3]">
                 <img 
-                  src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=900&auto=format&fit=crop" 
+                  src="https://images.unsplash.com/photo-1679623100266-db82be84f5f3?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                   alt="Minimal Skincare Hero" 
                   className="w-full h-full object-cover object-center"
                 />
