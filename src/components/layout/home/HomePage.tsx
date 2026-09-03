@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
 import HeroBanner from "../HomeLayout/Banners";
+import BrandSlider from "../HomeLayout/BrandSlider";
 
 export default function HomePage() {
   const { data: productsData, isLoading: productsLoading } = useAllpstockQuery({ 
@@ -42,6 +43,7 @@ export default function HomePage() {
       {/* ===== HERO SECTION (Minimal & Clean) ===== */}
 
    <HeroBanner/>
+     
       {/* ===== FEATURES ===== */}
       <section className="py-8 bg-white dark:bg-[#0D0D0D] border-b border-border/40">
         <div className="container mx-auto px-4 md:px-8">
@@ -60,7 +62,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
+<BrandSlider/>
       {/* ===== CATEGORIES ===== */}
       <section className="py-14 sm:py-20">
         <div className="container mx-auto px-4 md:px-8">
