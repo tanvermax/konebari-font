@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Link } from "react-router";
 import { useAllpstockQuery } from "@/redux/features/product/product.api";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import {
   ArrowRight, 
   ShieldCheck, 
   Truck, 
-  Sparkles, 
   RotateCcw,
   Headphones
 } from "lucide-react";

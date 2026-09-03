@@ -15,7 +15,7 @@ export default function CommonLayout({ children }: IProps) {
       <Navbar />
 
       {/* Main Content Area */}
-      <main className="grow container mx-auto px-4 md:px-6 py-4">
+      <main className="">
         {children}
       </main>
 

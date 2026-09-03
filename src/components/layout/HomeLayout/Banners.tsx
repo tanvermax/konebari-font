@@ -81,8 +81,8 @@ export default function HeroBanner() {
   }, [api]);
 
   return (
-    <section className="container mx-auto px-4 md:px-8 my-4">
-      <div className="relative rounded-3xl overflow-hidden border border-stone-200/60 dark:border-stone-800/60 shadow-lg bg-stone-900">
+    <section className="">
+      <div className="relative overflow-hidden border border-stone-200/60 dark:border-stone-800/60 shadow-lg bg-stone-900">
         <Carousel
           setApi={setApi}
           plugins={[plugin.current]}
