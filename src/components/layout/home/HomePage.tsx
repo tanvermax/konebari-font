@@ -13,6 +13,7 @@ import {
   Headphones
 } from "lucide-react";
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
+import HeroBanner from "../HomeLayout/Banners";
 
 export default function HomePage() {
   const { data: productsData, isLoading: productsLoading } = useAllpstockQuery({ 
@@ -41,63 +42,8 @@ export default function HomePage() {
     <div className="min-h-screen  text-foreground">
       
       {/* ===== HERO SECTION (Minimal & Clean) ===== */}
-      <section className="relative pt-6 pb-12 sm:pt-10 sm:pb-16 border-b border-border/40">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Left Content */}
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="lg:col-span-6 space-y-6 text-left"
-            >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 text-xs font-medium tracking-wide border border-rose-100 dark:border-rose-900/40">
-                <Sparkles size={13} />
-                <span>Pure Beauty, Crafted For You</span>
-              </div>
 
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-normal tracking-tight text-foreground leading-[1.15]">
-                Elevate Your Everyday <br />
-                <span className="italic font-light text-rose-500/90">Glow Routine.</span>
-              </h1>
-
-              <p className="text-muted-foreground text-sm sm:text-base font-light leading-relaxed max-w-md">
-                Experience authentic skincare and cosmetics curated with dermatological precision. Simple, effective, and beautifully safe.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Button asChild size="lg" className="rounded-full bg-slate-900 dark:bg-rose-600 hover:bg-slate-800 dark:hover:bg-rose-700 text-white shadow-none font-normal px-8 text-sm h-11">
-                  <Link to="/shop" className="flex items-center gap-2">
-                    Shop Collection <ArrowRight size={15} />
-                  </Link>
-                </Button>
-                <Button asChild variant="ghost" size="lg" className="rounded-full font-normal text-sm h-11 hover:bg-rose-50/50 dark:hover:bg-rose-950/20">
-                  <Link to="/shop?sort=new">Explore New</Link>
-                </Button>
-              </div>
-            </motion.div>
-
-            {/* Right Hero Visual Banner */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="lg:col-span-6"
-            >
-              <div className="relative rounded-2xl overflow-hidden shadow-sm bg-stone-100 dark:bg-stone-900 aspect-[16/10] sm:aspect-[16/9] lg:aspect-[4/3]">
-                <img 
-                  src="https://images.unsplash.com/photo-1679623100266-db82be84f5f3?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-                  alt="Minimal Skincare Hero" 
-                  className="w-full h-full object-cover object-center"
-                />
-              </div>
-            </motion.div>
-
-          </div>
-        </div>
-      </section>
-
+   <HeroBanner/>
       {/* ===== FEATURES ===== */}
       <section className="py-8 bg-white dark:bg-[#0D0D0D] border-b border-border/40">
         <div className="container mx-auto px-4 md:px-8">

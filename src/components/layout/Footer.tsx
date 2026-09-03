@@ -1,5 +1,6 @@
 import { Link } from "react-router";
-import { Flower2, Mail, Phone, MapPin, Instagram, Facebook, Youtube } from "lucide-react";
+import {  Mail, Phone, MapPin, Instagram, Facebook, Youtube } from "lucide-react";
+import Logo from "@/assets/icons/logo";
 
 export default function Footer() {
   return (
@@ -12,8 +13,7 @@ export default function Footer() {
           {/* Brand Info (Spans 2 columns on Large screens) */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="inline-flex items-center gap-2 text-stone-100 font-serif text-xl tracking-tight">
-              <Flower2 className="h-5 w-5 text-rose-400" />
-              <span>Glow & Elegance</span>
+              <Logo/>
             </Link>
 
             <p className="text-stone-400 text-xs sm:text-sm font-light leading-relaxed max-w-sm">

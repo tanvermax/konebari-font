@@ -503,7 +503,7 @@ console.log(isScrolled);
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-[68px] left-0 right-0 z-40 lg:hidden px-4"
+            className="fixed top-[120px] left-0 right-0 z-40 lg:hidden px-4"
           >
             <div className="bg-background/95 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl p-4">
               <form onSubmit={handleSearchSubmit} className="relative">

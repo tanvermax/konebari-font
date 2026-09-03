@@ -1,77 +1,193 @@
-import { CarouselPlugin } from "./Carosel1";
-import video1 from "../../../assets/video/grok-video-179dddd3-632d-44cc-99d2-c5abd2741c9d.mp4"
-import  video2  from "../../../assets/video/grok-video-658cb8c4-1dde-4941-be48-112473c0ee84.mp4"
-import  video3  from "../../../assets/video/grok-video-e17ba1fd-1b5c-45e4-a257-240606b48c0c.mp4"
+"use client";
 
-const homeData1 = [
-    { content: video1,type:'video' },
-    { content: video2,type:'video' },
-    { content: video3,type:'video' },
-]
-const homeData2 = [
-    { content: "https://static-01.daraz.com.bd/p/6dc39c2599cf3a3cd201f29bc1514b49.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/9346b754153311db8ac71877588b0371.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/233b80255c6654f27cd65062443e6cb8.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/7c3d2412024d0a6ba07c46e211d37ab9.jpg" },
-    { content: "https://bd-live-21.slatic.net/kf/S272e772e0ba343be91ffa37f525da623I.jpg" }
-]
-const homeData3 = [
-    { content: "https://static-01.daraz.com.bd/p/934d25d6b5ec9c0753761cc4e15e6556.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/6447d5c14c599bf0efc0e77f73000eff.jpg" },
-    { content: "https://bd-live-21.slatic.net/kf/Sd1d50a4607bf4f11bc2605349d32406av.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/37d943311e82f8ad85a66922dd7bce28.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/4952b420e4c0ff0fd3f4db68444b5db2.jpg" }
-]
-const homeData4 = [
-    { content: "https://static-01.daraz.com.bd/p/558f4ce6b8932bbda02c5e5b8fed8421.jpg" },
-    { content: "https://bd-live-21.slatic.net/kf/Sc798e3c1536b489da7c9e6fd685bfa84s.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/101416d7f645b5cb76ea95214e0e9a46.jpg" },
-    { content: "https://bd-live-21.slatic.net/kf/Se779445baf6e4359bc81ec6255b32684E.jpg" },
-    { content: "https://bd-live-21.slatic.net/kf/Se33d18802fd14943a546d13f6cb435c7N.jpg" }
-]
-const homeData5 = [
-    { content: "https://static-01.daraz.com.bd/p/bd4ac3a55dfd3b386555f71f7e874f12.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/e6a2f9510da1259093734138b9420158.jpg" },
-    { content: "https://bd-live-21.slatic.net/kf/S29f5ea86007b492ba75e9a385854dfe41.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/2c18f3c03a1413abebe66b3b8ea7c82a.jpg" },
-    { content: "https://bd-live-21.slatic.net/kf/S9e1a47f591294d69857945a03e3b904cp.jpg" }
-]
-const sideDAta = [
-    { content: "https://static-01.daraz.com.bd/p/b2b7e44270c2ad65536e7081f3fe1fde.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/9346b754153311db8ac71877588b0371.jpg" },
-    { content: "https://static-01.daraz.com.bd/p/cab140b06568c9a2e1a66ffdf86f63e9.jpg" }
-]
-export default function Banners() {
-    return (
-        <div className="grid     grid-cols-1 lg:grid-cols-10 gap-4 my-4 container mx-auto">
-            {/* First column with two carousels stacked vertically */}
-            <div className="flex-col grid-rows-2 col-span-3  gap-4 hidden lg:block">
-                <div className="   ">
-                    <CarouselPlugin imgsize="w-full  h-[17vh]" delayyime={1400} data={homeData3} />
-                </div>
-                <div className="  ">
-                    <CarouselPlugin imgsize="w-full  h-[17vh]" delayyime={1500} data={homeData2} />
-                </div>
-            </div>
+import * as React from "react";
+import Autoplay from "embla-carousel-autoplay";
+import { Link as RouterLink } from "react-router";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
+import { Sparkles, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
-            {/* Second column with a single carousel */}
-            <div className="col-span-4     md:block hidden h-full">
-                <CarouselPlugin imgsize="w-full  h-[35vh]" delayyime={4500}  data={homeData1} />
-            </div>
-            <div className="     w-full mx-auto  my-auto block md:hidden ">
-                <CarouselPlugin imgsize="w-full  h-[25vh]" delayyime={4500}  data={homeData1} />
-            </div>
+// 5/6 টি উচ্চমানের স্কিনকেয়ার ও বিউটি ব্যানার ইমেজ
+const bannerSlides = [
+  {
+    id: 1,
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?w=1600&auto=format&fit=crop",
+    subtitle: "100% Authentic K-Beauty",
+    title: "Reveal Your Skin's Natural Radiance",
+    description: "আসল কোরিয়ান স্কিনকেয়ার এবং ডার্মাটোলজিস্ট টেস্টেড সিরাম দিয়ে আপনার ত্বককে করুন সজীব।",
+    buttonText: "Shop Collection",
+    link: "/shop?category=skincare",
+  },
+  {
+    id: 2,
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1600&auto=format&fit=crop",
+    subtitle: "Hydration Mastery",
+    title: "Deep Moisture & Barrier Care",
+    description: "শুষ্কতা দূর করে ত্বককে আর্দ্র ও কোমল রাখতে বেছে নিন অ্যাডভান্সড হাইড্রেশন সেট।",
+    buttonText: "Explore Serums",
+    link: "/shop?concern=hydration",
+  },
+  {
+    id: 3,
+    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&auto=format&fit=crop",
+    subtitle: "Pure Ingredients",
+    title: "Gentle Formula for Sensitive Skin",
+    description: "কোনো প্রকার ক্ষতিকারক কেমিক্যাল ছাড়া প্রাকৃতিক নির্যাস থেকে তৈরি বিশ্বমানের প্রসাধনী।",
+    buttonText: "Discover Clean Care",
+    link: "/shop?sort=bestseller",
+  },
+  {
+    id: 4,
+    image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=1600&auto=format&fit=crop",
+    subtitle: "Spotless Glow",
+    title: "Targeted Anti-Acne & Dark Spot Care",
+    description: "ব্রণ ও ত্বকের যেকোনো দাগ দূর করার জন্য বিশেষ ফর্মুলেটেড ডার্মাটোলজি সলিউশন।",
+    buttonText: "View Acne Care",
+    link: "/shop?concern=acne-care",
+  },
+  {
+    id: 5,
+    image: "https://images.unsplash.com/photo-1512290900673-1f198f1a4e10?w=1600&auto=format&fit=crop",
+    subtitle: "Exclusive Bundles",
+    title: "Glass Skin Ritual 3-Step Routine",
+    description: "কমপ্লিট স্কিনকেয়ার রুটিন সেটে উপভোগ করুন ২০% পর্যন্ত নিশ্চিত ডিসকাউন্ট।",
+    buttonText: "Claim Bundle",
+    link: "/shop?category=bundles",
+  },
+];
 
-            {/* Third column with two carousels stacked vertically */}
-            <div className="flex-col col-span-3  hidden lg:block">
-                <div className="  ">
-                    <CarouselPlugin imgsize="w-full  h-[17vh]" delayyime={1500} data={homeData4} />
+export default function HeroBanner() {
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [current, setCurrent] = React.useState(0);
+
+  // Autoplay Plugin setup (3 Seconds = 3000ms delay)
+  const plugin = React.useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: false })
+  );
+
+  React.useEffect(() => {
+    if (!api) return;
+
+    setCurrent(api.selectedScrollSnap());
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  return (
+    <section className="container mx-auto px-4 md:px-8 my-4">
+      <div className="relative rounded-3xl overflow-hidden border border-stone-200/60 dark:border-stone-800/60 shadow-lg bg-stone-900">
+        <Carousel
+          setApi={setApi}
+          plugins={[plugin.current]}
+          className="w-full"
+          onMouseEnter={plugin.current.stop}
+          onMouseLeave={plugin.current.reset}
+        >
+          <CarouselContent>
+            {bannerSlides.map((slide) => (
+              <CarouselItem key={slide.id} className="relative">
+                {/* Hero Slide Container */}
+                <div className="relative h-[420px] sm:h-[480px] lg:h-[520px] w-full overflow-hidden">
+                  
+                  {/* Background Image */}
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover object-center transition-transform duration-1000 scale-105"
+                  />
+
+                  {/* Gradient Overlay for Text Readability */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-stone-950/85 via-stone-950/50 to-transparent" />
+
+                  {/* Banner Content */}
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="px-6 sm:px-12 lg:px-16 max-w-xl space-y-3 sm:space-y-4">
+                      
+                      {/* Subtitle Badge */}
+                      <motion.div
+                        key={`sub-${current}`}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] font-medium tracking-wider uppercase backdrop-blur-md"
+                      >
+                        <Sparkles size={12} className="text-rose-400" />
+                        <span>{slide.subtitle}</span>
+                      </motion.div>
+
+                      {/* Main Title */}
+                      <motion.h1
+                        key={`title-${current}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                        className="text-2xl sm:text-4xl lg:text-5xl font-serif text-white leading-tight font-medium"
+                      >
+                        {slide.title}
+                      </motion.h1>
+
+                      {/* Description */}
+                      <motion.p
+                        key={`desc-${current}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="text-stone-300 text-xs sm:text-sm font-light leading-relaxed line-clamp-2"
+                      >
+                        {slide.description}
+                      </motion.p>
+
+                      {/* CTA Button */}
+                      <motion.div
+                        key={`btn-${current}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                        className="pt-2"
+                      >
+                        <Button
+                          asChild
+                          className="rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium px-6 h-10 shadow-lg shadow-rose-600/30 gap-2 border-0"
+                        >
+                          <RouterLink to={slide.link}>
+                            {slide.buttonText}
+                            <ArrowRight size={14} />
+                          </RouterLink>
+                        </Button>
+                      </motion.div>
+
+                    </div>
+                  </div>
+
                 </div>
-                <div className="flex     items-center">
-                    <CarouselPlugin delayyime={1400} imgsize=" w-full   h-[17vh] w-full" data={homeData5}  />
-                    <CarouselPlugin delayyime={1300} imgsize=" w-full  h-[17vh] w-full" data={sideDAta}  />
-                </div>
-            </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+
+        {/* Custom Slide Indicators (Dots) */}
+        <div className="absolute bottom-5 right-6 sm:right-10 z-20 flex items-center gap-2">
+          {bannerSlides.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => api?.scrollTo(idx)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                current === idx
+                  ? "w-7 bg-rose-500"
+                  : "w-2 bg-white/40 hover:bg-white/70"
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
         </div>
-    )
+      </div>
+    </section>
+  );
 }
