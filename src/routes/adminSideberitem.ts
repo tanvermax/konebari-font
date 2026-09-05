@@ -1,3 +1,4 @@
+// adminSideberitem.ts - ফিক্সড ভার্সন
 import AddProduct from "@/components/layout/AdminLayoute/AddProduct/AddProduct";
 import AdminOrderTrack from "@/components/layout/AdminLayoute/AdminOrderTrack/AdminOrderTrack";
 import Allproduct from "@/components/layout/AdminLayoute/Allproduct";
@@ -5,53 +6,63 @@ import OrderviewAdmin from "@/components/layout/AdminLayoute/OrderviewAdmin/Orde
 import AdminOverviewPage from "@/components/layout/AdminLayoute/Overview/Adminoverviewpage";
 import type { ISidebarItem } from "@/types";
 
-// Lucide Icons থেকে মানানসই আইকনগুলো ইমপোর্ট করা হলো
 import { 
   LayoutDashboard, 
   ChartArea,
   ShoppingBag, 
   PlusCircle, 
-  ClipboardList 
+  ClipboardList,
+  Sparkles,
+  Gem
 } from "lucide-react";
-
-
 
 export const adminSidebarItem: ISidebarItem[] = [
   {
-    title: "Admin Dashboard",
+    title: "✨ Admin Dashboard",
     url: "#",
     items: [
       {
         title: "Dashboard",
         url: "/admin/dashboard",
         component: AdminOverviewPage,
-        icon: LayoutDashboard, // ড্যাশবোর্ডের জন্য গ্রিড আইকন
+        icon: LayoutDashboard,
       },
       {
         title: "Order Overview",
         url: "/admin/order-overview",
         component: OrderviewAdmin,
-        icon: ChartArea, // নতুন প্রোডাক্ট অ্যাড করার জন্য প্লাস আইকন
+        icon: ChartArea,
       },
       {
-        title: "All Product",
-        url: "/admin/users", // নোটিফিকেশন: আপনার এখানে URL এ /admin/users দেওয়া, প্রয়োজন হলে /admin/products করতে পারেন
+        title: "All Products",
+        url: "/admin/all-products", // Changed from /admin/users
         component: Allproduct,
-        icon: ShoppingBag, // প্রোডাক্ট লিস্টের জন্য শপিং ব্যাগ আইকন
+        icon: ShoppingBag,
       },
       {
-        title: "Order",
+        title: "Orders",
         url: "/admin/order",
         component: AdminOrderTrack,
-        icon: ClipboardList, // অর্ডারের জন্য ক্লিপবোর্ড/লিস্ট আইকন
+        icon: ClipboardList,
       },
       {
         title: "Add Product",
         url: "/admin/add-product",
         component: AddProduct,
-        icon: PlusCircle, // নতুন প্রোডাক্ট অ্যাড করার জন্য প্লাস আইকন
+        icon: PlusCircle,
       },
-      
+      {
+        title: "Beauty Collection",
+        url: "/admin/beauty",
+        component: Allproduct, // বা আলাদা কম্পোনেন্ট
+        icon: Sparkles,
+      },
+      {
+        title: "Jewelry Collection",
+        url: "/admin/jewelry",
+        component: Allproduct, // বা আলাদা কম্পোনেন্ট
+        icon: Gem,
+      },
     ],
   },
 ];

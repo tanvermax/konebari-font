@@ -27,8 +27,8 @@ const registerSchema = z
       .min(2, { message: "Name must be at least 2 characters" })
       .max(50, { message: "Name is too long" }),
     email: z.string().email({ message: "Please enter a valid email" }),
-    password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-    confirmPassword: z.string().min(8, { message: "Password must be at least 8 characters" }),
+    password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+    confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -52,35 +52,29 @@ export function RegisterForm({
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-    const userInfo = {
+const onSubmit = async (data: z.infer<typeof registerSchema>) => {
+  const userInfo = {
+    body: {
       name: data.name,
       email: data.email,
       role: "USER",
       password: data.password,
-    };
-
-    try {
-      const result = await register(userInfo).unwrap();
-      if (result.message === "User created successfully") {
-        toast.success("Account created! 🎉", {
-          description: "Please login to continue",
-        });
-        navigate("/login");
-      }
-    } catch (error: any) {
-      console.error(error);
-      if (error.data?.message?.includes("already exists")) {
-        toast.error("Email already registered", {
-          description: "Please try logging in instead",
-        });
-      } else {
-        toast.error("Something went wrong", {
-          description: "Please try again later",
-        });
-      }
     }
   };
+
+  try {
+    const result = await register(userInfo).unwrap();
+    if (result?.success || result?.message === "User created successfully") {
+      toast.success("Account created! 🎉", {
+        description: "Please login to continue",
+      });
+      navigate("/login");
+    }
+  } catch (error: any) {
+    console.error(error);
+    toast.error(error?.data?.message || "Something went wrong");
+  }
+};
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
