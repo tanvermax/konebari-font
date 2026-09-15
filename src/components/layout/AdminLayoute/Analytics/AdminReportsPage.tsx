@@ -1,9 +1,9 @@
 import { Link } from 'react-router';
 
-export default function OrderviewAdmin() {
+export default function AdminReportsPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-4xl font-bold">Welcome to OrderviewAdmin</h1>
+      <h1 className="text-4xl font-bold">Welcome to AdminReportsPage</h1>
       <p className="mt-4 text-muted-foreground text-center px-4">
         Ready to build the future of NoteArch.
       </p>

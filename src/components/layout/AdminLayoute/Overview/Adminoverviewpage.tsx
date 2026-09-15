@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+// Adminoverviewpage.tsx - Premium Redesign
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useAdminOverviewQuery } from "@/redux/features/product/product.api";
+import { motion } from "framer-motion";
 import { 
   Package, 
   CheckCircle, 
@@ -19,18 +21,42 @@ import {
   TrendingUp, 
   AlertTriangle,
   Clock,
+  Sparkles,
+  ShoppingBag,
+  DollarSign,
+  ArrowUp,
+  ArrowDown,
+
+  Gem,
+  
 } from "lucide-react";
-// চার্ট তৈরি করার জন্য recharts ব্যবহার করা হয়েছে (যদি ইনস্টল না থাকে: npm i recharts)
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell} from "recharts";
+
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 },
+};
+
+const staggerContainer = {
+  animate: { transition: { staggerChildren: 0.05 } },
+};
 
 const AdminOverviewPage = () => {
   const { data, isLoading } = useAdminOverviewQuery(undefined);
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6900]"></div>
-        <p className="text-muted-foreground animate-pulse text-sm font-medium">Loading Overview Data...</p>
+      <div className="flex flex-col items-center justify-center py-40 space-y-6">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          className="relative"
+        >
+          <div className="w-16 h-16 rounded-full border-4 border-pink-200 border-t-pink-500" />
+          <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 text-pink-400" />
+        </motion.div>
+        <p className="text-muted-foreground text-sm font-medium animate-pulse">Loading your dashboard...</p>
       </div>
     );
   }
@@ -42,315 +68,464 @@ const AdminOverviewPage = () => {
       title: "Total Products",
       value: overview?.totalProducts,
       icon: Package,
-      color: "from-orange-500/10 to-[#FF6900]/5",
-      iconColor: "text-[#FF6900]",
+      gradient: "from-pink-500/20 via-rose-500/10 to-pink-500/5",
+      iconBg: "bg-pink-500",
+      iconColor: "text-white",
+      trend: "+12%",
+      trendUp: true,
     },
     {
       title: "Active Products",
       value: overview?.totalActive,
       icon: CheckCircle,
-      color: "from-emerald-500/10 to-emerald-500/5",
-      iconColor: "text-emerald-500",
+      gradient: "from-emerald-500/20 via-emerald-500/10 to-emerald-500/5",
+      iconBg: "bg-emerald-500",
+      iconColor: "text-white",
+      trend: "+8%",
+      trendUp: true,
     },
     {
       title: "Inactive Products",
       value: overview?.totalInactive,
       icon: XCircle,
-      color: "from-rose-500/10 to-rose-500/5",
-      iconColor: "text-rose-500",
+      gradient: "from-zinc-500/20 via-zinc-500/10 to-zinc-500/5",
+      iconBg: "bg-zinc-500",
+      iconColor: "text-white",
+      trend: "-3%",
+      trendUp: false,
     },
     {
       title: "In Stock Types",
       value: overview?.totalInStock,
       icon: Layers,
-      color: "from-blue-500/10 to-blue-500/5",
-      iconColor: "text-blue-500",
+      gradient: "from-sky-500/20 via-sky-500/10 to-sky-500/5",
+      iconBg: "bg-sky-500",
+      iconColor: "text-white",
+      trend: "+15%",
+      trendUp: true,
     },
     {
       title: "Out Of Stock",
       value: overview?.totalOutOfStock,
       icon: AlertTriangle,
-      color: "from-amber-500/10 to-amber-500/5",
-      iconColor: "text-amber-500",
+      gradient: "from-amber-500/20 via-amber-500/10 to-amber-500/5",
+      iconBg: "bg-amber-500",
+      iconColor: "text-white",
+      trend: "-5%",
+      trendUp: false,
     },
     {
       title: "Total Variants",
       value: overview?.totalVariants,
       icon: Boxes,
-      color: "from-purple-500/10 to-purple-500/5",
-      iconColor: "text-purple-500",
+      gradient: "from-purple-500/20 via-purple-500/10 to-purple-500/5",
+      iconBg: "bg-purple-500",
+      iconColor: "text-white",
+      trend: "+22%",
+      trendUp: true,
     },
     {
       title: "With Discount",
       value: overview?.totalWithDiscount,
       icon: Percent,
-      color: "from-teal-500/10 to-teal-500/5",
-      iconColor: "text-teal-500",
+      gradient: "from-rose-400/20 via-pink-400/10 to-rose-400/5",
+      iconBg: "bg-rose-400",
+      iconColor: "text-white",
+      trend: "+7%",
+      trendUp: true,
     },
     {
       title: "Total Stock Qty",
       value: overview?.totalStockQuantity,
       icon: TrendingUp,
-      color: "from-indigo-500/10 to-indigo-500/5",
-      iconColor: "text-indigo-500",
+      gradient: "from-indigo-500/20 via-indigo-500/10 to-indigo-500/5",
+      iconBg: "bg-indigo-500",
+      iconColor: "text-white",
+      trend: "+18%",
+      trendUp: true,
     },
   ];
 
-  // চার্টের জন্য ক্যাটাগরি ডেটা ফরম্যাট করা
   const chartData = data?.categories?.map((cat: any) => ({
     name: cat._id,
     products: cat.productCount,
   })) || [];
 
-  return (
-    <div className="space-y-8 p-4 md:p-8 bg-slate-50/50 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b pb-5">
-        <div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Admin Dashboard</h2>
-          <p className="text-muted-foreground text-sm">Real-time product inventory and store statistics.</p>
-        </div>
-        <Badge variant="outline" className="w-fit border-[#FF6900]/30 text-[#FF6900] bg-[#FF6900]/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider">
-          Live Overview
-        </Badge>
-      </div>
+  const COLORS = ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3', '#fce7f3', '#fbcfe8'];
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-8"
+    >
+      {/* Header */}
+      <motion.div
+        variants={fadeIn}
+        initial="initial"
+        animate="animate"
+        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <motion.h2
+            className="text-3xl md:text-4xl font-extrabold tracking-tight flex items-center gap-3"
+            initial={{ x: -20 }}
+            animate={{ x: 0 }}
+          >
+            <span className="bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 bg-clip-text text-transparent">
+              Dashboard
+            </span>
+            <motion.span
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Sparkles className="w-6 h-6 text-pink-500" />
+            </motion.span>
+          </motion.h2>
+          <p className="text-muted-foreground text-sm">Real-time inventory & store performance insights</p>
+        </div>
+        <Badge className="w-fit bg-gradient-to-r from-pink-500 to-rose-500 text-white border-none px-4 py-1.5 text-xs font-semibold uppercase tracking-wider shadow-lg shadow-pink-500/20">
+          Live Dashboard
+        </Badge>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <motion.div
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
         {cards.map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.title} className="overflow-hidden border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 group hover:-translate-y-1">
-              <div className={`p-6 bg-gradient-to-br ${item.color} h-full flex flex-col justify-between`}>
-                <div className="flex items-center justify-between space-x-4">
-                  <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-900 transition-colors">
-                    {item.title}
-                  </span>
-                  <div className={`p-2 rounded-xl bg-white shadow-sm ${item.iconColor}`}>
-                    <Icon className="h-5 w-5" />
+            <motion.div
+              key={item.title}
+              variants={fadeIn}
+              whileHover={{ y: -6, scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+              className="relative group"
+            >
+              <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl bg-gradient-to-br from-white to-pink-50/30 dark:from-zinc-900 dark:to-zinc-900/50">
+                <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                <CardContent className="relative p-5">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        {item.title}
+                      </p>
+                      <h3 className="text-3xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">
+                        {item.value ?? 0}
+                      </h3>
+                      <div className="flex items-center gap-1.5">
+                        <Badge className={`text-[10px] px-2 py-0 h-5 ${item.trendUp ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'} border-0`}>
+                          {item.trendUp ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
+                          {item.trend}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground">vs last month</span>
+                      </div>
+                    </div>
+                    <div className={`p-3 rounded-2xl ${item.iconBg} shadow-lg shadow-${item.iconBg}/20 group-hover:scale-110 transition-transform duration-300`}>
+                      <Icon className={`w-5 h-5 ${item.iconColor}`} />
+                    </div>
                   </div>
-                </div>
-                <div className="mt-4">
-                  <h2 className="text-3xl font-black text-slate-800 tracking-tight">
-                    {item.value ?? 0}
-                  </h2>
-                </div>
-              </div>
-            </Card>
+                  <motion.div
+                    className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    animate={{ scale: [0.8, 1.2, 1] }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Sparkles className="w-3 h-3 text-pink-400" />
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
-      {/* Graphical Chart & Average Prices */}
+      {/* Charts Section */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Recharts Bar Chart */}
-        <Card className="lg:col-span-2 shadow-sm border-slate-200/60">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold text-slate-800">Products by Category</CardTitle>
-            <CardDescription>Visual distribution of total items per category</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[260px] pr-4">
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} stroke="#64748b" />
-                  <YAxis fontSize={11} tickLine={false} axisLine={false} stroke="#64748b" />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                    cursor={{ fill: 'rgba(255, 105, 0, 0.04)' }}
-                  />
-                  <Bar dataKey="products" radius={[4, 4, 0, 0]}>
-                    {chartData.map(( index:number) => (
-                      <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#FF6900' : '#ff8533'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">No data available</div>
-            )}
-          </CardContent>
-        </Card>
+        <motion.div
+          variants={fadeIn}
+          initial="initial"
+          animate="animate"
+          className="lg:col-span-2"
+        >
+          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden bg-gradient-to-br from-white to-pink-50/20 dark:from-zinc-900 dark:to-zinc-900/50">
+            <CardHeader className="border-b border-pink-100/50 dark:border-zinc-800/50 bg-pink-50/30 dark:bg-zinc-900/30">
+              <CardTitle className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+                <BarChart className="w-4 h-4 text-pink-500" />
+                Category Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-[280px] pt-6">
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} stroke="#888888" />
+                    <YAxis fontSize={11} tickLine={false} axisLine={false} stroke="#888888" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255,255,255,0.95)',
+                        borderRadius: '12px',
+                        border: '1px solid #f43f5e',
+                        backdropFilter: 'blur(8px)',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
+                      }}
+                      cursor={{ fill: 'rgba(244, 63, 94, 0.08)' }}
+                    />
+                    <Bar dataKey="products" radius={[8, 8, 0, 0]}>
+                      {chartData.map((_: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                  No data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Pricing Info */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          <Card className="shadow-sm border-slate-200/60 relative overflow-hidden bg-gradient-to-br from-white to-orange-50/20 group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6900]" />
+        {/* Price Summary */}
+        <motion.div
+          variants={fadeIn}
+          initial="initial"
+          animate="animate"
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1"
+        >
+          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden bg-gradient-to-br from-white to-pink-50/20 dark:from-zinc-900 dark:to-zinc-900/50 relative">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-rose-500" />
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Average Min Price</CardTitle>
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <DollarSign className="w-3.5 h-3.5 text-pink-500" />
+                Average Min Price
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <h1 className="text-4xl font-black text-slate-800 tracking-tight flex items-baseline">
-                <span className="text-[#FF6900] mr-2 text-2xl font-bold">৳</span>
+              <h1 className="text-3xl font-black text-zinc-900 dark:text-zinc-100 flex items-baseline">
+                <span className="text-pink-500 mr-1.5 text-xl font-bold">৳</span>
                 {overview?.avgMinPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h1>
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-slate-200/60 relative overflow-hidden bg-gradient-to-br from-white to-orange-50/20 group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-slate-800" />
+          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden bg-gradient-to-br from-white to-pink-50/20 dark:from-zinc-900 dark:to-zinc-900/50 relative">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-500" />
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">Average Max Price</CardTitle>
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <Gem className="w-3.5 h-3.5 text-purple-500" />
+                Average Max Price
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <h1 className="text-4xl font-black text-slate-800 tracking-tight flex items-baseline">
-                <span className="text-slate-700 mr-2 text-2xl font-bold">৳</span>
+              <h1 className="text-3xl font-black text-zinc-900 dark:text-zinc-100 flex items-baseline">
+                <span className="text-purple-500 mr-1.5 text-xl font-bold">৳</span>
                 {overview?.avgMaxPrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h1>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Category Table */}
-      <Card className="shadow-sm border-slate-200/60 overflow-hidden">
-        <CardHeader className="bg-slate-50/70 border-b border-slate-100">
-          <CardTitle className="text-lg font-bold text-slate-800">Category Statistics</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-slate-100/60">
-                <TableRow>
-                  <TableHead className="font-semibold text-slate-700">Category</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Products</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Stock Available</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Avg Price</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data?.categories?.map((category: any) => (
-                  <TableRow key={category._id} className="hover:bg-slate-50/80 transition-colors">
-                    <TableCell className="font-medium">
-                      <Badge className="bg-[#FF6900]/10 text-[#FF6900] border-none hover:bg-[#FF6900]/20 font-medium px-2.5 py-0.5">
-                        {category._id}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-slate-600 font-medium">{category.productCount}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center font-semibold px-2 py-0.5 rounded text-xs ${category.totalStock > 10 ? 'text-slate-700' : 'text-amber-600 bg-amber-50'}`}>
-                        {category.totalStock}
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-bold text-slate-800">৳ {category.avgPrice?.toFixed(2)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Grid for Low Stock & Out Of Stock */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Low Stock Table */}
-        <Card className="shadow-sm border-slate-200/60 overflow-hidden">
-          <CardHeader className="bg-amber-50/40 border-b border-amber-100/60 flex flex-row items-center justify-between space-y-0">
-            <div>
-              <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-500" /> Low Stock Warning
+      {/* Tables Section */}
+      <div className="grid gap-6">
+        {/* Category Table */}
+        <motion.div variants={fadeIn} initial="initial" animate="animate">
+          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-pink-50/50 to-rose-50/50 dark:from-zinc-900/50 dark:to-zinc-900/50 border-b border-pink-100/50 dark:border-zinc-800/50">
+              <CardTitle className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-pink-500" />
+                Category Statistics
               </CardTitle>
-            </div>
-            <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-none font-bold">Action Needed</Badge>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-semibold text-slate-700">Name</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Current Stock</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Price</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data?.lowStock?.map((item: any) => (
-                  <TableRow key={item._id} className="hover:bg-amber-50/10">
-                    <TableCell className="font-medium text-slate-800 max-w-[200px] truncate">{item.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 font-bold">
-                        {item.totalStock} left
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-semibold text-slate-700">৳ {item.minPrice}</TableCell>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader className="bg-zinc-50/80 dark:bg-zinc-900/50">
+                  <TableRow>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wider">Category</TableHead>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wider">Products</TableHead>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wider">Stock</TableHead>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wider">Avg Price</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                </TableHeader>
+                <TableBody>
+                  {data?.categories?.map((category: any, index: number) => (
+                    <motion.tr
+                      key={category._id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="hover:bg-pink-50/30 dark:hover:bg-zinc-900/30 transition-colors group"
+                    >
+                      <TableCell>
+                        <Badge className="bg-pink-500/10 text-pink-600 border-none hover:bg-pink-500/20 font-medium px-3 py-1 text-xs rounded-full">
+                          {category._id}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-semibold text-sm">{category.productCount}</TableCell>
+                      <TableCell>
+                        <Badge className={`font-bold px-3 py-1 text-xs rounded-full ${
+                          category.totalStock > 10 
+                            ? 'bg-emerald-100 text-emerald-700' 
+                            : 'bg-amber-100 text-amber-700'
+                        } border-0`}>
+                          {category.totalStock}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-bold text-sm text-zinc-800 dark:text-zinc-200">
+                        ৳ {category.avgPrice?.toFixed(2)}
+                      </TableCell>
+                    </motion.tr>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Out Of Stock Grid */}
-        <Card className="shadow-sm border-slate-200/60 overflow-hidden">
-          <CardHeader className="bg-rose-50/40 border-b border-rose-100/60">
-            <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-rose-500" /> Out Of Stock
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            {data?.outOfStock && data.outOfStock.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {data?.outOfStock?.map((item: any) => (
-                  <div key={item._id} className="border border-rose-100 bg-rose-50/30 rounded-xl p-3 flex items-center justify-between group hover:border-rose-200 transition-colors">
-                    <p className="font-medium text-slate-700 text-sm truncate pr-2">{item.name}</p>
-                    <span className="text-[10px] font-bold text-rose-600 bg-rose-100/60 px-2 py-0.5 rounded-full uppercase shrink-0">Empty</span>
+        {/* Low Stock & Out of Stock */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <motion.div variants={fadeIn} initial="initial" animate="animate">
+            <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-amber-50/50 to-amber-100/30 dark:from-amber-950/20 dark:to-amber-950/10 border-b border-amber-100/50 dark:border-zinc-800/50">
+                <CardTitle className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  Low Stock Warning
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs font-semibold">Product</TableHead>
+                      <TableHead className="text-xs font-semibold">Stock</TableHead>
+                      <TableHead className="text-xs font-semibold">Price</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data?.lowStock?.map((item: any, index: number) => (
+                      <motion.tr
+                        key={item._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="hover:bg-amber-50/20 transition-colors"
+                      >
+                        <TableCell className="font-medium text-sm max-w-[180px] truncate">{item.name}</TableCell>
+                        <TableCell>
+                          <Badge className="border-amber-300 bg-amber-50 text-amber-700 text-xs font-bold rounded-full px-3 py-1">
+                            {item.totalStock} left
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-semibold text-sm">৳ {item.minPrice}</TableCell>
+                      </motion.tr>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={fadeIn} initial="initial" animate="animate">
+            <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-rose-50/50 to-red-50/30 dark:from-rose-950/20 dark:to-red-950/10 border-b border-rose-100/50 dark:border-zinc-800/50">
+                <CardTitle className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-rose-500" />
+                  Out Of Stock
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                {data?.outOfStock && data.outOfStock.length > 0 ? (
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    {data?.outOfStock?.map((item: any, index: number) => (
+                      <motion.div
+                        key={item._id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border border-rose-100 dark:border-zinc-800 bg-rose-50/30 dark:bg-rose-950/20 rounded-xl p-3 flex items-center justify-between group hover:shadow-md transition-all"
+                      >
+                        <p className="font-medium text-sm text-zinc-700 dark:text-zinc-300 truncate pr-2">{item.name}</p>
+                        <Badge className="bg-rose-500 text-white text-xs font-bold rounded-full px-3 py-1 border-0 shadow-sm shadow-rose-500/20">
+                          Out
+                        </Badge>
+                      </motion.div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-muted-foreground text-sm">All items are currently in stock! 🎉</div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                ) : (
+                  <div className="text-center py-12 space-y-2">
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto" />
+                    </motion.div>
+                    <p className="text-muted-foreground font-medium">All items are in stock! 🎉</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
 
-      {/* Recently Updated Table */}
-      <Card className="shadow-sm border-slate-200/60 overflow-hidden">
-        <CardHeader className="bg-slate-50/70 border-b border-slate-100 flex flex-row items-center justify-between space-y-0">
-          <div>
-            <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <Clock className="h-5 w-5 text-slate-500" /> Recently Updated Products
-            </CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-slate-100/60">
-                <TableRow>
-                  <TableHead className="font-semibold text-slate-700">Product Name</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Status</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Last Updated</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data?.recentlyUpdated?.map((item: any) => (
-                  <TableRow key={item._id} className="hover:bg-slate-50/80 transition-colors">
-                    <TableCell className="font-medium text-slate-800">{item.name}</TableCell>
-                    <TableCell>
-                      <Badge className={`font-semibold border-none px-2.5 py-0.5 ${
-                        item.status?.toLowerCase() === 'active' 
-                          ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' 
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}>
-                        {item.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-slate-500 text-sm font-medium">
-                      {new Date(item.updatedAt).toLocaleString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit"
-                      })}
-                    </TableCell>
+        {/* Recently Updated */}
+        <motion.div variants={fadeIn} initial="initial" animate="animate">
+          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-purple-50/50 to-indigo-50/30 dark:from-purple-950/20 dark:to-indigo-950/10 border-b border-purple-100/50 dark:border-zinc-800/50">
+              <CardTitle className="text-sm font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-purple-500" />
+                Recently Updated Products
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader className="bg-zinc-50/80 dark:bg-zinc-900/50">
+                  <TableRow>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wider">Product</TableHead>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wider">Status</TableHead>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wider">Last Updated</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                </TableHeader>
+                <TableBody>
+                  {data?.recentlyUpdated?.map((item: any, index: number) => (
+                    <motion.tr
+                      key={item._id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="hover:bg-purple-50/20 transition-colors"
+                    >
+                      <TableCell className="font-medium text-sm">{item.name}</TableCell>
+                      <TableCell>
+                        <Badge className={`font-semibold border-0 px-3 py-1 text-xs rounded-full ${
+                          item.status?.toLowerCase() === 'active' 
+                            ? 'bg-emerald-100 text-emerald-700' 
+                            : 'bg-zinc-100 text-zinc-700'
+                        }`}>
+                          {item.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm font-medium text-muted-foreground">
+                        {new Date(item.updatedAt).toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </TableCell>
+                    </motion.tr>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 };
 

@@ -1,70 +1,60 @@
-// userSIdebarItem.ts - আপডেটেড
-import Booking from "@/pages/User/Booking";
+// import Booking from "@/pages/User/Booking";
+// import UserProfile from "@/pages/User/UserProfile";
+// import UserOrders from "@/pages/User/UserOrders";
+// import UserWishlist from "@/pages/User/UserWishlist";
+// import UserAddresses from "@/pages/User/UserAddresses";
+// import UserPayments from "@/pages/User/UserPayments";
+// import UserShipments from "@/pages/User/UserShipments";
 import type { ISidebarItem } from "@/types";
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  Heart, 
-  Gem, 
-  Clock,
-  Gift,
-  User,
-  Settings
-} from "lucide-react";
+// import { Calendar, ClipboardList, CreditCard, Heart, MapPin, Truck, User } from "lucide-react";
 
 export const userSidebarItem: ISidebarItem[] = [
   {
-    title: "💎 User Dashboard",
+    title: "My Account",
     url: "#",
     items: [
-      {
-        title: "Dashboard",
-        url: "/user/dashboard",
-        component: Booking, // অথবা আলাদা ড্যাশবোর্ড কম্পোনেন্ট
-        icon: LayoutDashboard,
-      },
-      {
-        title: "My Orders",
-        url: "/user/orders",
-        component: Booking,
-        icon: ShoppingBag,
-      },
-      {
-        title: "Wishlist",
-        url: "/user/wishlist",
-        component: Booking,
-        icon: Heart,
-      },
-      {
-        title: "My Collection",
-        url: "/user/collection",
-        component: Booking,
-        icon: Gem,
-      },
-      {
-        title: "Recent Views",
-        url: "/user/recent",
-        component: Booking,
-        icon: Clock,
-      },
-      {
-        title: "Rewards",
-        url: "/user/rewards",
-        component: Booking,
-        icon: Gift,
-      },
-      {
-        title: "Profile",
-        url: "/user/profile",
-        component: Booking,
-        icon: User,
-      },
-      {
-        title: "Settings",
-        url: "/user/settings",
-        component: Booking,
-        icon: Settings,
-      },
+      // {
+      //   title: "Profile",
+      //   url: "/user/profile",
+      //   component: UserProfile,
+      //   icon: User,
+      // },
+      // {
+      //   title: "My Orders",
+      //   url: "/user/orders",
+      //   component: UserOrders,
+      //   icon: ClipboardList,
+      // },
+      // {
+      //   title: "Wishlist",
+      //   url: "/user/wishlist",
+      //   component: UserWishlist,
+      //   icon: Heart,
+      // },
+      // {
+      //   title: "Addresses",
+      //   url: "/user/addresses",
+      //   component: UserAddresses,
+      //   icon: MapPin,
+      // },
+      // {
+      //   title: "Payments",
+      //   url: "/user/payments",
+      //   component: UserPayments,
+      //   icon: CreditCard,
+      // },
+      // {
+      //   title: "Shipments",
+      //   url: "/user/shipments",
+      //   component: UserShipments,
+      //   icon: Truck,
+      // },
+      // {
+      //   title: "Booking",
+      //   url: "/user/booking",
+      //   component: Booking,
+      //   icon: Calendar,
+      // },
     ],
   },
 ];
