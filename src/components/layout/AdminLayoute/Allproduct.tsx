@@ -27,7 +27,7 @@ export default function Allproduct() {
     page: adminPage, 
     status: activeTab === "all" ? "all" : activeTab === "active" ? "active" : "inactive"
   });
-console.log(adminData);
+// console.log(adminData.data);
   const [deleteProduct] = useDeleteProductMutation();
   const [deletingProducts, setDeletingProducts] = useState<Set<string>>(new Set());
 

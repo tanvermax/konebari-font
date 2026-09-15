@@ -3,8 +3,8 @@ import { Navigate, Outlet } from "react-router";
 import { useAppSelector } from "@/redux/hook";
 
 export const UserRouteGuard = () => {
-  const { user, isLoading } = useAppSelector((state) => state.auth);
-  console.log(user);
+  const { user, isLoading, isAuthenticated } = useAppSelector((state) => state.auth);
+  console.log("🔐 UserRouteGuard - User:", user);
 
   if (isLoading) {
     return (
@@ -19,16 +19,11 @@ export const UserRouteGuard = () => {
     );
   }
 
-  if (!user) {
+  // ❌ user না থাকলে লগইনে
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  // User can access user routes
-  // Admin can also access user routes
-  if (user.role === "USER" || user.role === "ADMIN") {
-    return <Outlet />;
-  }
-
-  // যদি অন্য কোনো রোল থাকে
-  return <Navigate to="/login" replace />;
+  // ✅ USER বা ADMIN — দুজনেই user routes এ যেতে পারবে
+  return <Outlet />;
 };

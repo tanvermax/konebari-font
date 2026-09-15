@@ -1,11 +1,16 @@
 // components/RouteGuard/AdminRouteGuard.tsx
-import { useUserInfoQuery } from "@/redux/features/auth/auth.api"; // আপনার API hook
 import { Navigate, Outlet } from "react-router";
+import { useAppSelector } from "@/redux/hook";
 
 export const AdminRouteGuard = () => {
-  // 1. সরাসরি RTK Query থেকে ইউজার ডাটা এবং লোডিং স্টেট নিন
-  const { data: userData, isLoading, isError } = useUserInfoQuery(undefined);
+  // ✅ Redux store থেকে user নিন (API কল নয়)
+  const { user, isLoading, isAuthenticated } = useAppSelector((state) => state.auth);
 
+  console.log("🔐 AdminRouteGuard - User:", user);
+  console.log("🔐 AdminRouteGuard - isLoading:", isLoading);
+  console.log("🔐 AdminRouteGuard - isAuthenticated:", isAuthenticated);
+
+  // ⏳ লোডিং হলে অপেক্ষা করুন
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -14,15 +19,12 @@ export const AdminRouteGuard = () => {
     );
   }
 
-  // API response থেকে আসল ইউজার অবজেক্ট বের করা
-  const user = userData?.data || userData; 
-
-  // 2. ইউজার না থাকলে বা API এরর দিলে লগইনে পাঠাবে
-  if (isError || !user) {
+  // ❌ user না থাকলে লগইনে পাঠান
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  // 3. রোল চেক (ADMIN না হলে ড্যাশবোর্ডে পাঠাবে)
+  // ❌ ADMIN না হলে ড্যাশবোর্ডে পাঠান
   if (user.role !== "ADMIN") {
     return <Navigate to="/dashboard" replace />;
   }

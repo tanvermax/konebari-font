@@ -1,4 +1,4 @@
-// EditProduct.tsx - সম্পূর্ণ ফিক্সড ভার্সন
+// EditProduct.tsx - আপনার API response অনুযায়ী ফিক্সড
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
@@ -23,15 +23,24 @@ import {
 } from "@/components/ui/select";
 
 import {
-  useGetSingleProductQuery,
+  usePricestockDetailsQuery,
   useUpdateProductMutation,
 } from "@/redux/features/product/product.api";
-import type { IProductVariant } from "@/redux/features/product/Product.types";
 
-// ✅ ফর্মের জন্য আলাদা টাইপ - combo কে string বানানো হয়েছে
+// ✅ API থেকে আসা ভেরিয়েন্ট টাইপ
+interface IProductVariant {
+  skuId: string;
+  combo?: string | null;
+  price: number;
+  specialPrice?: number;
+  quantity: number;
+  status: 'active' | 'inactive';
+  image?: string | null;
+}
+
 interface IFormVariant {
   skuId: string;
-  combo: string;  // ✅ string (null/undefined নয়)
+  combo: string;
   price: number;
   specialPrice?: number;
   quantity: number;
@@ -40,17 +49,18 @@ interface IFormVariant {
 }
 
 interface IProductForm {
-  name: string;
+  title: string;          // 👈 API response এ 'title', 'name' নয়
   nameBn: string;
   category: string;
   description: string;
-  highlights: string;
-  warranty: string;
-  specs: Record<string, string>;
-  variants: IFormVariant[];  // ✅ ফর্মের জন্য আলাদা টাইপ
-  mainImage: string;
+  shortDescription: string; // 👈 'highlights' নয়
+  price: number;
+  discountPrice: number;
+  stock: number;
+  brand: string;
+  variants: IFormVariant[];
   images: string[];
-  status: 'active' | 'inactive';
+  isActive: boolean;      // 👈 'status' নয়
 }
 
 export default function EditProduct() {
@@ -61,36 +71,42 @@ export default function EditProduct() {
     data: product, 
     isLoading, 
     isError,
-  } = useGetSingleProductQuery(id || '', {
+  } = usePricestockDetailsQuery(id || '', {
     skip: !id,
   });
 
   const [updateProduct, { isLoading: isSaving }] = useUpdateProductMutation();
+
   const [images, setImages] = useState<string[]>([]);
+
+  console.log("📦 Product Data:", product);
 
   const form = useForm<IProductForm>({
     defaultValues: {
-      name: "",
+      title: "",
       nameBn: "",
       category: "",
       description: "",
-      highlights: "",
-      warranty: "",
-      specs: {},
+      shortDescription: "",
+      price: 0,
+      discountPrice: 0,
+      stock: 0,
+      brand: "Generic",
       variants: [],
-      mainImage: "",
       images: [],
-      status: 'active',
+      isActive: true,
     },
   });
 
-  // ✅ Populate form when product loads - Type conversion করা হয়েছে
+  // ✅ Populate form when product loads
   useEffect(() => {
     if (product) {
+      console.log("📝 Populating form with:", product);
+
       // ✅ API থেকে আসা variants কে ফর্মের variants এ convert করুন
       const formVariants: IFormVariant[] = (product.variants || []).map((v: IProductVariant) => ({
         skuId: v.skuId,
-        combo: v.combo || '',  // ✅ null/undefined কে empty string এ convert
+        combo: v.combo || '',
         price: v.price,
         specialPrice: v.specialPrice,
         quantity: v.quantity,
@@ -99,70 +115,77 @@ export default function EditProduct() {
       }));
 
       form.reset({
-        name: product.name || "",
+        title: product.title || "",
         nameBn: product.nameBn || "",
         category: product.category || "",
         description: product.description || "",
-        highlights: product.highlights || "",
-        warranty: product.warranty || "",
-        specs: product.specs || {},
-        variants: formVariants,  // ✅ Converted variants
-        mainImage: product.mainImage || "",
+        shortDescription: product.shortDescription || "",
+        price: product.price || 0,
+        discountPrice: product.discountPrice || 0,
+        stock: product.stock || 0,
+        brand: product.brand || "Generic",
+        variants: formVariants,
         images: product.images || [],
-        status: product.status || 'active',
+        isActive: product.isActive ?? true,
       });
       
       setImages(product.images || []);
     }
   }, [product, form]);
 
-  // ✅ Submit handler - ফর্মের ডেটাকে API ডেটায় convert করুন
-  const onSubmit = async (data: IProductForm) => {
+// EditProduct.tsx - onSubmit
+const onSubmit = async (data: IProductForm) => {
     if (!id) {
-      toast.error("Product ID is missing");
-      return;
+        toast.error("Product ID is missing");
+        return;
     }
 
     try {
-      // ✅ ফর্মের variants কে API variants এ convert করুন
-      const apiVariants: IProductVariant[] = data.variants.map((v: IFormVariant) => ({
-        skuId: v.skuId,
-        combo: v.combo || null,  // ✅ empty string কে null এ convert
-        price: v.price,
-        specialPrice: v.specialPrice,
-        quantity: v.quantity,
-        status: v.status,
-        image: v.image || null,
-      }));
+        // ✅ updateData তৈরি
+        const updateData = {
+            title: data.title,
+            nameBn: data.nameBn,
+            category: data.category,
+            description: data.description,
+            shortDescription: data.shortDescription,
+            price: Number(data.price) || 0,
+            discountPrice: Number(data.discountPrice) || 0,
+            stock: Number(data.stock) || 0,
+            brand: data.brand,
+            variants: data.variants,
+            images: data.images,
+            isActive: data.isActive,
+        };
 
-      const updateData = {
-        name: data.name,
-        nameBn: data.nameBn,
-        category: data.category,
-        description: data.description,
-        highlights: data.highlights,
-        warranty: data.warranty,
-        specs: data.specs,
-        variants: apiVariants,  // ✅ API variants
-        mainImage: data.mainImage,
-        images: data.images,
-        status: data.status,
-      };
+        console.log('📤 Sending updateData:', updateData);
 
-      await updateProduct({
-        id,
-        updateData,
-      }).unwrap();
-      
-      toast.success("Product updated successfully ✨");
-      navigate(-1);
+        // ✅ FormData তৈরি করুন
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(updateData));
+
+        // ✅ FormData চেক করুন
+        console.log('📤 FormData entries:');
+        for (let pair of formData.entries()) {
+            console.log('  -', pair[0], ':', pair[1]);
+        }
+
+        // ✅ API কল
+        const res = await updateProduct({
+            id,
+            updateData: formData,   // 👈 FormData পাঠান
+        }).unwrap();
+
+        console.log('✅ Update Success:', res);
+        toast.success("Product updated successfully ✨");
+        navigate(-1);
+
     } catch (error: any) {
-      console.error('Update error:', error);
-      toast.error(error?.data?.message || "Failed to update product");
+        console.error('❌ Update error:', error);
+        toast.error(error?.data?.message || "Failed to update product");
     }
-  };
+};
 
-  // ✅ Add variant handler
+  // ✅ Add variant
   const addVariant = () => {
     const currentVariants = form.getValues('variants') || [];
     const newVariant: IFormVariant = {
@@ -176,13 +199,13 @@ export default function EditProduct() {
     form.setValue('variants', [...currentVariants, newVariant]);
   };
 
-  // ✅ Remove variant handler
+  // ✅ Remove variant
   const removeVariant = (index: number) => {
     const variants = form.getValues('variants') || [];
     form.setValue('variants', variants.filter((_, i) => i !== index));
   };
 
-  // ✅ Update variant handler
+  // ✅ Update variant
   const updateVariant = (index: number, field: keyof IFormVariant, value: any) => {
     const variants = form.getValues('variants') || [];
     variants[index] = { ...variants[index], [field]: value };
@@ -196,7 +219,6 @@ export default function EditProduct() {
           <Skeleton className="h-10 w-10 rounded-full" />
           <Skeleton className="h-8 w-48" />
         </div>
-        <Skeleton className="h-64 w-full rounded-2xl" />
         <Skeleton className="h-64 w-full rounded-2xl" />
         <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
@@ -241,22 +263,21 @@ export default function EditProduct() {
         </div>
         <Badge className="ml-auto bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0">
           <Sparkles className="w-3 h-3 mr-1" />
-          {product.status === 'active' ? 'Active' : 'Inactive'}
+          {product.isActive ? 'Active' : 'Inactive'}
         </Badge>
       </div>
 
-      {/* Form */}
       <Card className="border-0 shadow-xl rounded-2xl">
         <CardContent className="p-6 md:p-8">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Product Name */}
+            {/* Title */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="font-semibold">Product Name *</Label>
+                <Label className="font-semibold">Product Title *</Label>
                 <Input
-                  {...form.register('name')}
+                  {...form.register('title')}
                   className="border-pink-200/50 focus-visible:ring-pink-400"
-                  placeholder="Enter product name"
+                  placeholder="Enter product title"
                 />
               </div>
               <div className="space-y-2">
@@ -269,14 +290,52 @@ export default function EditProduct() {
               </div>
             </div>
 
-            {/* Category */}
-            <div className="space-y-2">
-              <Label className="font-semibold">Category *</Label>
-              <Input
-                {...form.register('category')}
-                className="border-pink-200/50 focus-visible:ring-pink-400"
-                placeholder="e.g. Skincare, Makeup, Jewelry"
-              />
+            {/* Category & Brand */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="font-semibold">Category *</Label>
+                <Input
+                  {...form.register('category')}
+                  className="border-pink-200/50 focus-visible:ring-pink-400"
+                  placeholder="e.g. Skincare, Makeup"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-semibold">Brand</Label>
+                <Input
+                  {...form.register('brand')}
+                  className="border-pink-200/50 focus-visible:ring-pink-400"
+                  placeholder="Generic"
+                />
+              </div>
+            </div>
+
+            {/* Price & Stock */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label className="font-semibold">Price (৳) *</Label>
+                <Input
+                  type="number"
+                  {...form.register('price', { valueAsNumber: true })}
+                  className="border-pink-200/50 focus-visible:ring-pink-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-semibold">Discount Price (৳)</Label>
+                <Input
+                  type="number"
+                  {...form.register('discountPrice', { valueAsNumber: true })}
+                  className="border-pink-200/50 focus-visible:ring-pink-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-semibold">Stock</Label>
+                <Input
+                  type="number"
+                  {...form.register('stock', { valueAsNumber: true })}
+                  className="border-pink-200/50 focus-visible:ring-pink-400"
+                />
+              </div>
             </div>
 
             {/* Description */}
@@ -290,24 +349,14 @@ export default function EditProduct() {
               />
             </div>
 
-            {/* Highlights */}
+            {/* Short Description */}
             <div className="space-y-2">
-              <Label className="font-semibold">Highlights</Label>
+              <Label className="font-semibold">Short Description</Label>
               <Textarea
-                {...form.register('highlights')}
+                {...form.register('shortDescription')}
                 rows={3}
                 className="border-pink-200/50 focus-visible:ring-pink-400 resize-none"
                 placeholder="Key features and benefits"
-              />
-            </div>
-
-            {/* Warranty */}
-            <div className="space-y-2">
-              <Label className="font-semibold">Warranty</Label>
-              <Input
-                {...form.register('warranty')}
-                className="border-pink-200/50 focus-visible:ring-pink-400"
-                placeholder="e.g. 1 Year, 6 Months"
               />
             </div>
 
@@ -347,8 +396,8 @@ export default function EditProduct() {
             <div className="space-y-2">
               <Label className="font-semibold">Status</Label>
               <Select
-                value={form.watch('status')}
-                onValueChange={(value: 'active' | 'inactive') => form.setValue('status', value)}
+                value={form.watch('isActive') ? 'active' : 'inactive'}
+                onValueChange={(value) => form.setValue('isActive', value === 'active')}
               >
                 <SelectTrigger className="border-pink-200/50 focus-visible:ring-pink-400">
                   <SelectValue placeholder="Select status" />
@@ -381,7 +430,7 @@ export default function EditProduct() {
                   <button
                     type="button"
                     onClick={() => removeVariant(index)}
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition-colors"
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

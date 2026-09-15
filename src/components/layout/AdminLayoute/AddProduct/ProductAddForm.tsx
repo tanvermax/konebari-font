@@ -173,13 +173,12 @@ export default function ProductAddForm() {
       const formData = new FormData();
       
       // ✅ JSON ডেটা 'data' ফিল্ডে
-      formData.append('data', JSON.stringify(payload));
+    formData.append('data', JSON.stringify(payload));
       
       // ✅ ইমেজ ফাইল 'files' ফিল্ডে (Postman এ 'file' ছিল, কিন্তু আপনার route এ 'files' আছে)
-      imageFiles.forEach((file) => {
-        formData.append('files', file);
-      });
-
+     if (imageFiles.length > 0) {
+  formData.append('files', imageFiles[0]);
+}
       // 🔍 ডিবাগ - FormData চেক করুন
       console.log('📤 FormData Debug:');
       for (let pair of formData.entries()) {

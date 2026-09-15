@@ -183,6 +183,7 @@ const quickActions = [
 
 // ============ MAIN COMPONENT ============
 export default function Navbar() {
+  
   const { data: userData, isLoading: isUserLoading } = useUserInfoQuery(undefined);
   const { data: response, isLoading: isOrdersLoading, isFetching } = useAllOrderQuery(undefined, {
     skip: !userData?.data,
@@ -209,6 +210,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 console.log(isScrolled);
+console.log(userData?.data?.user?.role);
   // --- Cart logic ---
   const updateCartView = useCallback(() => {
     if (userData?.data) {

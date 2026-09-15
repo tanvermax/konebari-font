@@ -9,6 +9,7 @@ import OrderviewAdmin from "@/components/layout/AdminLayoute/OrderviewAdmin/Orde
 import AdminBulkOrdersPage from "@/components/layout/AdminLayoute/Overview/AdminBulkOrdersPage";
 import AdminOverviewPage from "@/components/layout/AdminLayoute/Overview/Adminoverviewpage";
 import AdminShipmentsPage from "@/components/layout/AdminLayoute/Shipments/AdminShipmentsPage";
+import UserManagementPage from "@/components/layout/AdminLayoute/UserManagement/UserManagementPage";
 
 // 🔥 নতুন ইমপোর্ট - যেগুলো তৈরি করতে হবে
 // import AdminOrderTrack from "@/components/layout/AdminLayoute/AdminOrderTrack/AdminOrderTrack";
@@ -53,7 +54,7 @@ import {
   ClipboardList,
   Truck,
   // FileSpreadsheet,
-  // Users,
+  Users,
   // UserCog,
   // Building2,
   // FileText,
@@ -82,7 +83,6 @@ import {
   // Boxes,
 } from "lucide-react";
 
-// import AdminUsersPage from "@/components/layout/AdminLayoute/User/AdminUsersPage";
 // মন্তব্য করা ইমপোর্টগুলো সরিয়ে ফেলা হয়েছে কারণ উপরে আলাদা করে আনা হয়েছে
 
 export const adminSidebarItem: ISidebarItem[] = [
@@ -214,12 +214,12 @@ export const adminSidebarItem: ISidebarItem[] = [
     title: "User Management",
     url: "#",
     items: [
-      // {
-      //   title: "All Users",
-      //   url: "/admin/users",
-      //   component: AdminUsersPage,
-      //   icon: Users,
-      // },
+      {
+        title: "All Users",
+        url: "/admin/users",
+        component: UserManagementPage,
+        icon: Users,
+      },
       // {
       //   title: "User Details",
       //   url: "/admin/users/:id",
@@ -244,30 +244,7 @@ export const adminSidebarItem: ISidebarItem[] = [
   // ============================================
   // 💰 SECTION 7: PAYMENTS & INVOICES
   // ============================================
-  {
-    title: "Payments & Invoices",
-    url: "#",
-    items: [
-      // {
-      //   title: "Transactions",
-      //   url: "/admin/payments",
-      //   component: AdminPaymentsPage, // ✅ আনকমেন্ট
-      //   icon: CreditCard,
-      // },
-      // {
-      //   title: "Invoices",
-      //   url: "/admin/invoices",
-      //   component: AdminInvoicesPage, // ✅ আনকমেন্ট
-      //   icon: Receipt,
-      // },
-      // {
-      //   title: "Refund Management",
-      //   url: "/admin/refunds",
-      //   component: AdminRefundsPage, // ✅ নতুন
-      //   icon: RefreshCw,
-      // },
-    ],
-  },
+ 
 
   // ============================================
   // 📊 SECTION 8: REPORTS (ডুপ্লিকেট রিমুভ করা হয়েছে)
@@ -276,10 +253,10 @@ export const adminSidebarItem: ISidebarItem[] = [
   // ============================================
   // 🎯 SECTION 9: MARKETING & PROMOTIONS
   // ============================================
-  {
-    title: "Marketing & Promotions",
-    url: "#",
-    items: [
+  // {
+  //   title: "Marketing & Promotions",
+  //   url: "#",
+  //   items: [
   //     {
   //       title: "Discounts & Coupons",
   //       url: "/admin/discounts",
@@ -344,6 +321,6 @@ export const adminSidebarItem: ISidebarItem[] = [
   //       component: AdminSecurityPage, // ✅ নতুন
   //       icon: ShieldCheck,
   //     },
-    ],
-  },
+    // ],
+  // },
 ];

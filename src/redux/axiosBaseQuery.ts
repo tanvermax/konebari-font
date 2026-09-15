@@ -1,5 +1,6 @@
 
 import { axiosInstance } from '@/lib/axios'
+import { getSessionId } from '@/lib/guestStorage';
 import type { BaseQueryFn } from '@reduxjs/toolkit/query'
 import type { AxiosRequestConfig, AxiosError } from 'axios'
 
@@ -18,14 +19,17 @@ const axiosBaseQuery =
   > =>
   async ({ url, method, data, params, headers }) => {
     try {
-    
+          const sessionId = getSessionId();
+
       const result = await axiosInstance({
         url: url,
         method,
         data,
         params,
-        headers,
-        
+        headers :{
+          ...headers,
+          "x-session-id": sessionId, // 👈 Guest identify করার জন্য
+        },
       });
       return { data: result.data };
     } catch (axiosError) {

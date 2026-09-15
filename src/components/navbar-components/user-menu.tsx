@@ -34,6 +34,7 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 
 export interface IUser {
+  _id?: any,
   email: string;
   name: string;
   role: 'ADMIN' | 'USER';

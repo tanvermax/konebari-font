@@ -1,84 +1,88 @@
-import { useOrderMutation } from "../features/order/Order.api";
-import { useUserInfoQuery } from "../features/auth/auth.api";
+// hooks/useCart.ts
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { useAddToCartMutation } from "@/redux/features/cart/cart.api";
+import { getGuestCart, saveGuestCart } from "@/lib/guestStorage";
+import { useSessionId } from "@/hooks/useSessionId";
 
-interface AddToCartParams {
-    userId: string,
-    skuId: string;
-    productId: string ;
-    quantity: number;
-    price: number;
+interface AddToCartOptions {
+  productId: string;
+  variantId?: string | null;
+  quantity?: number;
+  productName?: string;
+  productData?: {
     title: string;
-    images?: string[];
+    image: string;
+    price: number;
+  };
 }
-
 
 export const useCart = () => {
+  const { isLoggedIn } = useSessionId();
+  const [addToCartMutation] = useAddToCartMutation();
+  const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
 
-    const [addtocart, { isLoading, error }] = useOrderMutation();
-    const { data: userInfo, isLoading: isUserLoading, refetch } = useUserInfoQuery(undefined);
+  const addToCart = useCallback(
+    async ({
+      productId,
+      variantId = null,
+      quantity = 1,
+      productName,
+      productData,
+    }: AddToCartOptions): Promise<boolean> => {
+      if (loadingIds.has(productId)) return false;
+      setLoadingIds((prev) => new Set(prev).add(productId));
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // const navigate = useNavigate();
+      try {
+        // ✅ GUEST
+        if (!isLoggedIn) {
+          const items = getGuestCart();
+          const idx = items.findIndex(
+            (i: any) =>
+              i.productId === productId &&
+              (i.variantId || null) === (variantId || null)
+          );
 
-    // hooks/useCart.ts - Update addToCart function
-    const addToCart = async (item: AddToCartParams) => {
-        const isLoggedIn = !!userInfo?.data;
-        refetch()
-        if (isLoggedIn) {
-            try {
-                const cartDetails = {
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    user: userInfo.data._id
-                    
-                };
-                console.log("cartDetails", cartDetails)
-                const result = await addtocart(cartDetails).unwrap();
-                toast.success("Added to database cart");
-                return result;
-            } catch (error) {
-                console.error('Error adding to database:', error);
-                toast.error("Failed to sync with account");
-                throw error;
-            }
-        } else {
-            console.log("Guest User: Saving to LocalStorage");
+          if (idx > -1) {
+            items[idx].quantity += quantity;
+          } else {
+            items.push({
+              productId,
+              variantId,
+              quantity,
+              title: productData?.title || "Product",
+              image: productData?.image || "",
+              price: productData?.price || 0,
+            });
+          }
 
-            // Generate a unique ID for each cart item (similar to MongoDB _id)
-            const generateId = () => `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-            // Get current cart or empty array
-            const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-
-            const existingItemIndex = localCart.findIndex(
-                (cartItem: { product: string }) => cartItem.product.toString() === item.productId.toString()
-            );
-
-            if (existingItemIndex > -1) {
-                localCart[existingItemIndex].quantity += item.quantity;
-            } else {
-                localCart.push({
-                    _id: generateId(), // Add _id for consistency
-                    product: item.productId,
-                    quantity: item.quantity,
-                    price: item.price,
-                    title: item.title,
-                    images: item.images
-                });
-                refetch()
-            }
-
-            localStorage.setItem('guestCart', JSON.stringify(localCart));
-            window.dispatchEvent(new Event('cartUpdated'));
-            toast.success("Added to guest cart");
-
-            return { message: "Saved locally", data: localCart };
+          saveGuestCart(items);
+          toast.success(`${productName || "Item"} added to cart 🛒`);
+          return true;
         }
-    }
-    return {
-        addToCart,
-        isLoading: isLoading || isUserLoading,
-        isLoggedIn: !!userInfo?.data, error
-    };
-}
+
+        // ✅ LOGGED-IN
+        await addToCartMutation({ productId, variantId, quantity }).unwrap();
+        toast.success(`${productName || "Item"} added to cart 🛒`);
+        return true;
+      } catch (error: any) {
+        console.error("❌ Add to cart error:", error);
+        toast.error(error?.data?.message || "Failed to add to cart");
+        return false;
+      } finally {
+        setLoadingIds((prev) => {
+          const s = new Set(prev);
+          s.delete(productId);
+          return s;
+        });
+      }
+    },
+    [addToCartMutation, isLoggedIn, loadingIds]
+  );
+
+  return {
+    addToCart,
+    isLoading: loadingIds.size > 0,
+    isAddingId: (id: string) => loadingIds.has(id),
+  };
+};

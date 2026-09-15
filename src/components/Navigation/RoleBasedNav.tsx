@@ -8,34 +8,37 @@ export const useRoleBasedNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log(user);
-
   useEffect(() => {
+    // ✅ 1. লোডিং হলে কিছু করবেন না
     if (isLoading) return;
 
-    // লগইন বা রেজিস্টার পেজে থাকলে যেন রিডাইরেক্ট লুপ না হয়
-    const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
+    // ✅ 2. auth পেজ চেক
+    const isAuthPage = 
+      location.pathname === "/login" || 
+      location.pathname === "/register";
 
+    // ✅ 3. user না থাকলে
     if (!user) {
+      // প্রোটেক্টেড পেজ হলে লগইনে পাঠান
       if (!isAuthPage) {
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
       return;
     }
 
-    // ইউজার যদি অলরেডি লগইন থাকে আর /login পেজে ঢোকে, তবে তাকে ড্যাশবোর্ডে পাঠাবে
+    // ✅ 4. user থাকলে auth পেজে ঢুকলে ড্যাশবোর্ডে
     if (user && isAuthPage) {
-      if (user.role === "ADMIN") {
-        navigate("/admin/dashboard");
+      if (user.role === "ADMIN" ) {
+        navigate("/admin/dashboard", { replace: true });
       } else {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
       return;
     }
 
-    // অ্যাডমিন ফ্রন্টএন্ড/ইউজার প্যানেল এবং অ্যাডমিন প্যানেল দুটোই দেখতে পারবে
+    // ✅ 5. USER কে admin প্যানেল থেকে আটকান
     if (user.role === "USER" && location.pathname.startsWith("/admin")) {
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     }
   }, [user, isLoading, navigate, location]);
 

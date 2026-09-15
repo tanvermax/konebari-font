@@ -60,7 +60,7 @@ export const productapi = baseApi.injectEndpoints({
       query: ({ id, updateData }) => ({
         url: `/products/${id}`,
         method: "PATCH",
-        body: updateData, // 👈 'data' তুলে 'body' ব্যবহার করুন
+        data: updateData, 
       }),
       invalidatesTags: ["PRODUCT"],
     }),

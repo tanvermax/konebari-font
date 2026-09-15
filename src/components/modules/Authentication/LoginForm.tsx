@@ -9,6 +9,10 @@ import { toast } from "sonner"
 import config from "@/config"
 import { Flower2, Sparkles } from "lucide-react"
 
+// ✅ Redux imports
+import { useAppDispatch } from "@/redux/hook"
+import { setUser } from "@/redux/features/auth/auth.slice"
+
 export function LoginForm({
   className,
   ...props
@@ -17,15 +21,45 @@ export function LoginForm({
   const form = useForm();
   const navigate = useNavigate();
   const [login] = useLoginMutation();
+  
+  // ✅ dispatch নিন
+  const dispatch = useAppDispatch();
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-
     try {
       const res = await login(data).unwrap();
-      navigate("/")
+      
+      console.log("📥 Login Response:", res);
+      
+      // ✅ Response থেকে user এবং token নিন
+      const userData = res?.data?.user;
+      const token = res?.data?.token || res?.data?.accessToken;
+      
+      console.log("👤 User Data:", userData);
+      console.log("🔑 Token:", token);
+      
+      if (!userData || !token) {
+        toast.error("Login response is invalid");
+        return;
+      }
+      
+      // ✅ Redux store এ সেভ করুন - এটাই মূল ফিক্স!
+      dispatch(setUser({ 
+        user: userData, 
+        token: token 
+      }));
+      
       toast.success("Welcome back! ✨", {
-        description: `Logged in as ${res?.data?.user?.email}`,
+        description: `Logged in as ${userData?.email}`,
       })
+      
+      // ✅ রোল অনুযায়ী নেভিগেট করুন
+      if (userData.role === "ADMIN" || userData.role === "SUPER_ADMIN") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+      
     } catch (err: any) {
       console.error(err)
       if (err.data?.message === "User does not exist") {
@@ -106,7 +140,6 @@ export function LoginForm({
               )}
             />
 
-            {/* Forgot Password Link */}
             <div className="text-right">
               <Link 
                 to="/forgot-password" 
@@ -126,7 +159,6 @@ export function LoginForm({
           </form>
         </Form>
 
-        {/* Divider */}
         <div className="relative text-center text-sm">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-pink-200/30 dark:border-pink-800/20" />
