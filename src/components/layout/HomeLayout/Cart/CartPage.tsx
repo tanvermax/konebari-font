@@ -20,7 +20,6 @@ export default function CartPage() {
   const totalItems = cart.totalItems || 0;
   const subtotal = cart.subtotal || 0;
 
-
   const handleUpdate = async (
     productId: string,
     variantId: string | null,

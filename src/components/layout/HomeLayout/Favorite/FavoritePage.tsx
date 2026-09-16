@@ -1,4 +1,4 @@
-// components/layout/HomeLayout/Favorite/FavoritePage.tsx
+// components/layout/Favorite/FavoritePage.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
@@ -17,16 +17,13 @@ import {
   clearGuestFavorites,
 } from "@/lib/guestStorage";
 import FavoriteCard from "./FavoriteCard";
-import { useFavorite } from "@/redux/hooks/useFavorite";
 import { useSessionId } from "@/redux/hooks/useSessionId";
+import { useFavorite } from "@/redux/hooks/useFavorite";
 import FavoriteEmpty from "@/card/FavoriteEmpty";
-
 
 export default function FavoritePage() {
   const { isLoggedIn } = useSessionId();
   const { toggleFavorite } = useFavorite();
-
-  // ✅ Guest items from localStorage
   const [guestItems, setGuestItems] = useState<any[]>([]);
   const [guestVersion, setGuestVersion] = useState(0);
 
@@ -40,7 +37,7 @@ export default function FavoritePage() {
     refetchOnMountOrArgChange: true,
   });
 
-  // ✅ Load guest favorites from localStorage
+  // ✅ Guest — localStorage
   useEffect(() => {
     if (isLoggedIn) return;
 
@@ -49,7 +46,6 @@ export default function FavoritePage() {
       console.log("🔍 Guest favorites loaded:", items);
       setGuestItems(items);
     };
-
     load();
 
     window.addEventListener("favoriteUpdated", load);
@@ -67,10 +63,6 @@ export default function FavoritePage() {
 
   const totalItems = items.length;
   const isLoading = isLoggedIn ? apiLoading : false;
-
-  console.log("🎯 FavoritePage — isLoggedIn:", isLoggedIn);
-  console.log("🎯 Final items:", items);
-  console.log("🎯 Total:", totalItems);
 
   // ✅ Clear all
   const handleClearAll = async () => {
@@ -98,7 +90,6 @@ export default function FavoritePage() {
   };
 
   // ─────────────────────────────────────────────
-  // Loading
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-6xl space-y-6">
@@ -112,7 +103,6 @@ export default function FavoritePage() {
     );
   }
 
-  // Empty
   if (items.length === 0) {
     return <FavoriteEmpty />;
   }

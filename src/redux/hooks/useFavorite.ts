@@ -45,11 +45,6 @@ export const useFavorite = () => {
     skip: !isLoggedIn,
   });
 
-
-// 2. Guest favorites check
-console.log("Favorites:", JSON.parse(localStorage.getItem("guest_favorites_v2") || "[]"));
-
-
   useEffect(() => {
     const handler = () => setGuestVersion((v) => v + 1);
     window.addEventListener("favoriteUpdated", handler);

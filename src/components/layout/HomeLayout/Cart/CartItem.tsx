@@ -4,27 +4,7 @@ import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CartItemProps {
-  item: {
-    productId: string | { _id: string; title?: string; images?: string[] };
-    variantId?: string | null;
-    quantity: number;
-
-    // ✅ Product fields (same as DB)
-    title?: string;
-    slug?: string;
-    price?: number;
-    discountPrice?: number;
-    stock?: number;
-    images?: string[];
-    category?: string;
-    brand?: string;
-    isActive?: boolean;
-    nameBn?: string;
-
-    // legacy
-    priceSnapshot?: number;
-    image?: string;
-  };
+  item: any;
   onUpdateQuantity: (
     productId: string,
     variantId: string | null,
@@ -40,7 +20,10 @@ export default function CartItem({
   onRemove,
   isUpdating = false,
 }: CartItemProps) {
-  // ✅ Safe extraction
+  // ✅ Debug
+  console.log("🛒 CartItem item:", item);
+
+  // ✅ productId (string OR object)
   const productId =
     typeof item?.productId === "object"
       ? item?.productId?._id
@@ -51,42 +34,93 @@ export default function CartItem({
     return null;
   }
 
-  // ✅ Same fields as DB
+  const isProductObject = typeof item.productId === "object";
+
+  // ✅ Title
   const title =
     item.title ||
-    (typeof item.productId === "object" ? item.productId?.title : "") ||
+    (isProductObject ? item.productId?.title : "") ||
     "Product";
 
+  // ✅ Images — support both `images` array and `image` string
   const images =
     item.images ||
-    (typeof item.productId === "object"
-      ? item.productId?.images
-      : undefined) ||
+    (isProductObject ? item.productId?.images : []) ||
     [];
 
-  const image = images[0] || "https://via.placeholder.com/150";
+  let image = images[0];
 
-  // ✅ Effective price (discount if available)
-  const basePrice = item.price ?? item.priceSnapshot ?? 0;
-  const effectivePrice =
-    item.discountPrice && item.discountPrice > 0
-      ? item.discountPrice
-      : basePrice;
+  // Fallback 1: item.image
+  if (!image && item.image) image = item.image;
 
+  // Fallback 2: populated productId.images
+  if (!image && isProductObject && item.productId?.images?.[0]) {
+    image = item.productId.images[0];
+  }
+
+  // Final fallback
+  if (!image) {
+    image = "https://via.placeholder.com/150?text=No+Image";
+  }
+
+  // ✅ Price (discount logic সহ)
+  const basePrice =
+    item.price ??
+    item.priceSnapshot ??
+    (isProductObject ? item.productId?.price : 0) ??
+    0;
+
+  const discountPrice =
+    item.discountPrice ??
+    (isProductObject ? item.productId?.discountPrice : 0) ??
+    0;
+
+  const hasDiscount = discountPrice > 0 && discountPrice < basePrice;
+  const effectivePrice = hasDiscount ? discountPrice : basePrice;
   const subtotal = effectivePrice * item.quantity;
-  const maxQty = item.stock || 99;
-  const hasDiscount = item.discountPrice && item.discountPrice > 0;
+
+  // ✅ Stock
+  const maxQty =
+    item.stock ??
+    (isProductObject ? item.productId?.stock : 99) ??
+    99;
+
+  // ✅ Category
+  const category =
+    item.category ||
+    (isProductObject ? item.productId?.category : "") ||
+    "";
+
+  console.log("🛒 CartItem parsed:", {
+    productId,
+    title,
+    image,
+    basePrice,
+    effectivePrice,
+    quantity: item.quantity,
+    hasDiscount,
+  });
 
   return (
     <div className="flex items-center gap-3 sm:gap-4 py-4 border-b border-border/40 last:border-0">
-
+      {/* Image */}
       <Link
         to={`/alldata/${productId}`}
         className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-900"
       >
-        <img src={image} alt={title} className="w-full h-full object-cover" loading="lazy" />
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src =
+              "https://via.placeholder.com/150?text=No+Image";
+          }}
+        />
       </Link>
 
+      {/* Info */}
       <div className="flex-1 min-w-0">
         <Link
           to={`/alldata/${productId}`}
@@ -95,9 +129,9 @@ export default function CartItem({
           {title}
         </Link>
 
-        {item.category && (
+        {category && (
           <p className="text-[10px] text-muted-foreground mt-0.5">
-            {item.category}
+            {category}
           </p>
         )}
 
@@ -107,6 +141,7 @@ export default function CartItem({
           </p>
         )}
 
+        {/* Price */}
         <div className="flex items-baseline gap-2 mt-1">
           <p className="text-xs sm:text-sm font-semibold text-rose-600">
             ৳{effectivePrice.toLocaleString()}
@@ -119,19 +154,28 @@ export default function CartItem({
         </div>
       </div>
 
+      {/* Quantity */}
       <div className="flex items-center border border-border/60 rounded-xl bg-background h-9 flex-shrink-0">
         <button
-          onClick={() => onUpdateQuantity(productId, item.variantId || null, item.quantity - 1)}
+          onClick={() =>
+            onUpdateQuantity(productId, item.variantId || null, item.quantity - 1)
+          }
           disabled={isUpdating || item.quantity <= 1}
           className="px-2 h-full hover:bg-stone-100 dark:hover:bg-stone-800 text-muted-foreground disabled:opacity-40 transition-colors"
         >
           <Minus className="w-3 h-3" />
         </button>
         <span className="px-2.5 text-xs font-medium min-w-[28px] text-center">
-          {isUpdating ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : item.quantity}
+          {isUpdating ? (
+            <Loader2 className="w-3 h-3 animate-spin mx-auto" />
+          ) : (
+            item.quantity
+          )}
         </span>
         <button
-          onClick={() => onUpdateQuantity(productId, item.variantId || null, item.quantity + 1)}
+          onClick={() =>
+            onUpdateQuantity(productId, item.variantId || null, item.quantity + 1)
+          }
           disabled={isUpdating || item.quantity >= maxQty}
           className="px-2 h-full hover:bg-stone-100 dark:hover:bg-stone-800 text-muted-foreground disabled:opacity-40 transition-colors"
         >
@@ -139,10 +183,12 @@ export default function CartItem({
         </button>
       </div>
 
+      {/* Subtotal (desktop) */}
       <div className="hidden sm:block w-24 text-right text-sm font-semibold flex-shrink-0">
         ৳{subtotal.toLocaleString()}
       </div>
 
+      {/* Remove */}
       <Button
         variant="ghost"
         size="icon"
