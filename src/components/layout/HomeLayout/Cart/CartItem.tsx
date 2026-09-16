@@ -58,11 +58,6 @@ export default function CartItem({
     image = item.productId.images[0];
   }
 
-  // Final fallback
-  if (!image) {
-    image = "https://via.placeholder.com/150?text=No+Image";
-  }
-
   // ✅ Price (discount logic সহ)
   const basePrice =
     item.price ??
@@ -113,10 +108,7 @@ export default function CartItem({
           alt={title}
           className="w-full h-full object-cover"
           loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              "https://via.placeholder.com/150?text=No+Image";
-          }}
+          
         />
       </Link>
 

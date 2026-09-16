@@ -69,62 +69,61 @@ export default function CheckoutDialog({
     if (!open) reset();
   }, [open, reset]);
 
-  const onSubmit = async (data: ICheckoutForm) => {
-    try {
-      const shipping = subtotal > 1000 ? 0 : 60;
+ // components/layout/Cart/CheckoutDialog.tsx
+const onSubmit = async (data: ICheckoutForm) => {
+  try {
+    const shipping = subtotal > 1000 ? 0 : 60;
+    const totalPrice = subtotal + shipping;
 
-      // ✅ Prepare payload
-      const orderPayload = {
-        // Customer info
-        customer: {
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          address: data.address,
-          city: data.city,
-          note: data.note || "",
-        },
-        // Items (backend can also use cart directly)
-        items: cartItems.map((i: any) => {
-          const productId =
-            typeof i.productId === "object" ? i.productId._id : i.productId;
-          return {
-            productId,
-            variantId: i.variantId || null,
-            quantity: i.quantity,
-            price: i.priceSnapshot ?? i.price ?? 0,
-            title: i.title || "",
-            image: i.image || "",
-          };
-        }),
-        subtotal,
-        shipping,
-        total: subtotal + shipping,
-        paymentMethod: data.paymentMethod,
-        // Guest info
-        isGuest: !isLoggedIn,
-        userId: userId || null,
-      };
+    const orderPayload = {
+      customer: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        note: data.note || "",
+      },
+      items: cartItems.map((i: any) => {
+        const productId =
+          typeof i.productId === "object" ? i.productId._id : i.productId;
+        return {
+          productId,
+          variantId: i.variantId || null,
+          quantity: i.quantity,
+          price: i.priceSnapshot ?? i.price ?? 0,
+          title: i.title || "",
+          image: i.image || (i.images?.[0] || ""),   // ✅ fixed
+        };
+      }),
+      subtotal,
+      shipping,
+      // ✅ All possible names — backend এর সাথে মিল
+      total: totalPrice,
+      totalPrice: totalPrice,
+      grandTotal: totalPrice,
+      paymentMethod: data.paymentMethod,
+      isGuest: !isLoggedIn,
+      userId: userId || null,
+    };
 
-      console.log("📤 Creating order:", orderPayload);
+    console.log("📦 Creating order:", orderPayload);
 
-      const res = await createOrder(orderPayload).unwrap();
-      console.log("✅ Order created:", res);
+    const res = await createOrder(orderPayload).unwrap();
+    console.log("✅ Order created:", res);
 
-      // ✅ Clear guest cart
-      if (!isLoggedIn) clearGuestCart();
+    if (!isLoggedIn) clearGuestCart();
 
-      toast.success("Order placed successfully! 🎉");
+    toast.success("Order placed successfully! 🎉");
 
-      // ✅ Navigate to thank you
-      const orderId = res?.data?._id || res?.data?.orderId;
-      onClose();
-      window.location.href = `/thankyou?orderId=${orderId}`;
-    } catch (error: any) {
-      console.error("❌ Order error:", error);
-      toast.error(error?.data?.message || "Failed to place order");
-    }
-  };
+    const orderId = res?.data?._id || res?.data?.orderId || res?.data?.trackingId;
+    onClose();
+    window.location.href = `/thankyou?orderId=${orderId}`;
+  } catch (error: any) {
+    console.error("❌ Order error:", error);
+    toast.error(error?.data?.message || "Failed to place order");
+  }
+};
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -216,8 +215,7 @@ export default function CheckoutDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="COD">💵 Cash on Delivery</SelectItem>
-                <SelectItem value="BKASH">📱 bKash</SelectItem>
-                <SelectItem value="NAGAD">📱 Nagad</SelectItem>
+        
               </SelectContent>
             </Select>
           </div>

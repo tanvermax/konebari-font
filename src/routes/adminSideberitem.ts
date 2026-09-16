@@ -5,8 +5,7 @@ import AddProduct from "@/components/layout/AdminLayoute/AddProduct/AddProduct";
 import Allproduct from "@/components/layout/AdminLayoute/Allproduct";
 import AdminAnalyticsPage from "@/components/layout/AdminLayoute/Analytics/AdminAnalyticsPage";
 import AdminReportsPage from "@/components/layout/AdminLayoute/Analytics/AdminReportsPage";
-import OrderviewAdmin from "@/components/layout/AdminLayoute/OrderviewAdmin/OrderviewAdmin";
-import AdminBulkOrdersPage from "@/components/layout/AdminLayoute/Overview/AdminBulkOrdersPage";
+import AdminOrdersPage from "@/components/layout/AdminLayoute/Orders/AdminOrdersPage";
 import AdminOverviewPage from "@/components/layout/AdminLayoute/Overview/Adminoverviewpage";
 import AdminShipmentsPage from "@/components/layout/AdminLayoute/Shipments/AdminShipmentsPage";
 import UserManagementPage from "@/components/layout/AdminLayoute/UserManagement/UserManagementPage";
@@ -48,7 +47,6 @@ import type { ISidebarItem } from "@/types";
 
 import {
   LayoutDashboard,
-  ChartArea,
   ShoppingBag,
   PlusCircle,
   ClipboardList,
@@ -68,7 +66,6 @@ import {
   FileBarChart,
   // ShieldCheck,
   // MessageSquare,
-  Copy,
   // TrendingUp,
   // Store,
   // CreditCard,
@@ -121,24 +118,15 @@ export const adminSidebarItem: ISidebarItem[] = [
     title: "Order Management",
     url: "#",
     items: [
+    
+    
       {
-        title: "All Orders",
-        url: "/admin/orders",
-        component: OrderviewAdmin,
-        icon: ClipboardList,
-      },
-      {
-        title: "Order Overview",
-        url: "/admin/order-overview",
-        component: OrderviewAdmin,
-        icon: ChartArea,
-      },
-      {
-        title: "Bulk Order Actions",
-        url: "/admin/orders/bulk",
-        component: AdminBulkOrdersPage, // ✅ নতুন কম্পোনেন্ট
-        icon: Copy,
-      },
+      title: "All Orders",
+      url: "/admin/orders",
+      component: AdminOrdersPage,
+      icon: ClipboardList,
+    },
+
     ],
   },
 

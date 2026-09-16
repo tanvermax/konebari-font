@@ -17,7 +17,7 @@ import { useSessionId } from "./useSessionId";
 
 export const useCartActions = () => {
   const { isLoggedIn } = useSessionId();
-  const [version, setVersion] = useState(0);
+  const [, setVersion] = useState(0);
 
   const {
     data: apiCart,

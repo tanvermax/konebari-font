@@ -76,19 +76,36 @@ export const productapi = baseApi.injectEndpoints({
     }),
 
     // ✅ 7. Categories Query
-    categories: builder.query({
-      query: () => ({
-        url: "/products/categories",
-        method: "GET",
-      }),
-      transformResponse: (response: any) => response.data,
-      providesTags: ["PRODUCT"],
-    }),
+    // redux/features/product/product.api.ts
+categories: builder.query({
+  query: () => ({
+    url: "/products/categories",
+    method: "GET",
+  }),
+  transformResponse: (res: any) => {
+    console.log("📦 Categories API response:", res);
+    // ✅ Return the array (response.data)
+    return res?.data || res || [];
+  },
+  providesTags: ["PRODUCT"],
+}),
+
+brands: builder.query({
+  query: () => ({
+    url: "/products/brands",
+    method: "GET",
+  }),
+  transformResponse: (res: any) => res?.data || res || [],
+  providesTags: ["PRODUCT"],
+}),
+
   }),
 });
 
 export const {
   usePricestockDetailsQuery,
+    useBrandsQuery,         // 👈 নতুন
+
   useCreateProductMutation,
   useDeleteProductMutation,
   useUpdateProductMutation,

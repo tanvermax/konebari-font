@@ -6,7 +6,6 @@ import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form"
 import { useLoginMutation } from "@/redux/features/auth/auth.api"
 import { Link, useNavigate } from "react-router"
 import { toast } from "sonner"
-import config from "@/config"
 import { Flower2, Sparkles } from "lucide-react"
 
 // ✅ Redux imports
@@ -163,12 +162,12 @@ export function LoginForm({
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-pink-200/30 dark:border-pink-800/20" />
           </div>
-          <span className="relative z-10 bg-background px-4 text-muted-foreground text-xs uppercase tracking-wider">
+          {/* <span className="relative z-10 bg-background px-4 text-muted-foreground text-xs uppercase tracking-wider">
             Or continue with
-          </span>
+          </span> */}
         </div>
 
-        <Button
+        {/* <Button
           type="button"
           onClick={() => window.open(`${config.baseUrl}/auth/google/`, "_self")}
           variant="outline"
@@ -193,7 +192,7 @@ export function LoginForm({
             />
           </svg>
           Sign in with Google
-        </Button>
+        </Button> */}
       </div>
 
       <div className="text-center text-sm text-muted-foreground">

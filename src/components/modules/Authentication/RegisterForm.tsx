@@ -60,7 +60,9 @@ const onSubmit = async (data: z.infer<typeof registerSchema>) => {
       role: "USER",
       password: data.password,
     }
+
   };
+    console.log(userInfo);
 
   try {
     const result = await register(userInfo).unwrap();
@@ -194,12 +196,12 @@ const onSubmit = async (data: z.infer<typeof registerSchema>) => {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-pink-200/30 dark:border-pink-800/20" />
           </div>
-          <span className="relative z-10 bg-background px-4 text-muted-foreground text-xs uppercase tracking-wider">
+          {/* <span className="relative z-10 bg-background px-4 text-muted-foreground text-xs uppercase tracking-wider">
             Or continue with
-          </span>
+          </span> */}
         </div>
 
-        <Button
+        {/* <Button
           type="button"
           variant="outline"
           className="w-full h-11 rounded-xl border-pink-200/50 dark:border-pink-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/10 hover:border-pink-300 transition-all duration-200 font-medium"
@@ -223,7 +225,7 @@ const onSubmit = async (data: z.infer<typeof registerSchema>) => {
             />
           </svg>
           Sign up with Google
-        </Button>
+        </Button> */}
       </div>
 
       <div className="text-center text-sm text-muted-foreground">

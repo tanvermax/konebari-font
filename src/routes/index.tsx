@@ -19,6 +19,8 @@ import { AdminRouteGuard } from "@/components/RouteGuard/AdminRouteGuard";
 import { UserRouteGuard } from "@/components/RouteGuard/UserRouteGuard";
 import CartPage from "@/components/layout/HomeLayout/Cart/CartPage";
 import FavoritePage from "@/components/layout/HomeLayout/Favorite/FavoritePage";
+import BrandsPage from "@/components/layout/HomeLayout/Brands/BrandsPage";
+import ProfilePage from "@/components/layout/HomeLayout/Profile/ProfilePage";
 
 
 // c// router/index.tsx - ফিক্সড ভার্সন
@@ -51,6 +53,10 @@ const router = createBrowserRouter([
       { path: "help", Component: Help },
       { path: "favorites", Component: FavoritePage},
       { path: "admin/products/edit/:id", Component: EditProduct },
+      { path: "brands", Component: BrandsPage },
+      { path: "profile", Component: ProfilePage },
+
+
     ],
   },
   {
