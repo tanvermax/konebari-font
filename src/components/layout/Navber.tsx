@@ -25,12 +25,20 @@ import {
   PackageSearch,
   ArrowRight,
 } from "lucide-react";
-import { useAllOrderQuery } from "@/redux/features/order/Order.api";
 import { Badge } from "../ui/badge";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Spinner } from "../ui/spinner";
 import { Input } from "../ui/input";
 import { motion, AnimatePresence } from "framer-motion";
+
+// ✅ NEW: Guest + Logged-in count support
+import { useGetCartQuery } from "@/redux/features/cart/cart.api";
+import { useGetFavoritesQuery } from "@/redux/features/favorite/favorite.api";
+import {
+  computeGuestCartTotals,
+  getGuestFavorites,
+} from "@/lib/guestStorage";
+import { useSessionId } from "@/redux/hooks/useSessionId";
 
 // ============ CATEGORY DATA ============
 const categoryData = [
@@ -161,10 +169,8 @@ const categoryData = [
   },
 ];
 
-// Special sale/highlight categories
 const saleCategories = ["Clearance Sale", "Combo"];
 
-// ============ MOBILE BOTTOM NAVIGATION ============
 const bottomNavItems = [
   { label: "Home", icon: Home, href: "/" },
   { label: "Brands", icon: Store, href: "/brands" },
@@ -173,9 +179,8 @@ const bottomNavItems = [
   { label: "Profile", icon: User, href: "/profile" },
 ];
 
-// ============ QUICK ACTIONS FOR MOBILE ============
 const quickActions = [
-  { label: "Wishlist", icon: Heart, href: "/wishlist" },
+  { label: "Wishlist", icon: Heart, href: "/favorites" },
   { label: "Chat", icon: MessageCircle, href: "/chat" },
   { label: "Orders", icon: PackageSearch, href: "/orders" },
   { label: "Support", icon: HelpCircle, href: "/support" },
@@ -183,14 +188,69 @@ const quickActions = [
 
 // ============ MAIN COMPONENT ============
 export default function Navbar() {
-  
+  // ✅ 1. Auth + Session
+  const { isLoggedIn } = useSessionId();
   const { data: userData, isLoading: isUserLoading } = useUserInfoQuery(undefined);
-  const { data: response, isLoading: isOrdersLoading, isFetching } = useAllOrderQuery(undefined, {
-    skip: !userData?.data,
-  });
 
-  const [cartItemsCount, setCartItemsCount] = useState<number>(0);
-  const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  // ✅ 2. API counts — শুধু logged-in হলেই কল হবে
+  const { data: apiCart, isFetching: isCartFetching } = useGetCartQuery(
+    undefined,
+    { skip: !isLoggedIn, pollingInterval: 30000 }
+  );
+
+  const { data: apiFavorites, isFetching: isFavFetching } = useGetFavoritesQuery(
+    undefined,
+    { skip: !isLoggedIn, pollingInterval: 30000 }
+  );
+
+  // ✅ 3. Guest counts (localStorage)
+  const [guestCartCount, setGuestCartCount] = useState(0);
+  const [guestFavCount, setGuestFavCount] = useState(0);
+
+  // ✅ 4. Listen to localStorage changes
+  useEffect(() => {
+    const update = () => {
+      const { totalItems } = computeGuestCartTotals();
+      setGuestCartCount(totalItems);
+      setGuestFavCount(getGuestFavorites().length);
+    };
+    update();
+    window.addEventListener("cartUpdated", update);
+    window.addEventListener("favoriteUpdated", update);
+    window.addEventListener("storage", update);
+    return () => {
+      window.removeEventListener("cartUpdated", update);
+      window.removeEventListener("favoriteUpdated", update);
+      window.removeEventListener("storage", update);
+    };
+  }, []);
+
+  // ✅ 5. FINAL COUNTS — logged-in vs guest
+  const cartItemsCount = isLoggedIn
+    ? apiCart?.totalItems ||
+      apiCart?.data?.totalItems ||
+      (Array.isArray(apiCart?.items)
+        ? apiCart.items.reduce(
+            (s: number, i: any) => s + (i.quantity || 0),
+            0
+          )
+        : 0)
+    : guestCartCount;
+
+  const favoriteItemsCount = isLoggedIn
+    ? apiFavorites?.totalItems ||
+      apiFavorites?.data?.totalItems ||
+      (Array.isArray(apiFavorites?.items) ? apiFavorites.items.length : 0) ||
+      (Array.isArray(apiFavorites?.data?.items)
+        ? apiFavorites.data.items.length
+        : 0)
+    : guestFavCount;
+
+  const showCartSpinner = isCartFetching;
+  const showFavSpinner = isFavFetching;
+
+  // ============ UI STATE ============
+  const [, setIsScrolled] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -201,45 +261,12 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // --- Scroll effect ---
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-console.log(isScrolled);
-console.log(userData?.data?.user?.role);
-  // --- Cart logic ---
-  const updateCartView = useCallback(() => {
-    if (userData?.data) {
-      const pendingOrder = response?.data?.find((o: { status: string }) => o.status === "Pending");
-      setCartItemsCount(pendingOrder?.orderedItems?.length || 0);
-    } else {
-      try {
-        const localItems = JSON.parse(localStorage.getItem("guestCart") || "[]");
-        setCartItemsCount(localItems.length);
-      } catch {
-        setCartItemsCount(0);
-      }
-    }
-  }, [response, userData]);
 
-  useEffect(() => {
-    updateCartView();
-  }, [userData, response, updateCartView]);
-
-  useEffect(() => {
-    window.addEventListener("cartUpdated", updateCartView);
-    window.addEventListener("storage", updateCartView);
-    return () => {
-      window.removeEventListener("cartUpdated", updateCartView);
-      window.removeEventListener("storage", updateCartView);
-    };
-  }, [updateCartView]);
-
-  // --- Search ---
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -248,7 +275,6 @@ console.log(userData?.data?.user?.role);
     }
   };
 
-  // --- Hover handlers ---
   const handleMouseEnter = (label: string) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
@@ -258,31 +284,21 @@ console.log(userData?.data?.user?.role);
   };
 
   const handleMouseLeave = () => {
-    hoverTimeoutRef.current = setTimeout(() => {
-      setActiveCategory(null);
-    }, 150);
+    hoverTimeoutRef.current = setTimeout(() => setActiveCategory(null), 150);
   };
 
-  const showSpinner = isUserLoading || isOrdersLoading || isFetching;
-
-  // Check if a bottom nav item is active
   const isBottomNavActive = (href: string) => {
     if (href === "/") return location.pathname === "/";
-    if (href === "/shop") return location.pathname === "/shop" || location.pathname.startsWith("/shop");
+    if (href === "/shop") return location.pathname.startsWith("/shop");
     return location.pathname === href || location.pathname.startsWith(href);
   };
 
-  // Menu item animation variants
   const menuItemVariants = {
     hidden: { opacity: 0, x: -20 },
     visible: (i: number) => ({
       opacity: 1,
       x: 0,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.3,
-        ease: [0.22, 1, 0.36, 1],
-      },
+      transition: { delay: i * 0.05, duration: 0.3, ease: [0.22, 1, 0.36, 1] },
     }),
     exit: { opacity: 0, x: -20, transition: { duration: 0.2 } },
   } as any;
@@ -292,15 +308,16 @@ console.log(userData?.data?.user?.role);
       {/* ===== TOP ANNOUNCEMENT BAR ===== */}
       <div className="bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 dark:from-rose-950 dark:via-rose-900 dark:to-rose-950 text-stone-100 text-[11px] font-medium py-2.5 px-4 text-center tracking-wider uppercase flex items-center justify-center gap-2 border-b border-white/5">
         <Sparkles size={12} className="text-rose-400 animate-pulse" />
-        <span>Free Delivery On Orders Above ৳2,000 | 100% Authentic Korean Skincare</span>
+        <span>
+          Free Delivery On Orders Above ৳2,000 | 100% Authentic Korean Skincare
+        </span>
         <Sparkles size={12} className="text-rose-400 animate-pulse" />
       </div>
 
       {/* ===== MAIN HEADER ===== */}
       <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md border-b border-border/40 shadow-sm">
         <div className="max-w-7xl mx-auto px-3 md:px-6">
-          
-          {/* ===== TOP ROW: Logo + Search + Actions ===== */}
+          {/* ===== TOP ROW ===== */}
           <div className="flex items-center justify-between gap-3 py-2 md:py-3">
             {/* Left: Logo & Mobile Menu */}
             <div className="flex items-center gap-2">
@@ -323,7 +340,10 @@ console.log(userData?.data?.user?.role);
                 </motion.div>
               </motion.button>
 
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <Link to="/" className="flex items-center">
                   <Logo />
                 </Link>
@@ -355,28 +375,59 @@ console.log(userData?.data?.user?.role);
                 <Search className="size-4" />
               </motion.button>
 
-              {/* Wishlist */}
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hidden sm:flex rounded-full text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 size-9 transition-all duration-300"
+              {/* ❤️ Wishlist with Badge */}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  to="/favorites"
+                  className="relative hidden sm:flex size-9 rounded-full border border-border/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors items-center justify-center group"
                   aria-label="Wishlist"
                 >
-                  <Heart size={18} />
-                </Button>
+                  <Heart
+                    size={18}
+                    className={`transition-colors ${
+                      favoriteItemsCount > 0
+                        ? "fill-rose-500 text-rose-500"
+                        : "text-muted-foreground group-hover:text-rose-500"
+                    }`}
+                  />
+                  {favoriteItemsCount > 0 && (
+                    <Badge className="bg-rose-500 text-white border-2 border-background absolute -top-1 -right-1 rounded-full text-[8px] font-bold px-1.5 min-w-[18px] h-[18px] flex items-center justify-center shadow-sm">
+                      {showFavSpinner ? (
+                        <Spinner className="w-2.5 h-2.5" />
+                      ) : favoriteItemsCount > 99 ? (
+                        "99+"
+                      ) : (
+                        favoriteItemsCount
+                      )}
+                    </Badge>
+                  )}
+                </Link>
               </motion.div>
 
-              {/* Cart */}
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              {/* 🛒 Cart with Badge */}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Link
                   to="/cart"
                   className="relative size-9 rounded-full border border-border/50 hover:bg-muted/50 transition-colors flex items-center justify-center"
                 >
                   <ShoppingCartIcon size={18} className="text-foreground" />
-                  <Badge className="bg-rose-500 text-white border-2 border-background absolute -top-1 -right-1 rounded-full text-[8px] font-bold px-1.5 min-w-[18px] h-[18px] flex items-center justify-center shadow-sm">
-                    {showSpinner ? <Spinner className="w-2.5 h-2.5" /> : cartItemsCount}
-                  </Badge>
+                  {cartItemsCount > 0 && (
+                    <Badge className="bg-rose-500 text-white border-2 border-background absolute -top-1 -right-1 rounded-full text-[8px] font-bold px-1.5 min-w-[18px] h-[18px] flex items-center justify-center shadow-sm">
+                      {showCartSpinner ? (
+                        <Spinner className="w-2.5 h-2.5" />
+                      ) : cartItemsCount > 99 ? (
+                        "99+"
+                      ) : (
+                        cartItemsCount
+                      )}
+                    </Badge>
+                  )}
                 </Link>
               </motion.div>
 
@@ -392,7 +443,10 @@ console.log(userData?.data?.user?.role);
                 </div>
               ) : (
                 !isUserLoading && (
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
                     <Button
                       asChild
                       size="sm"
@@ -412,9 +466,10 @@ console.log(userData?.data?.user?.role);
           {/* ===== BOTTOM ROW: Category Navigation ===== */}
           <div className="hidden lg:flex items-center justify-center gap-0.5 py-2 border-t border-border/30">
             {categoryData.map((category) => {
-              const isActive = location.pathname + location.search === category.href;
+              const isActive =
+                location.pathname + location.search === category.href;
               const isSale = saleCategories.includes(category.label);
-              
+
               return (
                 <div
                   key={category.label}
@@ -422,7 +477,10 @@ console.log(userData?.data?.user?.role);
                   onMouseEnter={() => handleMouseEnter(category.label)}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
                     <Link
                       to={category.href}
                       className={`relative px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap ${
@@ -433,7 +491,12 @@ console.log(userData?.data?.user?.role);
                     >
                       <span className="text-base">{category.icon}</span>
                       <span>{category.label}</span>
-                      <ChevronDown size={12} className={`opacity-60 ml-0.5 transition-transform duration-200 ${activeCategory === category.label ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        size={12}
+                        className={`opacity-60 ml-0.5 transition-transform duration-200 ${
+                          activeCategory === category.label ? "rotate-180" : ""
+                        }`}
+                      />
                       {isActive && (
                         <motion.div
                           layoutId="desktopNavIndicator"
@@ -451,7 +514,6 @@ console.log(userData?.data?.user?.role);
                     </Link>
                   </motion.div>
 
-                  {/* Dropdown Subcategories */}
                   <AnimatePresence>
                     {activeCategory === category.label && (
                       <motion.div
@@ -464,7 +526,8 @@ console.log(userData?.data?.user?.role);
                       >
                         <div className="space-y-0.5">
                           {category.subcategories.map((sub) => {
-                            const isSubActive = location.pathname + location.search === sub.href;
+                            const isSubActive =
+                              location.pathname + location.search === sub.href;
                             return (
                               <Link
                                 key={sub.label}
@@ -485,7 +548,10 @@ console.log(userData?.data?.user?.role);
                             className="flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all group"
                           >
                             <span>View All {category.label}</span>
-                            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight
+                              size={14}
+                              className="group-hover:translate-x-1 transition-transform"
+                            />
                           </Link>
                         </div>
                       </motion.div>
@@ -520,21 +586,23 @@ console.log(userData?.data?.user?.role);
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </form>
               <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
-                {["Serum", "Moisturizer", "Sunscreen", "Lipstick", "Foundation"].map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    onClick={() => {
-                      setSearchQuery(suggestion);
-                      setTimeout(() => {
-                        navigate(`/shop?search=${suggestion}`);
-                        setIsSearchOpen(false);
-                      }, 300);
-                    }}
-                    className="flex-shrink-0 px-3.5 py-1.5 text-[10px] font-medium rounded-full bg-muted/30 hover:bg-muted/60 transition-all border border-border/30"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
+                {["Serum", "Moisturizer", "Sunscreen", "Lipstick", "Foundation"].map(
+                  (suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => {
+                        setSearchQuery(suggestion);
+                        setTimeout(() => {
+                          navigate(`/shop?search=${suggestion}`);
+                          setIsSearchOpen(false);
+                        }, 300);
+                      }}
+                      className="flex-shrink-0 px-3.5 py-1.5 text-[10px] font-medium rounded-full bg-muted/30 hover:bg-muted/60 transition-all border border-border/30"
+                    >
+                      {suggestion}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </motion.div>
@@ -559,23 +627,15 @@ console.log(userData?.data?.user?.role);
               animate={{
                 x: 0,
                 opacity: 1,
-                transition: {
-                  type: "spring",
-                  bounce: 0.2,
-                  duration: 0.5,
-                },
+                transition: { type: "spring", bounce: 0.2, duration: 0.5 },
               }}
               exit={{
                 x: "-100%",
                 opacity: 0,
-                transition: {
-                  duration: 0.3,
-                  ease: "easeInOut",
-                },
+                transition: { duration: 0.3, ease: "easeInOut" },
               }}
               className="fixed top-0 left-0 bottom-0 w-[320px] max-w-[85vw] bg-background/95 backdrop-blur-xl border-r border-border/50 z-50 lg:hidden shadow-2xl"
             >
-              {/* Menu Header */}
               <div className="flex items-center justify-between p-4 border-b border-border/40">
                 <div className="flex items-center gap-2">
                   <Logo />
@@ -589,8 +649,47 @@ console.log(userData?.data?.user?.role);
                 </motion.button>
               </div>
 
-              {/* Menu Content */}
               <div className="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-80px)]">
+                {/* Quick Actions */}
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-500/60 mb-3 px-2 flex items-center gap-2">
+                    <span className="flex-1 h-px bg-rose-500/20" />
+                    <span>Quick Actions</span>
+                    <span className="flex-1 h-px bg-rose-500/20" />
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {quickActions.map((action, index) => (
+                      <motion.div
+                        key={action.label}
+                        custom={index}
+                        variants={menuItemVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        <Link
+                          to={action.href}
+                          className="relative flex flex-col items-center gap-1.5 p-3.5 rounded-xl bg-muted/30 hover:bg-muted/60 transition-all border border-border/30 hover:border-rose-500/30"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <action.icon className="size-5 text-rose-500" />
+                          <span className="text-[10px] font-medium text-center leading-tight">
+                            {action.label}
+                          </span>
+
+                          {action.label === "Wishlist" && favoriteItemsCount > 0 && (
+                            <Badge className="bg-rose-500 text-white absolute top-1.5 right-1.5 rounded-full text-[8px] font-bold px-1.5 min-w-[16px] h-[16px] flex items-center justify-center">
+                              {favoriteItemsCount > 99
+                                ? "99+"
+                                : favoriteItemsCount}
+                            </Badge>
+                          )}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Main Categories */}
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-rose-500/60 mb-3 px-2 flex items-center gap-2">
@@ -600,7 +699,8 @@ console.log(userData?.data?.user?.role);
                   </p>
                   <div className="space-y-1">
                     {categoryData.map((category, index) => {
-                      const isActive = location.pathname + location.search === category.href;
+                      const isActive =
+                        location.pathname + location.search === category.href;
                       const isExpanded = mobileExpanded === category.label;
                       const isSale = saleCategories.includes(category.label);
 
@@ -617,7 +717,9 @@ console.log(userData?.data?.user?.role);
                             <button
                               onClick={() => {
                                 if (window.innerWidth < 768) {
-                                  setMobileExpanded(isExpanded ? null : category.label);
+                                  setMobileExpanded(
+                                    isExpanded ? null : category.label
+                                  );
                                 }
                               }}
                               className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-medium transition-all ${
@@ -629,7 +731,9 @@ console.log(userData?.data?.user?.role);
                               <span className="flex items-center gap-3">
                                 <span className="text-lg">{category.icon}</span>
                                 <span>{category.label}</span>
-                                {isSale && <Tag size={12} className="text-rose-500" />}
+                                {isSale && (
+                                  <Tag size={12} className="text-rose-500" />
+                                )}
                               </span>
                               <ChevronRight
                                 size={16}
@@ -649,7 +753,9 @@ console.log(userData?.data?.user?.role);
                                 >
                                   <div className="pl-12 pb-2 pt-1 space-y-0.5">
                                     {category.subcategories.map((sub) => {
-                                      const isSubActive = location.pathname + location.search === sub.href;
+                                      const isSubActive =
+                                        location.pathname + location.search ===
+                                        sub.href;
                                       return (
                                         <Link
                                           key={sub.label}
@@ -659,7 +765,9 @@ console.log(userData?.data?.user?.role);
                                               ? "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-300 font-medium"
                                               : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                                           }`}
-                                          onClick={() => setIsMobileMenuOpen(false)}
+                                          onClick={() =>
+                                            setIsMobileMenuOpen(false)
+                                          }
                                         >
                                           {sub.label}
                                         </Link>
@@ -683,42 +791,12 @@ console.log(userData?.data?.user?.role);
                   </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-500/60 mb-3 px-2 flex items-center gap-2">
-                    <span className="flex-1 h-px bg-rose-500/20" />
-                    <span>Quick Actions</span>
-                    <span className="flex-1 h-px bg-rose-500/20" />
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {quickActions.map((action, index) => (
-                      <motion.div
-                        key={action.label}
-                        custom={index + categoryData.length}
-                        variants={menuItemVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                      >
-                        <Link
-                          to={action.href}
-                          className="flex flex-col items-center gap-1.5 p-3.5 rounded-xl bg-muted/30 hover:bg-muted/60 transition-all border border-border/30 hover:border-rose-500/30"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <action.icon className="size-5 text-rose-500" />
-                          <span className="text-[10px] font-medium text-center leading-tight">
-                            {action.label}
-                          </span>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Theme Toggle */}
                 <div className="border-t border-border/40 pt-4">
                   <div className="flex items-center justify-between px-2">
-                    <span className="text-xs font-medium text-muted-foreground">Theme</span>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Theme
+                    </span>
                     <ModeToggle />
                   </div>
                 </div>
@@ -767,11 +845,23 @@ console.log(userData?.data?.user?.role);
                       />
                       {isCart && cartItemsCount > 0 && (
                         <Badge className="bg-rose-500 text-white border-2 border-background absolute -top-1.5 -right-2.5 rounded-full text-[8px] font-bold px-1 min-w-[16px] h-[16px] flex items-center justify-center shadow-sm">
-                          {showSpinner ? <Spinner className="w-2 h-2" /> : cartItemsCount > 99 ? "99+" : cartItemsCount}
+                          {showCartSpinner ? (
+                            <Spinner className="w-2 h-2" />
+                          ) : cartItemsCount > 99 ? (
+                            "99+"
+                          ) : (
+                            cartItemsCount
+                          )}
                         </Badge>
                       )}
                     </div>
-                    <span className={`text-[9px] font-medium tracking-wide ${isActive ? "text-rose-600 dark:text-rose-400 font-semibold" : ""}`}>
+                    <span
+                      className={`text-[9px] font-medium tracking-wide ${
+                        isActive
+                          ? "text-rose-600 dark:text-rose-400 font-semibold"
+                          : ""
+                      }`}
+                    >
                       {item.label}
                     </span>
                     {isActive && (

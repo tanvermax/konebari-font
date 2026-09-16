@@ -42,27 +42,57 @@ export default function ProductCard({
       ? Math.round(((price - specialPrice) / price) * 100)
       : 0;
 
-  const handleToggleFavorite = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await toggleFavorite({
-      productId: id,
-      productName: name,
-      productData: { title: name, image, price: displayPrice },
-    });
-  };
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await addToCart({
-      productId: id,
-      variantId: null,
-      quantity: 1,
-      productName: name,
-      productData: { title: name, image, price: displayPrice },
-    });
-  };
+const handleToggleFavorite = async (e: React.MouseEvent) => {
+  // ✅ Link এর ভিতরে থাকলে navigation আটকান
+  e.preventDefault();
+  e.stopPropagation();
+
+  // ✅ Full product object পাঠান — localStorage এ image/title/price সব save হবে
+  await toggleFavorite({
+    productId: id,
+    variantId: null,
+    productName: name,
+    product: {
+      _id: id,
+      title: name,
+      slug: slug,
+      price: price,
+      discountPrice: hasDiscount && specialPrice ? specialPrice : 0,
+      stock: 25, // 👈 আপনার product এর stock থাকলে দিন
+      images: image ? [image] : [],
+      isActive: true,
+      // বাকি field DB তে যেভাবে আছে
+    },
+  });
+};
+
+// components/HomeLayout/ProductCard/ProductCard.tsx
+const handleAddToCart = async (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  // ✅ Console log check
+
+  await addToCart({
+    productId: id,
+    variantId: null,
+    quantity: 1,
+    productName: name,
+    // ✅ Full product object পাঠান
+    product: {
+      _id: id,
+      title: name,
+      slug: slug,
+      price: price,
+      discountPrice: hasDiscount && specialPrice ? specialPrice : 0,
+      stock: 25, // 👈 আপনার product এর stock থাকলে দিন
+      images: image ? [image] : [],
+      isActive: true,
+      // বাকি field যেগুলো backend এ আছে
+    },
+  });
+};
 
   return (
     <Card className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-300 hover:shadow-lg hover:border-rose-200/60 dark:hover:border-rose-900/40 flex flex-col">

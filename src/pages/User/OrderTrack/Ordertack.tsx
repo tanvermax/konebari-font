@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useAllOrderQuery } from "@/redux/features/order/Order.api";
 import { OrderTrackCard } from "./OrderTrackCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Order } from "@/types/cart";
+import { useGetOrderByIdQuery } from "@/redux/features/order/Order.api";
 
 export default function OrderTrack() {
-  const { data: response, isLoading } = useAllOrderQuery(undefined);
+  const { data: response, isLoading } = useGetOrderByIdQuery(undefined);
   const [localOrders, setLocalOrders] = useState<Order[]>([]);
 
   // 1. Component mount hobar sathe sathe localStorage-er data load hobe (Guest User-er jonno)

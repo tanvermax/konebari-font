@@ -113,35 +113,65 @@ const ProductDetails = () => {
   const isAdding = isAddingId(product._id);
   const isToggling = isTogglingId(product._id);
 
-  // ✅ Handlers
-  const handleAddToCart = async (redirect = false) => {
-    const ok = await addToCart({
-      productId: product._id,
-      variantId: selectedVariant?.skuId || null,
-      quantity,
-      productName: product.title,
-      productData: {
-        title: product.title,
-        image: allImages[0] || "",
-        price: hasDiscount ? (displaySpecialPrice as number) : displayPrice,
-      },
-    });
-    if (ok && redirect) navigate("/cart");
-    return ok;
-  };
 
-  const handleToggleFavorite = async () => {
-    await toggleFavorite({
-      productId: product._id,
-      variantId: selectedVariant?.skuId || null,
-      productName: product.title,
-      productData: {
-        title: product.title,
-        image: allImages[0] || "",
-        price: hasDiscount ? (displaySpecialPrice as number) : displayPrice,
-      },
-    });
-  };
+  // ✅ Handlers
+ // components/HomeLayout/ProductCard/ProductDetails.tsx
+const handleAddToCart = async (redirect = false) => {
+  if (!product) return false;
+
+  const ok = await addToCart({
+    productId: product._id,
+    variantId: selectedVariant?.skuId || null,
+    quantity,
+    productName: product.title,
+    // ✅ Full product object
+    product: {
+      _id: product._id,
+      title: product.title,
+      slug: product.slug,
+      description: product.description,
+      shortDescription: product.shortDescription,
+      price: product.price,
+      discountPrice: product.discountPrice || 0,
+      stock: product.stock || 0,
+      category: product.category,
+      brand: product.brand,
+      images: allImages.length > 0 ? allImages : product.images || [],
+      isActive: product.isActive,
+      nameBn: product.nameBn,
+      variants: product.variants || [],
+    },
+  });
+  if (ok && redirect) navigate("/cart");
+  return ok;
+};
+
+
+const handleToggleFavorite = async () => {
+  if (!product) return;
+
+  await toggleFavorite({
+    productId: product._id,
+    variantId: selectedVariant?.skuId || null,
+    productName: product.title,
+    // ✅ Full product object — DB এর মতো same fields
+    product: {
+      _id: product._id,
+      title: product.title,
+      slug: product.slug,
+      description: product.description,
+      shortDescription: product.shortDescription,
+      price: product.price,
+      discountPrice: product.discountPrice || 0,
+      stock: product.stock || 0,
+      category: product.category,
+      brand: product.brand,
+      images: allImages.length > 0 ? allImages : product.images || [],
+      isActive: product.isActive,
+      nameBn: product.nameBn,
+    },
+  });
+};
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-12 max-w-6xl">

@@ -1,23 +1,37 @@
 // hooks/useFavorite.ts
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   useAddFavoriteMutation,
   useGetFavoritesQuery,
   useRemoveFavoriteMutation,
 } from "@/redux/features/favorite/favorite.api";
-import { getGuestFavorites, saveGuestFavorites } from "@/lib/guestStorage";
-import { useSessionId } from "@/hooks/useSessionId";
+import {
+  addGuestFavorite,
+  getGuestFavorites,
+  removeGuestFavorite,
+} from "@/lib/guestStorage";
+import { useSessionId } from "./useSessionId";
 
 interface ToggleFavoriteOptions {
   productId: string;
   variantId?: string | null;
-  productName?: string;
-  productData?: {
+  product?: {
+    _id?: string;
     title: string;
-    image: string;
+    slug?: string;
+    description?: string;
+    shortDescription?: string;
     price: number;
+    discountPrice?: number;
+    stock: number;
+    category?: string;
+    brand?: string;
+    images: string[];
+    isActive?: boolean;
+    nameBn?: string;
   };
+  productName?: string;
 }
 
 export const useFavorite = () => {
@@ -25,39 +39,54 @@ export const useFavorite = () => {
   const [addFavMutation] = useAddFavoriteMutation();
   const [removeFavMutation] = useRemoveFavoriteMutation();
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
+  const [guestVersion, setGuestVersion] = useState(0);
 
-  const { data: favorites } = useGetFavoritesQuery(undefined, {
+  const { data: apiFavorites, refetch } = useGetFavoritesQuery(undefined, {
     skip: !isLoggedIn,
   });
+
+
+// 2. Guest favorites check
+console.log("Favorites:", JSON.parse(localStorage.getItem("guest_favorites_v2") || "[]"));
+
+
+  useEffect(() => {
+    const handler = () => setGuestVersion((v) => v + 1);
+    window.addEventListener("favoriteUpdated", handler);
+    window.addEventListener("storage", handler);
+    return () => {
+      window.removeEventListener("favoriteUpdated", handler);
+      window.removeEventListener("storage", handler);
+    };
+  }, []);
 
   const isFavorite = useCallback(
     (productId: string, variantId?: string | null): boolean => {
       if (!isLoggedIn) {
         const items = getGuestFavorites();
         return items.some(
-          (i: any) =>
+          (i) =>
             i.productId === productId &&
             (i.variantId || null) === (variantId || null)
         );
       }
-
       return (
-        favorites?.items?.some(
+        apiFavorites?.items?.some(
           (i: any) =>
             (i.productId?._id || i.productId) === productId &&
             (i.variantId || null) === (variantId || null)
         ) || false
       );
     },
-    [favorites, isLoggedIn]
+    [isLoggedIn, apiFavorites, guestVersion]
   );
 
   const toggleFavorite = useCallback(
     async ({
       productId,
       variantId = null,
+      product,
       productName,
-      productData,
     }: ToggleFavoriteOptions): Promise<boolean> => {
       if (loadingIds.has(productId)) return false;
       setLoadingIds((prev) => new Set(prev).add(productId));
@@ -65,41 +94,50 @@ export const useFavorite = () => {
       try {
         const alreadyFav = isFavorite(productId, variantId);
 
-        // ✅ GUEST
         if (!isLoggedIn) {
-          let items = getGuestFavorites();
           if (alreadyFav) {
-            items = items.filter(
-              (i: any) =>
-                !(
-                  i.productId === productId &&
-                  (i.variantId || null) === (variantId || null)
-                )
+            removeGuestFavorite(productId, variantId);
+            toast.success(
+              `${product?.title || productName} removed from favorites 💔`
             );
-            saveGuestFavorites(items);
-            toast.success(`${productName || "Item"} removed from favorites 💔`);
           } else {
-            items.push({
+            addGuestFavorite({
               productId,
               variantId,
-              title: productData?.title || "Product",
-              image: productData?.image || "",
-              price: productData?.price || 0,
+              title: product?.title || productName || "Product",
+              slug: product?.slug,
+              description: product?.description,
+              shortDescription: product?.shortDescription,
+              price: product?.price || 0,
+              discountPrice: product?.discountPrice,
+              stock: product?.stock || 0,
+              category: product?.category,
+              brand: product?.brand,
+              images: product?.images || [],
+              isActive: product?.isActive,
+              nameBn: product?.nameBn,
             });
-            saveGuestFavorites(items);
-            toast.success(`${productName || "Item"} added to favorites ❤️`);
+            toast.success(
+              `${product?.title || productName} added to favorites ❤️`
+            );
           }
+          setGuestVersion((v) => v + 1);
           return !alreadyFav;
         }
 
-        // ✅ LOGGED-IN
         if (alreadyFav) {
           await removeFavMutation({ productId, variantId }).unwrap();
-          toast.success(`${productName || "Item"} removed from favorites 💔`);
+          toast.success(
+            `${product?.title || productName} removed from favorites 💔`
+          );
+          refetch();
           return false;
         } else {
           await addFavMutation({ productId, variantId }).unwrap();
-          toast.success(`${productName || "Item"} added to favorites ❤️`);
+          toast.success(
+            `${product?.title || productName} added to favorites ❤️`
+          );
+          refetch();
           return true;
         }
       } catch (error: any) {
@@ -114,7 +152,7 @@ export const useFavorite = () => {
         });
       }
     },
-    [addFavMutation, removeFavMutation, isFavorite, isLoggedIn, loadingIds]
+    [addFavMutation, removeFavMutation, isFavorite, isLoggedIn, loadingIds, refetch]
   );
 
   return {

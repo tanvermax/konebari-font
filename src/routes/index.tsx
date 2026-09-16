@@ -10,7 +10,6 @@ import { createBrowserRouter } from "react-router";
 import { adminSidebarItem } from "./adminSideberitem";
 import { userSidebarItem } from "./userSIdebarItem";
 import ProductDetails from "@/components/layout/HomeLayout/ProductCard/ProductDetails";
-import CartPage from "@/components/layout/HomeLayout/Cart/Cart";
 import OrderTrack from "@/pages/User/OrderTrack/Ordertack";
 import Help from "@/pages/Help/Help";
 import HomeShope from "@/components/layout/HomeShope/HomeShope";
@@ -18,6 +17,8 @@ import OrderSuccessPage from "@/components/layout/OrderSuccess/OrderSuccessPage"
 import EditProduct from "@/components/layout/AdminLayoute/AddProduct/EditProduct";
 import { AdminRouteGuard } from "@/components/RouteGuard/AdminRouteGuard";
 import { UserRouteGuard } from "@/components/RouteGuard/UserRouteGuard";
+import CartPage from "@/components/layout/HomeLayout/Cart/CartPage";
+import FavoritePage from "@/components/layout/HomeLayout/Favorite/FavoritePage";
 
 
 // c// router/index.tsx - ফিক্সড ভার্সন
@@ -36,7 +37,7 @@ import { UserRouteGuard } from "@/components/RouteGuard/UserRouteGuard";
 // // ... অন্যান্য ইমপোর্ট
 
 const router = createBrowserRouter([
-  {
+  { 
     path: "/",
     Component: App,
     children: [
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
       { path: "alldata/:id", Component: ProductDetails },
       { path: "ordertrack", Component: OrderTrack },
       { path: "help", Component: Help },
+      { path: "favorites", Component: FavoritePage},
       { path: "admin/products/edit/:id", Component: EditProduct },
     ],
   },

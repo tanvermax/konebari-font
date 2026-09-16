@@ -17,6 +17,7 @@ function App() {
     '/shop',
     '/cart',
     '/help'
+    ,"/favorites"
   ].includes(location.pathname) && !location.pathname.startsWith('/alldata');
 
   // শুধুমাত্র Protected Routes এ use করবেন

@@ -1,86 +1,42 @@
+// redux/features/order/order.api.ts
 import { baseApi } from "@/redux/baseApi";
 
-export const Orderapi = baseApi.injectEndpoints({
-  
+export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // ✅ Create Order (Guest or Logged-in)
+    createOrder: builder.mutation({
+      query: (payload) => ({
+        url: "/orders/create",
+        method: "POST",
+        data: payload,
+      }),
+      invalidatesTags: ["ORDER", "Cart"],
+    }),
 
-    allOrder: builder.query({
+    // ✅ Get My Orders
+    getMyOrders: builder.query({
       query: () => ({
-        url: "/order",
+        url: "/orders/my-orders",
         method: "GET",
       }),
-      providesTags: ['ORDER'],
-      //   transformResponse: (arg) => arg.data,
+      transformResponse: (res: any) => res.data,
+      providesTags: ["ORDER"],
     }),
-    Order: builder.mutation({
-      query: (order) => {
-        return {
-          url: '/product/order',
-          method: 'POST',
-          data: order
-        };
-      },
-      invalidatesTags: ['ORDER'],
-    }),
-    updateOrder: builder.mutation({
-      query: ({ id, updatedData }) => ({
-        url: `/order/${id}`,
-        method: "PATCH",
-        data: updatedData
-      }),
-      invalidatesTags: ['ORDER'],
-    }),
-    confirmOrder: builder.mutation({
-      query: ({ id, updatedData }) => ({
-        url: `/order/orderconfirm/${id}`,
-        method: "PATCH",
-        data: updatedData
-      }),
-      invalidatesTags: ['ORDER'],
-    }),
-    confirmOrdernonUser: builder.mutation({
-      query: ({ id, updatedData }) => ({
-        url: `/order/orderconfirmnonuser/${id}`,
-        method: "PATCH",
-        data: updatedData
-      }),
-      invalidatesTags: ['ORDER'],
-    }),
-    getAdminDashboardStats: builder.query({
-  query: () => ({
-    url: "/order/admin/dashboard-stats",
-    method: "GET",
-  }),
-  providesTags: ['ORDER'],
-}),
-    deleteOrder: builder.mutation({
-      query: ({ id, updatedData }) => ({
-        url: `/order/${id}`,
-        method: "DELETE",
-        data: updatedData
 
-      }),
-      invalidatesTags: ['ORDER'],
-    }),
-    AdminupdateOrder: builder.mutation({
-      query: ({ id, ...updatedData }) => ({
-        url: `/order/admin/${id}`,
-        method: 'PATCH',
-        data: updatedData ,
-      }),
-      invalidatesTags: ['ORDER'],
-    }),
-    allOrderForAdmin: builder.query({
-      query: () => ({
-        url: "/order/admin",
+    // ✅ Get Single Order
+    getOrderById: builder.query({
+      query: (id) => ({
+        url: `/orders/${id}`,
         method: "GET",
       }),
-      providesTags: ['ORDER'],
-      //   transformResponse: (arg) => arg.data,
+      transformResponse: (res: any) => res.data,
+      providesTags: ["ORDER"],
     }),
-
   }),
 });
 
-
-export const { useDeleteOrderMutation,useGetAdminDashboardStatsQuery, useAllOrderForAdminQuery, useAdminupdateOrderMutation, useAllOrderQuery, useUpdateOrderMutation, useOrderMutation, useConfirmOrderMutation, useConfirmOrdernonUserMutation } = Orderapi
+export const {
+  useCreateOrderMutation,
+  useGetMyOrdersQuery,
+  useGetOrderByIdQuery,
+} = orderApi;
