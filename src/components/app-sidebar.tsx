@@ -25,15 +25,43 @@ import {
 // import { Sidebar } from "./ui/sidebar";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: userData } = useUserInfoQuery(undefined);
+  const { data: userData, isLoading: isUserLoading, isFetching } = useUserInfoQuery(undefined);
   const location = useLocation();
   const [collapsed, setCollapsed] = React.useState(false);
 
-  const data = {
-    navMain: getSidebarItems(userData?.data?.role) || [],
-  };
+
+  console.log("🎯 AppSidebar render:", {
+    role: userData?.data?.role,
+    isLoading: isUserLoading,
+    isFetching,
+  });
+
+
+
+const role = userData?.data?.role;
+
 
   const isActive = (url: string) => location.pathname === url;
+
+    const data = React.useMemo(() => {
+    if (!role) {
+      console.warn("⚠️ No role yet, sidebar items empty");
+      return { navMain: [] };
+    }
+    return { navMain: getSidebarItems(role) || [] };
+  }, [role]);
+
+if (isUserLoading) {
+    return (
+      <Sidebar {...props} className="w-64">
+        <div className="p-5 flex flex-col gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-10 rounded-xl bg-stone-100 dark:bg-stone-900 animate-pulse" />
+          ))}
+        </div>
+      </Sidebar>
+    );
+  }
 
   return (
     <Sidebar
