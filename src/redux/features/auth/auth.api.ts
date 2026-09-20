@@ -28,8 +28,7 @@ export const authApi = baseApi.injectEndpoints({
                 url: "/auth/logout",
                 method: "POST",
             }),
-            invalidatesTags:["USER"]
-        }),
+invalidatesTags: ["USER", "Cart", "Favorite", "ORDER"],        }),
          sendOtp: builder.mutation<IResponse<null>,ISendOtp>({
             query: (userInfo) => ({
                 url: "/otp/send",

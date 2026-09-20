@@ -25,20 +25,35 @@ import {
 // import { Sidebar } from "./ui/sidebar";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: userData, isLoading: isUserLoading, isFetching } = useUserInfoQuery(undefined);
-  const location = useLocation();
+const { data: userData, isLoading, isError, error } = useUserInfoQuery(undefined);  const location = useLocation();
   const [collapsed, setCollapsed] = React.useState(false);
 
+const role = userData?.data?.role;
 
-  console.log("🎯 AppSidebar render:", {
-    role: userData?.data?.role,
-    isLoading: isUserLoading,
-    isFetching,
+   // ✅ FULL DEBUG
+// // 👇 এটা Login করার পরে
+console.log("=== AFTER LOGIN ===");
+console.log("Token:", localStorage.getItem("token"));
+console.log("Token length:", localStorage.getItem("token")?.length);
+
+const root = localStorage.getItem("persist:root");
+if (root) {
+  const auth = JSON.parse(JSON.parse(root).auth || "{}");
+  console.log("Persist token:", auth.token);
+  console.log("Persist user:", auth.user);
+}
+
+
+  console.log("🎯 AppSidebar FULL DEBUG:", {
+    userData,
+    role,
+    isLoading,
+    isError,
+    error: error ? { status: (error as any)?.status, data: (error as any)?.data } : null,
+    sidebarItems: role ? getSidebarItems(role) : [],
+    sidebarItemsCount: role ? getSidebarItems(role)?.length : 0,
   });
 
-
-
-const role = userData?.data?.role;
 
 
   const isActive = (url: string) => location.pathname === url;
@@ -51,7 +66,7 @@ const role = userData?.data?.role;
     return { navMain: getSidebarItems(role) || [] };
   }, [role]);
 
-if (isUserLoading) {
+if (isLoading) {
     return (
       <Sidebar {...props} className="w-64">
         <div className="p-5 flex flex-col gap-3">

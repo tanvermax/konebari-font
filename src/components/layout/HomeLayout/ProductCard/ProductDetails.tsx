@@ -35,6 +35,8 @@ const ProductDetails = () => {
 
   const { data: product, isLoading } = usePricestockDetailsQuery(id) as any;
 
+
+  
   // ✅ Handle variants (may be empty)
   const activeVariants = useMemo(
     () =>
@@ -92,19 +94,23 @@ const ProductDetails = () => {
       </div>
     );
   }
+// ✅ Regular price = product.price (1200)
+// ✅ Special/discount price = product.discountPrice (100)
+// ✅ Display: discounted (bold) + original (strikethrough)
 
+const regularPrice = product.price ?? 0;                      // 1200
+const discountPrice = product.discountPrice ?? 0;              // 100
+const hasDiscount = discountPrice > 0 && discountPrice < regularPrice;
+
+const displayPrice = hasDiscount ? discountPrice : regularPrice;  // 100
+const originalPrice = regularPrice;                              // 1200
+
+const discountPercentage = hasDiscount
+  ? Math.round(((regularPrice - discountPrice) / regularPrice) * 100)
+  : 0;
+  
   // ✅ Price & Stock logic — handle empty variants
-  const displayPrice = selectedVariant?.price ?? product.price ?? product.minPrice ?? 0;
-  const displaySpecialPrice =
-    selectedVariant?.specialPrice ??
-    (product.discountPrice > 0 ? product.discountPrice : null);
-  const hasDiscount =
-    displaySpecialPrice != null && displaySpecialPrice < displayPrice;
-  const discountPercentage = hasDiscount
-    ? Math.round(
-        ((displayPrice - (displaySpecialPrice as number)) / displayPrice) * 100
-      )
-    : 0;
+ 
 
   const stockCount = selectedVariant?.quantity ?? product.stock ?? product.totalStock ?? 0;
   const inStock = stockCount > 0;
@@ -306,19 +312,19 @@ const handleToggleFavorite = async () => {
           <div className="p-4 sm:p-5 rounded-2xl bg-stone-50 dark:bg-stone-900/40 border border-border/40 flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-baseline gap-3">
               {hasDiscount ? (
-                <>
-                  <span className="text-2xl sm:text-3xl font-semibold text-foreground">
-                    ৳{Number(displaySpecialPrice).toLocaleString()}
-                  </span>
-                  <span className="text-sm font-light text-muted-foreground line-through">
-                    ৳{Number(displayPrice).toLocaleString()}
-                  </span>
-                </>
-              ) : (
-                <span className="text-2xl sm:text-3xl font-semibold text-foreground">
-                  ৳{Number(displayPrice).toLocaleString()}
-                </span>
-              )}
+  <>
+    <span className="text-2xl sm:text-3xl font-semibold text-foreground">
+      ৳{Number(displayPrice).toLocaleString()}     {/* ৳100 bold */}
+    </span>
+    <span className="text-sm font-light text-muted-foreground line-through">
+      ৳{Number(originalPrice).toLocaleString()}    {/* ৳1,200 strikethrough */}
+    </span>
+  </>
+) : (
+  <span className="text-2xl sm:text-3xl font-semibold text-foreground">
+    ৳{Number(regularPrice).toLocaleString()}
+  </span>
+)}
             </div>
             {discountPercentage > 0 && (
               <span className="bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs px-3 py-1 rounded-full font-medium border border-rose-200/50 dark:border-rose-900/30">

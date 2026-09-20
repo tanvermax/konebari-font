@@ -9,7 +9,6 @@ export const productapi = baseApi.injectEndpoints({
         url: "/products/create-product",
         method: "POST",
         data: addProduct,
-       
       }),
       invalidatesTags: ["PRODUCT"],
     }),
@@ -21,7 +20,7 @@ export const productapi = baseApi.injectEndpoints({
       }),
       keepUnusedDataFor: 600, // 10 Minutes Cache
       transformResponse: (response: any) => response?.data || response,
-      providesTags: ( id) => [{ type: "PRODUCT", id }],
+      providesTags: (id) => [{ type: "PRODUCT", id }],
     }),
 
     // ✅ 2. All Products Query
@@ -60,7 +59,7 @@ export const productapi = baseApi.injectEndpoints({
       query: ({ id, updateData }) => ({
         url: `/products/${id}`,
         method: "PATCH",
-        data: updateData, 
+        data: updateData,
       }),
       invalidatesTags: ["PRODUCT"],
     }),
@@ -77,34 +76,33 @@ export const productapi = baseApi.injectEndpoints({
 
     // ✅ 7. Categories Query
     // redux/features/product/product.api.ts
-categories: builder.query({
-  query: () => ({
-    url: "/products/categories",
-    method: "GET",
-  }),
-  transformResponse: (res: any) => {
-    console.log("📦 Categories API response:", res);
-    // ✅ Return the array (response.data)
-    return res?.data || res || [];
-  },
-  providesTags: ["PRODUCT"],
-}),
+    categories: builder.query({
+      query: () => ({
+        url: "/products/categories",
+        method: "GET",
+      }),
+      transformResponse: (res: any) => {
+        // console.log("📦 Categories API response:", res);
+        // ✅ Return the array (response.data)
+        return res?.data || res || [];
+      },
+      providesTags: ["PRODUCT"],
+    }),
 
-brands: builder.query({
-  query: () => ({
-    url: "/products/brands",
-    method: "GET",
-  }),
-  transformResponse: (res: any) => res?.data || res || [],
-  providesTags: ["PRODUCT"],
-}),
-
+    brands: builder.query({
+      query: () => ({
+        url: "/products/brands",
+        method: "GET",
+      }),
+      transformResponse: (res: any) => res?.data || res || [],
+      providesTags: ["PRODUCT"],
+    }),
   }),
 });
 
 export const {
   usePricestockDetailsQuery,
-    useBrandsQuery,         // 👈 নতুন
+  useBrandsQuery, // 👈 নতুন
 
   useCreateProductMutation,
   useDeleteProductMutation,

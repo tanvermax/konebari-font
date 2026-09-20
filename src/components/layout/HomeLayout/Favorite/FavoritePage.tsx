@@ -56,6 +56,9 @@ export default function FavoritePage() {
     };
   }, [isLoggedIn, guestVersion]);
 
+
+
+  
   // ✅ Unified items
   const items: any[] = isLoggedIn
     ? apiData?.items || apiData?.data?.items || []
@@ -89,6 +92,8 @@ export default function FavoritePage() {
     refetchApi();
   };
 
+
+  console.log("item",items);
   // ─────────────────────────────────────────────
   if (isLoading) {
     return (

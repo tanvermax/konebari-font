@@ -2,6 +2,7 @@
 import { Link } from "react-router";
 import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface CartItemProps {
   item: any;
@@ -59,19 +60,19 @@ export default function CartItem({
   }
 
   // ✅ Price (discount logic সহ)
-  const basePrice =
-    item.price ??
-    item.priceSnapshot ??
-    (isProductObject ? item.productId?.price : 0) ??
-    0;
+const basePrice = item.price ?? item.priceSnapshot ?? 0;
+// Kelly Ortiz: 1200 ?? 100 = 1200 ✅
 
-  const discountPrice =
-    item.discountPrice ??
-    (isProductObject ? item.productId?.discountPrice : 0) ??
-    0;
+const discountPrice = item.discountPrice ?? 0;
+// 100 ✅
 
-  const hasDiscount = discountPrice > 0 && discountPrice < basePrice;
-  const effectivePrice = hasDiscount ? discountPrice : basePrice;
+const hasDiscount = discountPrice > 0 && discountPrice < basePrice;
+// 100 > 0 && 100 < 1200 = true ✅
+
+const effectivePrice = hasDiscount ? discountPrice : basePrice;
+// 100 ✅
+
+
   const subtotal = effectivePrice * item.quantity;
 
   // ✅ Stock
@@ -86,15 +87,15 @@ export default function CartItem({
     (isProductObject ? item.productId?.category : "") ||
     "";
 
-  console.log("🛒 CartItem parsed:", {
-    productId,
-    title,
-    image,
-    basePrice,
-    effectivePrice,
-    quantity: item.quantity,
-    hasDiscount,
-  });
+  console.log("🛒 PRICE DEBUG:", {
+  title: item.title,
+  basePrice: item.price ?? item.priceSnapshot ?? 0,
+  discountPrice: item.discountPrice ?? 0,
+  effectivePrice: (item.discountPrice > 0 && item.discountPrice < (item.price ?? 0))
+    ? item.discountPrice
+    : (item.price ?? item.priceSnapshot ?? 0),
+  hasDiscount: item.discountPrice > 0 && item.discountPrice < (item.price ?? 0),
+});
 
   return (
     <div className="flex items-center gap-3 sm:gap-4 py-4 border-b border-border/40 last:border-0">
@@ -134,16 +135,32 @@ export default function CartItem({
         )}
 
         {/* Price */}
-        <div className="flex items-baseline gap-2 mt-1">
-          <p className="text-xs sm:text-sm font-semibold text-rose-600">
-            ৳{effectivePrice.toLocaleString()}
-          </p>
-          {hasDiscount && (
-            <span className="text-[10px] text-muted-foreground line-through">
-              ৳{basePrice.toLocaleString()}
-            </span>
-          )}
-        </div>
+        {/* Price */}
+{/* Price with better UX */}
+<div className="flex items-baseline gap-2 mt-1.5">
+  {hasDiscount ? (
+    <>
+      {/* Current price - prominent */}
+      <p className="text-sm font-bold text-rose-600">
+        ৳{effectivePrice.toLocaleString()}
+      </p>
+
+      {/* Original price - muted with strike */}
+      <span className="text-[11px] text-muted-foreground/70 line-through">
+        ৳{basePrice.toLocaleString()}
+      </span>
+
+      {/* Discount badge */}
+      <Badge className="text-[9px] bg-rose-100 text-rose-700 border-0 px-1.5 py-0 h-4">
+        -{Math.round(((basePrice - discountPrice) / basePrice) * 100)}%
+      </Badge>
+    </>
+  ) : (
+    <p className="text-sm font-semibold text-rose-600">
+      ৳{effectivePrice.toLocaleString()}
+    </p>
+  )}
+</div>
       </div>
 
       {/* Quantity */}

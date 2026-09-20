@@ -20,7 +20,7 @@ export default function CommonLayout({ children }: IProps) {
       </main>
 
       {/* Unified Toaster for notifications */}
-      <Toaster position="top-right" richColors closeButton />
+      <Toaster  richColors closeButton />
 
       {/* Footer */}
       <Footer />

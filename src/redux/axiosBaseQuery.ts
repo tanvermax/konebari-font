@@ -20,7 +20,7 @@ const axiosBaseQuery =
   async ({ url, method, data, params, headers }) => {
     try {
           const sessionId = getSessionId();
-const token = localStorage.getItem("token");
+// const token = localStorage.getItem("token");
       const result = await axiosInstance({
         url: url,
         method,
@@ -30,7 +30,7 @@ const token = localStorage.getItem("token");
           ...headers,
 
           "x-session-id": sessionId,
-          ...(token ?{ Authorization: `Bearer ${token}` } : {}) // 👈 Guest identify করার জন্য
+           // 👈 Guest identify করার জন্য
         },
       });
       return { data: result.data };
