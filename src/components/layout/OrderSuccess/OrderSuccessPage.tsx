@@ -1,17 +1,16 @@
 // components/layout/OrderSuccess/OrderSuccessPage.tsx
-import {  useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
+  XCircle,
   Package,
   Truck,
-
   ShoppingBag,
   MapPin,
   CreditCard,
   Phone,
-
   Clock,
   Sparkles,
   Copy,
@@ -19,6 +18,7 @@ import {
   Home,
   Headphones,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,17 +30,32 @@ import { toast } from "sonner";
 export default function OrderSuccessPage() {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get("orderId");
+  const paymentStatus = searchParams.get("payment"); // "success" | "failed" | "cancelled" | null
   const [copied, setCopied] = useState(false);
 
-  // ✅ Fetch order details from backend
+  // ✅ Fetch order
   const {
     data: orderData,
     isLoading,
+    
   } = useGetOrderByIdQuery(orderId || "", {
     skip: !orderId,
+    // Poll until payment status updates (SSLCommerz IPN delay)
+    pollingInterval: paymentStatus === "success" ? 3000 : 0,
   });
 
   const order = orderData?.data || orderData;
+
+  // ✅ Show toast based on payment status
+  useEffect(() => {
+    if (paymentStatus === "success") {
+      toast.success("Payment successful! 🎉");
+    } else if (paymentStatus === "failed") {
+      toast.error("Payment failed. Please try again.");
+    } else if (paymentStatus === "cancelled") {
+      toast.warning("Payment cancelled.");
+    }
+  }, [paymentStatus]);
 
   // ✅ Copy order ID
   const handleCopy = () => {
@@ -52,7 +67,7 @@ export default function OrderSuccessPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // ✅ If no order ID in URL
+  // ✅ No order ID
   if (!orderId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50/30 via-white to-purple-50/30 flex items-center justify-center p-6">
@@ -77,8 +92,7 @@ export default function OrderSuccessPage() {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Loading
+  // ✅ Loading
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50/30 via-white to-purple-50/30 flex items-center justify-center p-6">
@@ -97,9 +111,8 @@ export default function OrderSuccessPage() {
     );
   }
 
-  // ✅ Order values (dynamic)
-  const displayOrderId =
-    order?.trackingId || order?._id || orderId || "N/A";
+  // ✅ Order values
+  const displayOrderId = order?.trackingId || order?._id || orderId || "N/A";
 
   const estimatedDelivery =
     order?.estimatedDelivery ||
@@ -111,24 +124,62 @@ export default function OrderSuccessPage() {
   const total = order?.totalPrice || order?.total || 0;
   const subtotal = order?.subtotal || order?.subTotal || 0;
   const shipping = order?.shippingFee || order?.shipping || 0;
-  const items = order?.items || [];
+  const items = order?.orderedItems || order?.items || [];
   const customer = order?.customer || {};
   const paymentMethod = order?.paymentMethod || "COD";
+  const orderPaymentStatus = order?.paymentStatus || "Pending";
 
+  // ✅ Payment method label
   const paymentLabel =
     paymentMethod === "COD"
       ? "Cash on Delivery"
-      : paymentMethod === "BKASH"
-      ? "bKash"
-      : paymentMethod === "NAGAD"
-      ? "Nagad"
+      : paymentMethod === "SSLCOMMERZ"
+      ? "Online Payment"
       : paymentMethod;
+
+  // ✅ Determine UI state based on payment status
+  const isPaymentSuccess = paymentStatus === "success" || orderPaymentStatus === "Paid";
+  const isPaymentFailed = paymentStatus === "failed";
+  const isPaymentCancelled = paymentStatus === "cancelled";
+  const isCOD = paymentMethod === "COD";
+
+  // ✅ Header config
+  const headerConfig = (() => {
+    if (isPaymentFailed) {
+      return {
+        gradient: "from-red-500 via-rose-500 to-pink-500",
+        icon: <XCircle className="h-14 w-14 text-white" />,
+        title: "Payment Failed ❌",
+        subtitle: "Your payment could not be completed. Please try again.",
+      };
+    }
+    if (isPaymentCancelled) {
+      return {
+        gradient: "from-amber-500 via-orange-500 to-red-500",
+        icon: <XCircle className="h-14 w-14 text-white" />,
+        title: "Payment Cancelled",
+        subtitle: "You cancelled the payment. Your order is still pending.",
+      };
+    }
+    if (isCOD) {
+      return {
+        gradient: "from-rose-500 via-pink-500 to-purple-500",
+        icon: <CheckCircle2 className="h-14 w-14 text-white" />,
+        title: `Thank You${customer.name ? `, ${customer.name.split(" ")[0]}` : ""}! 🎉`,
+        subtitle: "Your order has been confirmed and is being prepared with love.",
+      };
+    }
+    return {
+      gradient: "from-emerald-500 via-green-500 to-teal-500",
+      icon: <CheckCircle2 className="h-14 w-14 text-white" />,
+      title: `Payment Successful! 🎉`,
+      subtitle: "Thank you for your payment. Your order is confirmed.",
+    };
+  })();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/40 via-white to-purple-50/40 py-8 md:py-12 px-4">
       <div className="max-w-3xl mx-auto">
-
-        {/* ✅ Success Animation Card */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -136,14 +187,15 @@ export default function OrderSuccessPage() {
         >
           <Card className="overflow-hidden rounded-3xl border-0 shadow-2xl shadow-rose-500/10">
 
-            {/* ✅ Success Header */}
-            <div className="relative bg-gradient-to-br from-rose-500 via-pink-500 to-purple-500 p-8 md:p-10 text-center text-white overflow-hidden">
-              {/* Decorative circles */}
+            {/* ✅ Success/Error Header */}
+            <div
+              className={`relative bg-gradient-to-br ${headerConfig.gradient} p-8 md:p-10 text-center text-white overflow-hidden`}
+            >
               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
               <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
 
               <div className="relative z-10">
-                {/* Animated check icon */}
+                {/* Animated icon */}
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
@@ -158,7 +210,7 @@ export default function OrderSuccessPage() {
                   <div className="relative">
                     <div className="absolute inset-0 bg-white/30 rounded-full blur-xl animate-pulse" />
                     <div className="relative bg-white/20 backdrop-blur-sm p-4 rounded-full border border-white/30">
-                      <CheckCircle2 className="h-14 w-14 text-white" />
+                      {headerConfig.icon}
                     </div>
                   </div>
                 </motion.div>
@@ -169,10 +221,10 @@ export default function OrderSuccessPage() {
                   transition={{ delay: 0.4 }}
                 >
                   <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                    Thank You{order?.customer?.name ? `, ${order.customer.name.split(" ")[0]}` : ""}! 🎉
+                    {headerConfig.title}
                   </h1>
                   <p className="text-white/90 text-sm md:text-base max-w-md mx-auto">
-                    Your order has been confirmed and is being prepared with love.
+                    {headerConfig.subtitle}
                   </p>
                 </motion.div>
               </div>
@@ -180,6 +232,59 @@ export default function OrderSuccessPage() {
 
             {/* ✅ Order Details */}
             <CardContent className="p-6 md:p-8 space-y-6">
+
+              {/* Payment Status Banner */}
+              {!isCOD && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.45 }}
+                  className={`rounded-2xl p-4 border-2 ${
+                    isPaymentSuccess
+                      ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40"
+                      : isPaymentFailed
+                      ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/40"
+                      : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {isPaymentSuccess ? (
+                      <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0" />
+                    ) : isPaymentFailed ? (
+                      <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
+                    ) : (
+                      <Clock className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                    )}
+                    <div className="flex-1">
+                      <p
+                        className={`text-sm font-bold ${
+                          isPaymentSuccess
+                            ? "text-emerald-700 dark:text-emerald-400"
+                            : isPaymentFailed
+                            ? "text-red-700 dark:text-red-400"
+                            : "text-amber-700 dark:text-amber-400"
+                        }`}
+                      >
+                        {isPaymentSuccess
+                          ? "Payment Verified ✅"
+                          : isPaymentFailed
+                          ? "Payment Failed ❌"
+                          : "Payment Processing..."}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {isPaymentSuccess
+                          ? "Your payment has been successfully processed."
+                          : isPaymentFailed
+                          ? "Your payment was not completed. Please try again or contact support."
+                          : "Verifying your payment. This may take a moment..."}
+                      </p>
+                    </div>
+                    {!isPaymentSuccess && !isPaymentFailed && (
+                      <Loader2 className="w-5 h-5 animate-spin text-amber-600 flex-shrink-0" />
+                    )}
+                  </div>
+                </motion.div>
+              )}
 
               {/* Order ID Card */}
               <motion.div
@@ -198,12 +303,11 @@ export default function OrderSuccessPage() {
                       #{displayOrderId}
                     </p>
                   </div>
-
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleCopy}
-                    className="rounded-xl border-rose-200 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 text-xs"
+                    className="rounded-xl border-rose-200 hover:bg-rose-50 gap-1.5 text-xs"
                   >
                     {copied ? (
                       <>
@@ -220,7 +324,7 @@ export default function OrderSuccessPage() {
                 </div>
               </motion.div>
 
-              {/* Delivery + Payment info */}
+              {/* Delivery + Payment Info */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -259,15 +363,21 @@ export default function OrderSuccessPage() {
                     </p>
                     <Badge
                       variant="outline"
-                      className="mt-1 text-[9px] bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40"
+                      className={`mt-1 text-[9px] ${
+                        orderPaymentStatus === "Paid"
+                          ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 border-emerald-200"
+                          : orderPaymentStatus === "Failed"
+                          ? "bg-red-50 dark:bg-red-950/30 text-red-700 border-red-200"
+                          : "bg-amber-50 dark:bg-amber-950/30 text-amber-700 border-amber-200"
+                      }`}
                     >
-                      {order?.paymentStatus || "Pending"}
+                      {orderPaymentStatus}
                     </Badge>
                   </div>
                 </div>
               </motion.div>
 
-              {/* ✅ Order Items */}
+              {/* Order Items */}
               {items.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -279,7 +389,6 @@ export default function OrderSuccessPage() {
                     <Package className="w-4 h-4 text-rose-500" />
                     Order Items ({items.length})
                   </h3>
-
                   <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                     {items.map((item: any, idx: number) => (
                       <div
@@ -288,21 +397,30 @@ export default function OrderSuccessPage() {
                       >
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-stone-200 dark:bg-stone-800 flex-shrink-0">
                           <img
-                            src={item.image || item.images?.[0] }
-                            alt={item.title}
+                            src={
+                              item.productImage ||
+                              item.image ||
+                              item.images?.[0] ||
+                              "https://via.placeholder.com/100"
+                            }
+                            alt={item.productName || item.title}
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs sm:text-sm font-medium truncate">
-                            {item.title || "Product"}
+                            {item.productName || item.title || "Product"}
                           </p>
                           <p className="text-[10px] text-muted-foreground">
-                            Qty: {item.quantity} × ৳{(item.price || 0).toLocaleString()}
+                            Qty: {item.quantity} × ৳
+                            {(item.price || 0).toLocaleString()}
                           </p>
                         </div>
                         <p className="text-xs sm:text-sm font-semibold text-rose-600 flex-shrink-0">
-                          ৳{((item.price || 0) * (item.quantity || 1)).toLocaleString()}
+                          ৳
+                          {(
+                            (item.price || 0) * (item.quantity || 1)
+                          ).toLocaleString()}
                         </p>
                       </div>
                     ))}
@@ -310,7 +428,7 @@ export default function OrderSuccessPage() {
                 </motion.div>
               )}
 
-              {/* ✅ Order Total */}
+              {/* Order Total */}
               {total > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -345,7 +463,7 @@ export default function OrderSuccessPage() {
                 </motion.div>
               )}
 
-              {/* ✅ Customer Address */}
+              {/* Customer Address */}
               {customer.address && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -377,7 +495,7 @@ export default function OrderSuccessPage() {
                 </motion.div>
               )}
 
-              {/* ✅ Support Card */}
+              {/* Support Card */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -405,7 +523,7 @@ export default function OrderSuccessPage() {
                 </div>
               </motion.div>
 
-              {/* ✅ Trust badges */}
+              {/* Trust badges */}
               <div className="grid grid-cols-3 gap-2 py-2">
                 <div className="text-center space-y-1">
                   <ShieldCheck className="w-4 h-4 mx-auto text-emerald-500" />
@@ -427,7 +545,7 @@ export default function OrderSuccessPage() {
                 </div>
               </div>
 
-              {/* ✅ Action Buttons */}
+              {/* Action Buttons */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -440,11 +558,10 @@ export default function OrderSuccessPage() {
                     Track My Order
                   </Button>
                 </Link>
-
                 <Link to="/shop" className="flex-1">
                   <Button
                     variant="outline"
-                    className="w-full h-11 rounded-xl border-rose-200/60 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/20 gap-2"
+                    className="w-full h-11 rounded-xl border-rose-200/60 hover:bg-rose-50 gap-2"
                   >
                     <ShoppingBag className="h-4 w-4" />
                     Continue Shopping
@@ -452,7 +569,7 @@ export default function OrderSuccessPage() {
                 </Link>
               </motion.div>
 
-              {/* ✅ Home link */}
+              {/* Home link */}
               <div className="text-center pt-2">
                 <Link
                   to="/"
@@ -464,7 +581,7 @@ export default function OrderSuccessPage() {
               </div>
             </CardContent>
 
-            {/* ✅ Footer */}
+            {/* Footer */}
             <div className="border-t border-border/40 p-4 bg-gradient-to-r from-rose-50/50 to-pink-50/50 dark:from-rose-950/10 dark:to-pink-950/10 text-center">
               <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] flex items-center justify-center gap-1.5">
                 <Sparkles className="w-3 h-3 text-rose-500" />
@@ -475,7 +592,6 @@ export default function OrderSuccessPage() {
           </Card>
         </motion.div>
 
-        {/* ✅ Below card — extra info */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -60,7 +60,16 @@ export const orderApi = baseApi.injectEndpoints({
       transformResponse: (res: any) => res,
       providesTags: ["ORDER"],
     }),
+    initiatePayment: builder.mutation({
+      query: (payload) => ({
+        url: "/payment/sslcommerz/init",
+        method: "POST",
+        data: payload,
+      }),
+    }),
+
   }),
+  
   
 });
 
@@ -71,4 +80,5 @@ export const {
   useGetOrderByIdQuery,
   useUpdateOrderMutation,
   useDeleteOrderMutation,
+  useInitiatePaymentMutation
 } = orderApi;

@@ -99,6 +99,7 @@ export default function CheckoutDialog({
       const shipping = subtotal > 1000 ? 0 : 60;
       const totalPrice = subtotal + shipping;
 
+      // ✅ Order payload
       const orderPayload = {
         customer: {
           name: data.name,
@@ -137,13 +138,14 @@ export default function CheckoutDialog({
       const orderId = res?.data?._id;
 
       if (!orderId) {
-        throw new Error("Order creation failed");
+        throw new Error("Order creation failed: no order ID");
       }
 
       console.log("✅ Order created:", orderId);
 
       // ✅ STEP 2: Handle Payment
       if (data.paymentMethod === "SSLCOMMERZ") {
+        // Online payment
         try {
           const payRes = await initiatePayment({ orderId }).unwrap();
           const gatewayUrl = payRes?.data?.GatewayPageURL;
@@ -154,9 +156,10 @@ export default function CheckoutDialog({
 
           console.log("🚀 Redirecting to SSLCommerz:", gatewayUrl);
 
+          // Clear guest cart BEFORE redirect
           if (!isLoggedIn) clearGuestCart();
 
-          // ✅ Redirect to SSLCommerz
+          // ✅ Redirect to SSLCommerz payment page
           window.location.href = gatewayUrl;
           return;
         } catch (paymentError: any) {
@@ -169,11 +172,12 @@ export default function CheckoutDialog({
         }
       }
 
-      // ✅ STEP 3: COD - Success
+      // ✅ STEP 3: COD - Clear cart & redirect
       if (!isLoggedIn) clearGuestCart();
 
       toast.success("Order placed successfully! 🎉");
       onClose();
+
       window.location.href = `/thankyou?orderId=${orderId}`;
     } catch (error: any) {
       console.error("❌ Order error:", error);
@@ -183,6 +187,7 @@ export default function CheckoutDialog({
     }
   };
 
+  // ✅ Loading state
   const isProcessing = isLoading || isPaymentLoading;
 
   return (
@@ -302,14 +307,15 @@ export default function CheckoutDialog({
               </SelectContent>
             </Select>
 
+            {/* SSLCommerz info */}
             {paymentMethod === "SSLCOMMERZ" && (
               <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 rounded-xl p-3 text-xs text-blue-800 dark:text-blue-300 mt-2 flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold">Secure Payment</p>
                   <p className="mt-0.5">
-                    You'll be redirected to SSLCommerz to pay via bKash, Nagad,
-                    Rocket, or Card.
+                    You'll be redirected to SSLCommerz to pay securely via
+                    bKash, Nagad, Rocket, or Card.
                   </p>
                 </div>
               </div>

@@ -21,19 +21,12 @@ export default function CartItem({
   onRemove,
   isUpdating = false,
 }: CartItemProps) {
-  // ✅ Debug
-  console.log("🛒 CartItem item:", item);
-
-  // ✅ productId (string OR object)
   const productId =
     typeof item?.productId === "object"
       ? item?.productId?._id
       : item?.productId;
 
-  if (!productId) {
-    console.warn("⚠️ CartItem invalid item:", item);
-    return null;
-  }
+  if (!productId) return null;
 
   const isProductObject = typeof item.productId === "object";
 
@@ -43,37 +36,28 @@ export default function CartItem({
     (isProductObject ? item.productId?.title : "") ||
     "Product";
 
-  // ✅ Images — support both `images` array and `image` string
+  // ✅ Image
   const images =
     item.images ||
     (isProductObject ? item.productId?.images : []) ||
     [];
 
   let image = images[0];
-
-  // Fallback 1: item.image
   if (!image && item.image) image = item.image;
-
-  // Fallback 2: populated productId.images
   if (!image && isProductObject && item.productId?.images?.[0]) {
     image = item.productId.images[0];
   }
+  if (!image) image = "https://via.placeholder.com/150?text=No+Image";
 
-  // ✅ Price (discount logic সহ)
-const basePrice = item.price ?? item.priceSnapshot ?? 0;
-// Kelly Ortiz: 1200 ?? 100 = 1200 ✅
-
-const discountPrice = item.discountPrice ?? 0;
-// 100 ✅
-
-const hasDiscount = discountPrice > 0 && discountPrice < basePrice;
-// 100 > 0 && 100 < 1200 = true ✅
-
-const effectivePrice = hasDiscount ? discountPrice : basePrice;
-// 100 ✅
-
-
+  // ✅ Price logic
+  const regularPrice = item.price ?? item.priceSnapshot ?? 0;
+  const discountPrice = item.discountPrice ?? 0;
+  const hasDiscount = discountPrice > 0 && discountPrice < regularPrice;
+  const effectivePrice = hasDiscount ? discountPrice : regularPrice;
   const subtotal = effectivePrice * item.quantity;
+  const discountPercent = hasDiscount
+    ? Math.round(((regularPrice - discountPrice) / regularPrice) * 100)
+    : 0;
 
   // ✅ Stock
   const maxQty =
@@ -87,16 +71,6 @@ const effectivePrice = hasDiscount ? discountPrice : basePrice;
     (isProductObject ? item.productId?.category : "") ||
     "";
 
-  console.log("🛒 PRICE DEBUG:", {
-  title: item.title,
-  basePrice: item.price ?? item.priceSnapshot ?? 0,
-  discountPrice: item.discountPrice ?? 0,
-  effectivePrice: (item.discountPrice > 0 && item.discountPrice < (item.price ?? 0))
-    ? item.discountPrice
-    : (item.price ?? item.priceSnapshot ?? 0),
-  hasDiscount: item.discountPrice > 0 && item.discountPrice < (item.price ?? 0),
-});
-
   return (
     <div className="flex items-center gap-3 sm:gap-4 py-4 border-b border-border/40 last:border-0">
       {/* Image */}
@@ -109,7 +83,6 @@ const effectivePrice = hasDiscount ? discountPrice : basePrice;
           alt={title}
           className="w-full h-full object-cover"
           loading="lazy"
-          
         />
       </Link>
 
@@ -135,32 +108,25 @@ const effectivePrice = hasDiscount ? discountPrice : basePrice;
         )}
 
         {/* Price */}
-        {/* Price */}
-{/* Price with better UX */}
-<div className="flex items-baseline gap-2 mt-1.5">
-  {hasDiscount ? (
-    <>
-      {/* Current price - prominent */}
-      <p className="text-sm font-bold text-rose-600">
-        ৳{effectivePrice.toLocaleString()}
-      </p>
-
-      {/* Original price - muted with strike */}
-      <span className="text-[11px] text-muted-foreground/70 line-through">
-        ৳{basePrice.toLocaleString()}
-      </span>
-
-      {/* Discount badge */}
-      <Badge className="text-[9px] bg-rose-100 text-rose-700 border-0 px-1.5 py-0 h-4">
-        -{Math.round(((basePrice - discountPrice) / basePrice) * 100)}%
-      </Badge>
-    </>
-  ) : (
-    <p className="text-sm font-semibold text-rose-600">
-      ৳{effectivePrice.toLocaleString()}
-    </p>
-  )}
-</div>
+        <div className="flex items-baseline gap-2 mt-1.5 flex-wrap">
+          {hasDiscount ? (
+            <>
+              <p className="text-sm font-bold text-rose-600">
+                ৳{effectivePrice.toLocaleString()}
+              </p>
+              <span className="text-[11px] text-muted-foreground/70 line-through">
+                ৳{regularPrice.toLocaleString()}
+              </span>
+              <Badge className="text-[9px] bg-rose-100 text-rose-700 border-0 px-1.5 py-0 h-4">
+                -{discountPercent}%
+              </Badge>
+            </>
+          ) : (
+            <p className="text-sm font-semibold text-rose-600">
+              ৳{effectivePrice.toLocaleString()}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Quantity */}
