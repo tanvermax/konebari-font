@@ -25,7 +25,7 @@ import {
 // import { Sidebar } from "./ui/sidebar";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-const { data: userData, isLoading, isError, error } = useUserInfoQuery(undefined);  const location = useLocation();
+const { data: userData, isLoading } = useUserInfoQuery(undefined);  const location = useLocation();
   const [collapsed, setCollapsed] = React.useState(false);
 
 const role = userData?.data?.role;
