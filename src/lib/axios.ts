@@ -44,12 +44,12 @@ const getAuthToken = (): string | null => {
       token = auth?.token;
 
       if (isValidToken(token)) {
-        console.log("✅ Token from persist:root");
+        // console.log("✅ Token from persist:root");
         return token;
       }
     }
 
-    console.warn("⚠️ No valid token found");
+     console.warn("⚠️ No valid token found");
     return null;
   } catch (error) {
     console.error("❌ Token extraction error:", error);

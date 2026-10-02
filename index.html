@@ -1,23 +1,32 @@
+<!-- index.html -->
 <!doctype html>
-<html lang="bn" class="scroll-smooth">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/src/assets/icons/konebari.png" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Primary Meta Tags -->
-    <title>Konebari | Authentic Korean Skincare & Beauty Shop in Bangladesh</title>
-    <meta name="title" content="Konebari | Authentic Korean Skincare & Beauty Shop in Bangladesh" />
-    <meta name="description" content="Discover 100% authentic Korean skincare, serums, cleansers, and cosmetics in Bangladesh. Dermatologist tested routines for all skin concerns with fast home delivery." />
-    <meta name="keywords" content="skincare, Korean skincare Bangladesh, K-beauty BD, serums, moisturizers, acne care, glass skin, authentic cosmetics" />
 
-    <!-- Google Fonts (Serif + Sans Serif for Premium Beauty Aesthetic) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ✅ Fallback meta tags (prerender এ replace হবে) -->
+    <title>Konebari — Authentic Beauty & Skincare</title>
+    <meta name="description" content="Shop 100% authentic skincare, makeup, and jewelry from top brands. Fast delivery across Bangladesh." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://konebari.com/" />
+
+    <!-- ✅ Open Graph fallback -->
+    <meta property="og:title" content="Konebari — Authentic Beauty & Skincare" />
+    <meta property="og:description" content="Shop 100% authentic skincare, makeup, and jewelry." />
+    <meta property="og:image" content="https://konebari.com/og-default.jpg" />
+    <meta property="og:url" content="https://konebari.com/" />
+    <meta property="og:type" content="website" />
   </head>
-  <body class="bg-background text-foreground antialiased selection:bg-rose-500 selection:text-white">
-    <div id="root"></div>
-
+  <body>
+    <!-- ✅ Fallback content for bots/no-JS -->
+    <div id="root">
+      <noscript>
+        <h1>Konebari — Authentic Beauty & Skincare</h1>
+        <p>Shop 100% authentic skincare, makeup, and jewelry from top brands. Fast delivery across Bangladesh.</p>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -18,10 +18,14 @@ export default function HomePage() {
   const { data: productsData, isLoading: productsLoading } = useAllpstockQuery({
     limit: 8,
     sort: "-createdAt",
+    isFeatured: true,
+    status: "active",
   });
 
   const products: IProductCard[] = productsData?.data || [];
 
+
+  // console.log(products);
   // Minimal Elegance Categories
   const categories = [
     {

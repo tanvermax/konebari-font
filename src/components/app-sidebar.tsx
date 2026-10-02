@@ -30,29 +30,29 @@ const { data: userData, isLoading, isError, error } = useUserInfoQuery(undefined
 
 const role = userData?.data?.role;
 
-   // ✅ FULL DEBUG
-// // 👇 এটা Login করার পরে
-console.log("=== AFTER LOGIN ===");
-console.log("Token:", localStorage.getItem("token"));
-console.log("Token length:", localStorage.getItem("token")?.length);
+//    // ✅ FULL DEBUG
+// // // 👇 এটা Login করার পরে
+// console.log("=== AFTER LOGIN ===");
+// console.log("Token:", localStorage.getItem("token"));
+// console.log("Token length:", localStorage.getItem("token")?.length);
 
-const root = localStorage.getItem("persist:root");
-if (root) {
-  const auth = JSON.parse(JSON.parse(root).auth || "{}");
-  console.log("Persist token:", auth.token);
-  console.log("Persist user:", auth.user);
-}
+// const root = localStorage.getItem("persist:root");
+// if (root) {
+//   const auth = JSON.parse(JSON.parse(root).auth || "{}");
+//   console.log("Persist token:", auth.token);
+//   console.log("Persist user:", auth.user);
+// }
 
 
-  console.log("🎯 AppSidebar FULL DEBUG:", {
-    userData,
-    role,
-    isLoading,
-    isError,
-    error: error ? { status: (error as any)?.status, data: (error as any)?.data } : null,
-    sidebarItems: role ? getSidebarItems(role) : [],
-    sidebarItemsCount: role ? getSidebarItems(role)?.length : 0,
-  });
+  // console.log("🎯 AppSidebar FULL DEBUG:", {
+  //   userData,
+  //   role,
+  //   isLoading,
+  //   isError,
+  //   error: error ? { status: (error as any)?.status, data: (error as any)?.data } : null,
+  //   sidebarItems: role ? getSidebarItems(role) : [],
+  //   sidebarItemsCount: role ? getSidebarItems(role)?.length : 0,
+  // });
 
 
 

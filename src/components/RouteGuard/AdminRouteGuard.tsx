@@ -6,9 +6,9 @@ export const AdminRouteGuard = () => {
   // ✅ Redux store থেকে user নিন (API কল নয়)
   const { user, isLoading, isAuthenticated } = useAppSelector((state) => state.auth);
 
-  console.log("🔐 AdminRouteGuard - User:", user);
-  console.log("🔐 AdminRouteGuard - isLoading:", isLoading);
-  console.log("🔐 AdminRouteGuard - isAuthenticated:", isAuthenticated);
+  // console.log("🔐 AdminRouteGuard - User:", user);
+  // console.log("🔐 AdminRouteGuard - isLoading:", isLoading);
+  // console.log("🔐 AdminRouteGuard - isAuthenticated:", isAuthenticated);
 
   // ⏳ লোডিং হলে অপেক্ষা করুন
   if (isLoading) {
