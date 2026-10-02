@@ -2,7 +2,6 @@ import HomePage from "@/components/layout/home/HomePage";
 import LookbookReviews from "@/components/layout/HomeLayout/LookbookReviews/LookbookReviews";
 import SkinGoals from "@/components/layout/HomeLayout/SkinGoals/SkinGoals";
 import SkinPhilosophy from "@/components/layout/HomeLayout/SkinPhilosophy/SkinPhilosophy";
-import TrendingOffers from "@/components/layout/HomeLayout/TrendingOffers/TrendingOffers";
 import { useAllpstockQuery } from "@/redux/features/product/product.api";
 import { useEffect } from "react";
 
@@ -21,7 +20,7 @@ export default function Home() {
     <div>
       <HomePage />
     
-      <TrendingOffers />
+      {/* <TrendingOffers /> */}
       <SkinPhilosophy />
       <SkinGoals />
       <LookbookReviews />
