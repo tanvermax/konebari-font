@@ -64,15 +64,7 @@ export const productapi = baseApi.injectEndpoints({
       invalidatesTags: ["PRODUCT"],
     }),
 
-    // ✅ 6. Admin Overview Query
-    adminOverview: builder.query({
-      query: () => ({
-        url: "/products/admin/overview",
-        method: "GET",
-      }),
-      transformResponse: (response: any) => response.data,
-      providesTags: ["PRODUCT"],
-    }),
+   
 
     // ✅ 7. Categories Query
     // redux/features/product/product.api.ts
@@ -109,6 +101,6 @@ export const {
   useUpdateProductMutation,
   useAllpstockQuery,
   useGetSingleProductQuery,
-  useAdminOverviewQuery,
+  
   useCategoriesQuery,
 } = productapi;

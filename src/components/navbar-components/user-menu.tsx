@@ -1,6 +1,6 @@
 import {
   LogOutIcon,
-  SettingsIcon,
+
   HeartIcon,
   ShoppingBagIcon,
   CrownIcon,
@@ -181,15 +181,7 @@ export default function UserMenu({ userData }: UserMenuProps) {
         bgColor: "bg-emerald-50",
         hoverColor: "hover:bg-emerald-50"
       },
-      {
-        icon: SettingsIcon,
-        label: "Store Settings",
-        href: "/admin/settings",
-        description: "Customize store",
-        color: "text-gray-600",
-        bgColor: "bg-gray-50",
-        hoverColor: "hover:bg-gray-50"
-      }
+      
     ]
   };
 
@@ -261,7 +253,7 @@ export default function UserMenu({ userData }: UserMenuProps) {
       <AnimatePresence>
         {isOpen && (
           <DropdownMenuContent 
-            className="w-80 p-1.5 border-primary/10 shadow-2xl shadow-pink-500/10 bg-gradient-to-b from-white to-pink-50/30 backdrop-blur"
+            className="w-80 p-1.5 border-primary/10 shadow-2xl shadow-pink-500/10 bg-gradient-to-b from-white to-pink-50/30 backdrop-blur-xl"
             align="end"
             asChild
           >
@@ -372,7 +364,7 @@ export default function UserMenu({ userData }: UserMenuProps) {
                       onClick={handlelogout}
                       disabled={isLoggingOut}
                       variant="ghost"
-                      className="w-full gap-2 bg-gradient-to-r from-pink-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20 text-pink-600 hover:text-pink-700 border border-pink-200/50 hover:border-pink-300 transition-all duration-300 group"
+                      className="w-full gap-2 bg-gradient-to-r  hover:from-pink-500/20 hover:to-purple-500/20 text-white from-pink-50 to-purple-500 bg-clip-text text-transparent font-medium hover:text-pink-700 border border-pink-200/50 hover:border-pink-300 transition-all duration-300 group"
                     >
                       {isLoggingOut ? (
                         <motion.div
@@ -386,13 +378,7 @@ export default function UserMenu({ userData }: UserMenuProps) {
                       <span className="font-medium">
                         {isLoggingOut ? "Logging out..." : "Sign Out"}
                       </span>
-                      <motion.span
-                        animate={{ x: [0, 5, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="ml-auto text-pink-400"
-                      >
-                        ✨
-                      </motion.span>
+                      
                     </Button>
                   </motion.div>
                 </DropdownMenuItem>
@@ -401,8 +387,8 @@ export default function UserMenu({ userData }: UserMenuProps) {
                 <div className="px-4 py-2 mt-1">
                   <p className="text-[10px] text-center text-muted-foreground/50 flex items-center justify-center gap-2">
                     <span className="w-4 h-px bg-gradient-to-r from-transparent to-pink-300"></span>
-                    <span className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent font-medium">
-                      ✦ Glamour & Elegance ✦
+                    <span className="bg-gradient-to-r from-pink-50 to-purple-500 bg-clip-text text-transparent font-medium">
+                      ✦ KONEBARI ✦
                     </span>
                     <span className="w-4 h-px bg-gradient-to-l from-transparent to-pink-300"></span>
                   </p>
