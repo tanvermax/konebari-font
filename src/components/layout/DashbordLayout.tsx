@@ -8,15 +8,12 @@ import UserMenu from "@/components/navbar-components/user-menu";
 import { motion } from "framer-motion";
 import { 
   Sparkles, 
-  Bell, 
   Search, 
-  Menu, 
-
+  Menu,
   Home,
   Zap,
   Sun,
   Moon,
-
   Maximize2,
   Minimize2,
 } from "lucide-react";
@@ -24,14 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import NotificationDropdown from "../navbar-components/notification-menu";
+
 
 export default function DashbordLayout() {
   const { data: userData } = useUserInfoQuery(undefined);
@@ -180,46 +171,8 @@ export default function DashbordLayout() {
             </div>
 
             {/* Notifications */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full relative text-zinc-600 hover:text-pink-500 hover:bg-pink-50 dark:text-zinc-400 dark:hover:text-pink-400 dark:hover:bg-pink-950/30 transition-all duration-200"
-                >
-                  <Bell className="w-4 h-4" />
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-pink-500 rounded-full animate-pulse" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72 p-2 border-pink-100/50 dark:border-zinc-800/50 shadow-xl">
-                <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  Notifications
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-sm py-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-950/50 flex items-center justify-center text-pink-500">
-                      <Sparkles className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium">New product added</p>
-                      <p className="text-[10px] text-muted-foreground">2 minutes ago</p>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm py-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-500">
-                      <Zap className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium">Order #1234 delivered</p>
-                      <p className="text-[10px] text-muted-foreground">1 hour ago</p>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <NotificationDropdown />
+
 
             {/* Fullscreen */}
             <Button
