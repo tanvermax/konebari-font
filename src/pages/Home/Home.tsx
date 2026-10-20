@@ -1,4 +1,6 @@
 import HomePage from "@/components/layout/home/HomePage";
+import HeroBanner from "@/components/layout/HomeLayout/Banners";
+import BrandSlider from "@/components/layout/HomeLayout/BrandSlider";
 import LookbookReviews from "@/components/layout/HomeLayout/LookbookReviews/LookbookReviews";
 import SkinGoals from "@/components/layout/HomeLayout/SkinGoals/SkinGoals";
 import SkinPhilosophy from "@/components/layout/HomeLayout/SkinPhilosophy/SkinPhilosophy";
@@ -18,6 +20,11 @@ export default function Home() {
   }, [isLoading, data]);
   return (
     <div>
+       <HeroBanner />
+
+      {/* ===== FEATURES ===== */}
+    
+      <BrandSlider />
       <HomePage />
     
       {/* <TrendingOffers /> */}

@@ -53,8 +53,8 @@ export const orderApi = baseApi.injectEndpoints({
       invalidatesTags: ["ORDER"],
     }),
     getMyOrders: builder.query({
-      query: () => ({
-        url: "/orders/my-orders",             // 👈 NEW endpoint
+      query: (id) => ({
+        url: `/orders/my-orders/${id}`,             // 👈 NEW endpoint
         method: "GET",
       }),
       transformResponse: (res: any) => res,

@@ -45,6 +45,8 @@ interface CheckoutDialogProps {
   subtotal: number;
 }
 
+type DeliveryLocation = "INSIDE_DHAKA" | "OUTSIDE_DHAKA";
+
 interface ICheckoutForm {
   name: string;
   email: string;
@@ -53,6 +55,7 @@ interface ICheckoutForm {
   city: string;
   note?: string;
   paymentMethod: "COD" | "SSLCOMMERZ";
+  deliveryLocation: DeliveryLocation;
 }
 
 export default function CheckoutDialog({
@@ -82,10 +85,16 @@ export default function CheckoutDialog({
       city: "",
       note: "",
       paymentMethod: "COD",
+      deliveryLocation: "INSIDE_DHAKA",
     },
   });
 
   const paymentMethod = watch("paymentMethod");
+  const deliveryLocation = watch("deliveryLocation");
+
+  // ✅ Shipping cost based on delivery location
+  const shipping = deliveryLocation === "INSIDE_DHAKA" ? 60 : 120;
+  const total = subtotal + shipping;
 
   useEffect(() => {
     if (!open) reset();
@@ -96,7 +105,6 @@ export default function CheckoutDialog({
   // ============================================
   const onSubmit = async (data: ICheckoutForm) => {
     try {
-      const shipping = subtotal > 1000 ? 0 : 60;
       const totalPrice = subtotal + shipping;
 
       const orderPayload = {
@@ -122,6 +130,7 @@ export default function CheckoutDialog({
         }),
         subtotal,
         shipping,
+        deliveryLocation: data.deliveryLocation,
         total: totalPrice,
         totalPrice,
         grandTotal: totalPrice,
@@ -156,7 +165,6 @@ export default function CheckoutDialog({
 
           if (!isLoggedIn) clearGuestCart();
 
-          // ✅ Redirect to SSLCommerz
           window.location.href = gatewayUrl;
           return;
         } catch (paymentError: any) {
@@ -282,6 +290,31 @@ export default function CheckoutDialog({
             )}
           </div>
 
+          {/* ✅ Delivery Location (NEW) */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold flex items-center gap-1.5">
+              <Truck className="w-3 h-3 text-rose-500" /> Delivery Location *
+            </Label>
+            <Select
+              value={deliveryLocation}
+              onValueChange={(v) =>
+                setValue("deliveryLocation", v as DeliveryLocation)
+              }
+            >
+              <SelectTrigger className="h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="INSIDE_DHAKA">
+                  🏙️ Inside Dhaka — ৳60
+                </SelectItem>
+                <SelectItem value="OUTSIDE_DHAKA">
+                  🚚 Outside Dhaka — ৳120
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Payment Method */}
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold flex items-center gap-1.5">
@@ -335,13 +368,19 @@ export default function CheckoutDialog({
               <span>৳{subtotal.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Shipping</span>
-              <span>{subtotal > 1000 ? "Free" : "৳60"}</span>
+              <span>
+                Shipping (
+                {deliveryLocation === "INSIDE_DHAKA"
+                  ? "Inside Dhaka"
+                  : "Outside Dhaka"}
+                )
+              </span>
+              <span>৳{shipping}</span>
             </div>
             <div className="border-t border-rose-200/50 pt-2 flex justify-between font-semibold text-sm">
               <span>Total</span>
               <span className="text-rose-600">
-                ৳{(subtotal + (subtotal > 1000 ? 0 : 60)).toLocaleString()}
+                ৳{total.toLocaleString()}
               </span>
             </div>
           </div>

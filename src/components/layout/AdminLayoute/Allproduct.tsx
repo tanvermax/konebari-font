@@ -49,7 +49,7 @@ export default function Allproduct() {
   };
 
   const handleAddProduct = () => {
-    navigate("/admin/products/add");
+    navigate("/admin/add-product");
   };
 
   const adminTotalPages = adminData?.meta?.totalPage || adminData?.meta?.totalPages || 1;

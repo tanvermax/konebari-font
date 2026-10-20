@@ -1,6 +1,11 @@
 import { motion } from "framer-motion";
 import { Star, Instagram, Quote, CheckCircle2 } from "lucide-react";
-
+import {
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  Headphones,
+} from "lucide-react";
 const reviews = [
   {
     id: 1,
@@ -60,7 +65,24 @@ const lookbookImages = [
     likes: "1.8k",
   },
 ];
-
+ const features = [
+    { icon: Truck, title: "Fast Shipping", desc: "Across Dhaka & Countrywide" },
+    {
+      icon: ShieldCheck,
+      title: "100% Authentic",
+      desc: "Guaranteed Original Items",
+    },
+    {
+      icon: RotateCcw,
+      title: "Easy Returns",
+      desc: "Hassle-free 7 Days Return",
+    },
+    {
+      icon: Headphones,
+      title: "Dedicated Support",
+      desc: "Always here for your query",
+    },
+  ];
 export default function LookbookReviews() {
   return (
     <section className="py-16 rounded-2xl sm:py-24 bg-stone-50/60 dark:bg-stone-900/30 overflow-hidden border-t border-border/40">
@@ -194,6 +216,28 @@ export default function LookbookReviews() {
         </div>
 
       </div>
+        <section className="py-8 bg-white dark:bg-[#0D0D0D] border-b border-border/40">
+              <div className="container mx-auto px-4 md:px-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {features.map((item, index) => (
+                    <div key={index} className="flex items-center gap-3.5">
+                      <div className="p-2.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 shrink-0">
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-medium text-foreground">
+                          {item.title}
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
     </section>
+    
   );
 }

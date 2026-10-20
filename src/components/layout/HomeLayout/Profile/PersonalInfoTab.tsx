@@ -131,7 +131,7 @@ export default function PersonalInfoTab({ user }: PersonalInfoTabProps) {
             {isEditing ? (
               <Input
                 {...register("phone")}
-                placeholder="01XXXXXXXXX"
+                placeholder="01...."
                 className="h-10 border-rose-200/50"
               />
             ) : (

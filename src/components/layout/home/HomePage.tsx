@@ -5,14 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { IProductCard } from "@/redux/features/product/Product.types";
 import {
   ArrowRight,
-  ShieldCheck,
-  Truck,
-  RotateCcw,
-  Headphones,
+
 } from "lucide-react";
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
-import HeroBanner from "../HomeLayout/Banners";
-import BrandSlider from "../HomeLayout/BrandSlider";
 
 export default function HomePage() {
   const { data: productsData, isLoading: productsLoading } = useAllpstockQuery({
@@ -54,54 +49,13 @@ export default function HomePage() {
     },
   ];
 
-  const features = [
-    { icon: Truck, title: "Fast Shipping", desc: "Across Dhaka & Countrywide" },
-    {
-      icon: ShieldCheck,
-      title: "100% Authentic",
-      desc: "Guaranteed Original Items",
-    },
-    {
-      icon: RotateCcw,
-      title: "Easy Returns",
-      desc: "Hassle-free 7 Days Return",
-    },
-    {
-      icon: Headphones,
-      title: "Dedicated Support",
-      desc: "Always here for your query",
-    },
-  ];
+ 
 
   return (
     <div className="min-h-screen  text-foreground">
       {/* ===== HERO SECTION (Minimal & Clean) ===== */}
 
-      <HeroBanner />
-
-      {/* ===== FEATURES ===== */}
-      <section className="py-8 bg-white dark:bg-[#0D0D0D] border-b border-border/40">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {features.map((item, index) => (
-              <div key={index} className="flex items-center gap-3.5">
-                <div className="p-2.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 shrink-0">
-                  <item.icon className="h-4 w-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-medium text-foreground">
-                    {item.title}
-                  </h4>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {item.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      <BrandSlider />
+     
       {/* ===== CATEGORIES ===== */}
       <section className="py-14 sm:py-20">
         <div className="container mx-auto px-4 md:px-8">

@@ -201,7 +201,23 @@ const onSubmit = async (data: z.infer<typeof registerSchema>) => {
           </span> */}
         </div>
 
-        {/* <Button
+  <SocialLogin/>
+      </div>
+
+      <div className="text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link to="/login" className="text-pink-500 hover:text-pink-600 font-medium hover:underline transition-colors">
+          Sign In
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+export const SocialLogin = () => {
+return (
+  <>
+      <Button
           type="button"
           variant="outline"
           className="w-full h-11 rounded-xl border-pink-200/50 dark:border-pink-800/30 hover:bg-pink-50 dark:hover:bg-pink-900/10 hover:border-pink-300 transition-all duration-200 font-medium"
@@ -225,15 +241,8 @@ const onSubmit = async (data: z.infer<typeof registerSchema>) => {
             />
           </svg>
           Sign up with Google
-        </Button> */}
-      </div>
+        </Button>
+        </>
 
-      <div className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link to="/login" className="text-pink-500 hover:text-pink-600 font-medium hover:underline transition-colors">
-          Sign In
-        </Link>
-      </div>
-    </div>
-  )
+)
 }

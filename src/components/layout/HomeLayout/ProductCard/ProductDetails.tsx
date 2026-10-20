@@ -1,6 +1,6 @@
 // components/HomeLayout/ProductCard/ProductDetails.tsx
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,11 +12,11 @@ import {
   Package,
   ShieldCheck,
   Truck,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import { usePricestockDetailsQuery } from "@/redux/features/product/product.api";
 import { useNavigate, useParams } from "react-router";
 import { useCart } from "@/redux/hooks/useCart";
@@ -35,24 +35,52 @@ const ProductDetails = () => {
 
   const { data: product, isLoading } = usePricestockDetailsQuery(id) as any;
 
-
-  
-  // ✅ Handle variants (may be empty)
+  // ============================================
+  // ✅ VARIANTS
+  // ============================================
   const activeVariants = useMemo(
-    () =>
-      (product?.variants || []).filter(
-        (v: any) => v.status === "active"
-      ),
+    () => (product?.variants || []).filter((v: any) => v.status === "active"),
     [product]
   );
 
   const selectedVariant = activeVariants[selectedVariantIdx];
 
-  // ✅ Images — mainImage OR images[0]
+  // ============================================
+  // ✅ PRICE CALCULATION
+  // ============================================
+  const regularPrice =
+    Number(selectedVariant?.price ?? product?.price ?? 0);
+
+  const specialPrice = Number(
+    selectedVariant?.specialPrice ?? product?.discountPrice ?? 0
+  );
+
+  const hasDiscount =
+    specialPrice > 0 && specialPrice < regularPrice;
+
+  const displayPrice = hasDiscount ? specialPrice : regularPrice;
+
+  const discountPercent = hasDiscount
+    ? Math.round(((regularPrice - displayPrice) / regularPrice) * 100)
+    : 0;
+
+  // ============================================
+  // ✅ STOCK
+  // ============================================
+  const stockCount =
+    selectedVariant?.quantity ??
+    product?.stock ??
+    product?.totalStock ??
+    0;
+
+  const inStock = stockCount > 0;
+
+  // ============================================
+  // ✅ IMAGES
+  // ============================================
   const allImages = useMemo(() => {
     if (!product) return [];
     const imgs = [
-      product.mainImage,
       ...(product.images || []),
       selectedVariant?.image,
       ...(selectedVariant?.images || []),
@@ -60,7 +88,89 @@ const ProductDetails = () => {
     return Array.from(new Set(imgs)) as string[];
   }, [product, selectedVariant]);
 
-  // ─────────────────────────────────────────────
+  // Reset active image and quantity when variant changes
+  useEffect(() => {
+    setActiveImg(0);
+    setQuantity(1);
+  }, [selectedVariantIdx]);
+
+  // ============================================
+  // ✅ FAVORITE STATUS
+  // ============================================
+  const favActive = isFavorite(product?._id, selectedVariant?.skuId || null);
+  const isAdding = isAddingId(product?._id);
+  const isToggling = isTogglingId(product?._id);
+
+  // ============================================
+  // ✅ HANDLERS
+  // ============================================
+  const handleAddToCart = async (redirect = false) => {
+    if (!product) return false;
+
+
+      console.log("🛒 Adding to cart with:", {
+    regularPrice,
+    specialPrice,
+    selectedVariantId: selectedVariant?.skuId
+  });
+
+    const ok = await addToCart({
+      productId: product._id,
+      variantId: selectedVariant?.skuId || null,
+      quantity,
+      productName: product.title,
+      product: {
+        _id: product._id,
+        title: product.title,
+        slug: product.slug,
+        description: product.description,
+        shortDescription: product.shortDescription,
+        price: regularPrice,
+        discountPrice: hasDiscount ? specialPrice : 0,
+        stock: stockCount,
+        category: product.category,
+        brand: product.brand,
+        images: allImages,
+        isActive: product.isActive,
+        nameBn: product.nameBn,
+        variants: product.variants || [],
+        // ✅ Payment options pass
+        allowCashOnDelivery: product.allowCashOnDelivery ?? true,
+        allowOnlinePayment: product.allowOnlinePayment ?? true,
+      },
+    });
+    if (ok && redirect) navigate("/cart");
+    return ok;
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!product) return;
+
+    await toggleFavorite({
+      productId: product._id,
+      variantId: selectedVariant?.skuId || null,
+      productName: product.title,
+      product: {
+        _id: product._id,
+        title: product.title,
+        slug: product.slug,
+        description: product.description,
+        shortDescription: product.shortDescription,
+        price: regularPrice,
+        discountPrice: hasDiscount ? specialPrice : 0,
+        stock: stockCount,
+        category: product.category,
+        brand: product.brand,
+        images: allImages,
+        isActive: product.isActive,
+        nameBn: product.nameBn,
+      },
+    });
+  };
+
+  // ============================================
+  // ✅ LOADING
+  // ============================================
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
@@ -94,105 +204,23 @@ const ProductDetails = () => {
       </div>
     );
   }
-// ✅ Regular price = product.price (1200)
-// ✅ Special/discount price = product.discountPrice (100)
-// ✅ Display: discounted (bold) + original (strikethrough)
-
-const regularPrice = product.price ?? 0;                      // 1200
-const discountPrice = product.discountPrice ?? 0;              // 100
-const hasDiscount = discountPrice > 0 && discountPrice < regularPrice;
-
-const displayPrice = hasDiscount ? discountPrice : regularPrice;  // 100
-const originalPrice = regularPrice;                              // 1200
-
-const discountPercentage = hasDiscount
-  ? Math.round(((regularPrice - discountPrice) / regularPrice) * 100)
-  : 0;
-  
-  // ✅ Price & Stock logic — handle empty variants
- 
-
-  const stockCount = selectedVariant?.quantity ?? product.stock ?? product.totalStock ?? 0;
-  const inStock = stockCount > 0;
-
-  const favActive = isFavorite(product._id, selectedVariant?.skuId || null);
-  const isAdding = isAddingId(product._id);
-  const isToggling = isTogglingId(product._id);
-
-
-  // ✅ Handlers
- // components/HomeLayout/ProductCard/ProductDetails.tsx
-const handleAddToCart = async (redirect = false) => {
-  if (!product) return false;
-
-  const ok = await addToCart({
-    productId: product._id,
-    variantId: selectedVariant?.skuId || null,
-    quantity,
-    productName: product.title,
-    // ✅ Full product object
-    product: {
-      _id: product._id,
-      title: product.title,
-      slug: product.slug,
-      description: product.description,
-      shortDescription: product.shortDescription,
-      price: product.price,
-      discountPrice: product.discountPrice || 0,
-      stock: product.stock || 0,
-      category: product.category,
-      brand: product.brand,
-      images: allImages.length > 0 ? allImages : product.images || [],
-      isActive: product.isActive,
-      nameBn: product.nameBn,
-      variants: product.variants || [],
-    },
-  });
-  if (ok && redirect) navigate("/cart");
-  return ok;
-};
-
-
-const handleToggleFavorite = async () => {
-  if (!product) return;
-
-  await toggleFavorite({
-    productId: product._id,
-    variantId: selectedVariant?.skuId || null,
-    productName: product.title,
-    // ✅ Full product object — DB এর মতো same fields
-    product: {
-      _id: product._id,
-      title: product.title,
-      slug: product.slug,
-      description: product.description,
-      shortDescription: product.shortDescription,
-      price: product.price,
-      discountPrice: product.discountPrice || 0,
-      stock: product.stock || 0,
-      category: product.category,
-      brand: product.brand,
-      images: allImages.length > 0 ? allImages : product.images || [],
-      isActive: product.isActive,
-      nameBn: product.nameBn,
-    },
-  });
-};
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-12 max-w-6xl">
+    <div className="container mx-auto px-3 sm:px-4 py-6 md:py-12 max-w-6xl">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
-
-        {/* ✅ GALLERY */}
+        {/* ============================================
+            LEFT: IMAGE GALLERY
+           ============================================ */}
         <div className="lg:col-span-6 space-y-3 lg:sticky lg:top-6">
-          <div className="relative group rounded-2xl overflow-hidden border border-border/40 bg-stone-50 dark:bg-stone-900/50 aspect-square">
+          {/* Main Image */}
+          <div className="relative group rounded-2xl overflow-hidden border border-border/40 bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-900/50 dark:to-stone-900/80 aspect-square">
             <img
               src={allImages[activeImg] || "/placeholder-image.png"}
               alt={product.title}
               className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
             />
 
-            {/* Navigation */}
+            {/* Image Navigation */}
             {allImages.length > 1 && (
               <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 flex justify-between opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
@@ -200,7 +228,9 @@ const handleToggleFavorite = async () => {
                   size="icon"
                   className="rounded-full h-8 w-8 sm:h-9 sm:w-9 bg-white/80 dark:bg-black/60 backdrop-blur-md shadow-sm"
                   onClick={() =>
-                    setActiveImg((p) => (p === 0 ? allImages.length - 1 : p - 1))
+                    setActiveImg((p) =>
+                      p === 0 ? allImages.length - 1 : p - 1
+                    )
                   }
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -210,7 +240,9 @@ const handleToggleFavorite = async () => {
                   size="icon"
                   className="rounded-full h-8 w-8 sm:h-9 sm:w-9 bg-white/80 dark:bg-black/60 backdrop-blur-md shadow-sm"
                   onClick={() =>
-                    setActiveImg((p) => (p === allImages.length - 1 ? 0 : p + 1))
+                    setActiveImg((p) =>
+                      p === allImages.length - 1 ? 0 : p + 1
+                    )
                   }
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -218,7 +250,7 @@ const handleToggleFavorite = async () => {
               </div>
             )}
 
-            {/* ❤️ Favorite button on image */}
+            {/* Favorite Button */}
             <button
               type="button"
               onClick={handleToggleFavorite}
@@ -239,12 +271,20 @@ const handleToggleFavorite = async () => {
               )}
             </button>
 
+            {/* Out of Stock Badge */}
             {!inStock && (
               <Badge
                 variant="destructive"
                 className="absolute top-4 left-4 rounded-full font-normal text-xs"
               >
                 Out of Stock
+              </Badge>
+            )}
+
+            {/* Discount Badge */}
+            {hasDiscount && (
+              <Badge className="absolute bottom-4 left-4 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white border-0 text-xs px-3">
+                Save {discountPercent}%
               </Badge>
             )}
           </div>
@@ -256,7 +296,7 @@ const handleToggleFavorite = async () => {
                 <button
                   key={idx}
                   onClick={() => setActiveImg(idx)}
-                  className={`relative flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl border transition-all overflow-hidden p-1 bg-stone-50 dark:bg-stone-900 ${
+                  className={`relative flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 transition-all overflow-hidden p-1 bg-stone-50 dark:bg-stone-900 ${
                     activeImg === idx
                       ? "border-rose-500 ring-1 ring-rose-500"
                       : "border-border/40 opacity-70 hover:opacity-100"
@@ -273,8 +313,11 @@ const handleToggleFavorite = async () => {
           )}
         </div>
 
-        {/* ✅ INFO */}
-        <div className="lg:col-span-6 space-y-5 sm:space-y-6">
+        {/* ============================================
+            RIGHT: PRODUCT INFO
+           ============================================ */}
+        <div className="lg:col-span-6 space-y-5">
+          {/* Header */}
           <header className="space-y-2">
             <span className="text-[10px] sm:text-xs font-semibold tracking-wider text-rose-500 uppercase">
               {product.category || "Authentic Beauty"}
@@ -285,7 +328,7 @@ const handleToggleFavorite = async () => {
                 {product.title}
               </h1>
 
-              {/* Favorite (Secondary) */}
+              {/* Secondary Favorite */}
               <button
                 type="button"
                 onClick={handleToggleFavorite}
@@ -308,74 +351,136 @@ const handleToggleFavorite = async () => {
             )}
           </header>
 
-          {/* ✅ Pricing */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-stone-50 dark:bg-stone-900/40 border border-border/40 flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-baseline gap-3">
+          {/* ============================================
+              PRICE CARD — Dynamic based on variant
+             ============================================ */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-stone-50 to-white dark:from-stone-900/40 dark:to-stone-900/20 border border-border/40 space-y-3">
+            <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
               {hasDiscount ? (
-  <>
-    <span className="text-2xl sm:text-3xl font-semibold text-foreground">
-      ৳{Number(displayPrice).toLocaleString()}     {/* ৳100 bold */}
-    </span>
-    <span className="text-sm font-light text-muted-foreground line-through">
-      ৳{Number(originalPrice).toLocaleString()}    {/* ৳1,200 strikethrough */}
-    </span>
-  </>
-) : (
-  <span className="text-2xl sm:text-3xl font-semibold text-foreground">
-    ৳{Number(regularPrice).toLocaleString()}
-  </span>
-)}
+                <>
+                  <span className="text-3xl sm:text-4xl font-bold text-rose-600">
+                    ৳{displayPrice.toLocaleString()}
+                  </span>
+                  <span className="text-sm sm:text-base text-muted-foreground line-through">
+                    ৳{regularPrice.toLocaleString()}
+                  </span>
+                  <Badge className="bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-400 text-[10px]">
+                    -{discountPercent}%
+                  </Badge>
+                </>
+              ) : (
+                <span className="text-3xl sm:text-4xl font-bold text-foreground">
+                  ৳{regularPrice.toLocaleString()}
+                </span>
+              )}
             </div>
-            {discountPercentage > 0 && (
-              <span className="bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs px-3 py-1 rounded-full font-medium border border-rose-200/50 dark:border-rose-900/30">
-                Save {discountPercentage}%
-              </span>
-            )}
-          </div>
 
-          {/* ✅ Stock info */}
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Package className="w-3.5 h-3.5" />
-              <span>{inStock ? `${stockCount} in stock` : "Out of stock"}</span>
-            </div>
-            {product.brand && (
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>{product.brand}</span>
+            {/* Stock & Brand */}
+            <div className="flex items-center gap-4 text-xs flex-wrap pt-2 border-t border-border/40">
+              <div className="flex items-center gap-1.5">
+                <Package className="w-3.5 h-3.5 text-rose-500" />
+                <span
+                  className={
+                    inStock ? "text-emerald-600" : "text-rose-600"
+                  }
+                >
+                  {inStock ? `${stockCount} in stock` : "Out of stock"}
+                </span>
               </div>
-            )}
+              {product.brand && (
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>{product.brand}</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* ✅ Variants */}
+          {/* ============================================
+              VARIANT SELECTOR
+             ============================================ */}
           {activeVariants.length > 0 && (
-            <div className="space-y-2.5">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Options
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {activeVariants.map((v: any, idx: number) => (
-                  <button
-                    key={v.skuId}
-                    onClick={() => {
-                      setSelectedVariantIdx(idx);
-                      setActiveImg(0);
-                    }}
-                    className={`px-3.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
-                      selectedVariantIdx === idx
-                        ? "border-rose-500 bg-rose-50/50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400"
-                        : "border-border/60 text-muted-foreground hover:border-border"
-                    } ${v.quantity <= 0 ? "opacity-40 line-through" : ""}`}
-                    disabled={v.quantity <= 0}
-                  >
-                    {v.combo || v.skuId}
-                  </button>
-                ))}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Choose {activeVariants.length > 1 ? "Options" : "Option"}
+                </span>
+                {selectedVariant && (
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    SKU: {selectedVariant.skuId}
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {activeVariants.map((v: any, idx: number) => {
+                  const isSelected = selectedVariantIdx === idx;
+                  const isOutOfStock = v.quantity <= 0;
+                  const variantRegular = Number(v.price || 0);
+                  const variantSpecial = Number(v.specialPrice || 0);
+                  const variantDisplay =
+                    variantSpecial > 0 && variantSpecial < variantRegular
+                      ? variantSpecial
+                      : variantRegular;
+
+                  return (
+                    <button
+                      key={v.skuId}
+                      onClick={() => setSelectedVariantIdx(idx)}
+                      disabled={isOutOfStock}
+                      className={`relative px-3 py-3 rounded-xl border-2 text-left transition-all ${
+                        isSelected
+                          ? "border-rose-500 bg-rose-50 dark:bg-rose-950/20 shadow-sm"
+                          : "border-border/60 hover:border-rose-200 dark:hover:border-rose-900/40"
+                      } ${
+                        isOutOfStock
+                          ? "opacity-40 cursor-not-allowed"
+                          : "cursor-pointer"
+                      }`}
+                    >
+                      {isSelected && (
+                        <CheckCircle2 className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+                      )}
+
+                      <p
+                        className={`text-xs sm:text-sm font-semibold line-clamp-1 ${
+                          isSelected ? "text-rose-600" : "text-foreground"
+                        }`}
+                      >
+                        {v.combo || v.skuId}
+                      </p>
+
+                      <div className="flex items-baseline gap-1.5 mt-1">
+                        <span
+                          className={`text-sm font-bold ${
+                            isSelected ? "text-rose-600" : "text-foreground"
+                          }`}
+                        >
+                          ৳{variantDisplay.toLocaleString()}
+                        </span>
+                        {variantSpecial > 0 &&
+                          variantSpecial < variantRegular && (
+                            <span className="text-[10px] text-muted-foreground line-through">
+                              ৳{variantRegular.toLocaleString()}
+                            </span>
+                          )}
+                      </div>
+
+                      {isOutOfStock && (
+                        <p className="text-[9px] text-rose-500 mt-0.5">
+                          Out of stock
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* ✅ Quantity + Actions */}
+          {/* ============================================
+              QUANTITY & ACTIONS
+             ============================================ */}
           <div className="space-y-3 pt-1">
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Quantity */}
@@ -383,7 +488,7 @@ const handleToggleFavorite = async () => {
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   disabled={quantity <= 1}
-                  className="px-3 h-full hover:bg-stone-100 dark:hover:bg-stone-800 text-sm font-medium transition-colors text-muted-foreground disabled:opacity-40"
+                  className="px-3 h-full hover:bg-stone-100 dark:hover:bg-stone-800 text-sm font-medium transition-colors text-muted-foreground disabled:opacity-40 rounded-l-xl"
                 >
                   -
                 </button>
@@ -395,7 +500,7 @@ const handleToggleFavorite = async () => {
                     setQuantity((q) => Math.min(stockCount || 1, q + 1))
                   }
                   disabled={quantity >= stockCount}
-                  className="px-3 h-full hover:bg-stone-100 dark:hover:bg-stone-800 text-sm font-medium transition-colors text-muted-foreground disabled:opacity-40"
+                  className="px-3 h-full hover:bg-stone-100 dark:hover:bg-stone-800 text-sm font-medium transition-colors text-muted-foreground disabled:opacity-40 rounded-r-xl"
                 >
                   +
                 </button>
@@ -406,7 +511,7 @@ const handleToggleFavorite = async () => {
                 variant="outline"
                 onClick={() => handleAddToCart(false)}
                 disabled={!inStock || isAdding}
-                className="flex-1 h-11 border-border/60 rounded-xl text-xs sm:text-sm font-normal gap-2 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-300"
+                className="flex-1 h-11 border-border/60 rounded-xl text-xs sm:text-sm font-medium gap-2 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-300"
               >
                 {isAdding ? (
                   <>
@@ -425,7 +530,7 @@ const handleToggleFavorite = async () => {
             <Button
               onClick={() => handleAddToCart(true)}
               disabled={!inStock || isAdding}
-              className="w-full h-11 bg-slate-900 dark:bg-rose-600 hover:bg-slate-800 dark:hover:bg-rose-700 text-white font-normal text-xs sm:text-sm rounded-xl gap-2 transition-all"
+              className="w-full h-11 bg-slate-900 dark:bg-rose-600 hover:bg-slate-800 dark:hover:bg-rose-700 text-white font-medium text-xs sm:text-sm rounded-xl gap-2 transition-all"
             >
               {inStock ? (
                 <>
@@ -437,7 +542,7 @@ const handleToggleFavorite = async () => {
             </Button>
           </div>
 
-          {/* ✅ Trust badges */}
+          {/* Trust Badges */}
           <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/40">
             <div className="text-center space-y-1">
               <Truck className="w-4 h-4 mx-auto text-rose-500" />
@@ -453,7 +558,7 @@ const handleToggleFavorite = async () => {
             </div>
           </div>
 
-          {/* ✅ Highlights */}
+          {/* Highlights */}
           {product.shortDescription && (
             <div className="space-y-2 border-t border-border/40 pt-5">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
@@ -466,7 +571,7 @@ const handleToggleFavorite = async () => {
             </div>
           )}
 
-          {/* ✅ Description */}
+          {/* Description */}
           {product.description && (
             <div className="space-y-2 border-t border-border/40 pt-5">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

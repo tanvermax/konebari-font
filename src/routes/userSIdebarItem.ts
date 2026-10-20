@@ -5,7 +5,10 @@
 // import UserAddresses from "@/pages/User/UserAddresses";
 // import UserPayments from "@/pages/User/UserPayments";
 // import UserShipments from "@/pages/User/UserShipments";
+import FavoritePage from "@/components/layout/HomeLayout/Favorite/FavoritePage";
+import OrderTrack from "@/pages/User/OrderTrack/Ordertack";
 import type { ISidebarItem } from "@/types";
+import { ClipboardList, Heart } from "lucide-react";
 // import { Calendar, ClipboardList, CreditCard, Heart, MapPin, Truck, User } from "lucide-react";
 
 export const userSidebarItem: ISidebarItem[] = [
@@ -16,21 +19,23 @@ export const userSidebarItem: ISidebarItem[] = [
       // {
       //   title: "Profile",
       //   url: "/user/profile",
-      //   component: UserProfile,
+      //   component: ProfilePage,
       //   icon: User,
       // },
-      // {
-      //   title: "My Orders",
-      //   url: "/user/orders",
-      //   component: UserOrders,
-      //   icon: ClipboardList,
-      // },
-      // {
-      //   title: "Wishlist",
-      //   url: "/user/wishlist",
-      //   component: UserWishlist,
-      //   icon: Heart,
-      // },
+      
+      {
+        title: "My Orders",
+        url: "/user/orders",
+        component: OrderTrack,
+        icon: ClipboardList,
+      },
+      {
+        title: "Wishlist",
+        url: "/user/favorites",
+        component: FavoritePage,
+        icon: Heart,
+      },
+      
       // {
       //   title: "Addresses",
       //   url: "/user/addresses",

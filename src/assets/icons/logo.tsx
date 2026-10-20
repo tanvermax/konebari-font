@@ -1,4 +1,4 @@
-import day from "../images/Screenshot 2026-09-04 at 2.30.28 AM.png"
+import day from "../images/konebaridaylogo.png"
 import night from "../images/Kone Bari Client File/PNG/Kone Bari Client File-17.png"
 
 export default function Logo() {

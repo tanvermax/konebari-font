@@ -16,6 +16,9 @@ export default function CartPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
 
+
+  console.log("cart",cart);
+  
   const cartItems = cart.items || [];
   const totalItems = cart.totalItems || 0;
   const subtotal = cart.subtotal || 0;

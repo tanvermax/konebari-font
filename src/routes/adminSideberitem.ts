@@ -5,6 +5,7 @@ import AddProduct from "@/components/layout/AdminLayoute/AddProduct/AddProduct";
 import Allproduct from "@/components/layout/AdminLayoute/Allproduct";
 import AdminAnalyticsPage from "@/components/layout/AdminLayoute/Analytics/AdminAnalyticsPage";
 import AdminReportsPage from "@/components/layout/AdminLayoute/Analytics/AdminReportsPage";
+import BrandManagementPage from "@/components/layout/AdminLayoute/BrandManagement/BrandManagementPage";
 import AdminOrdersPage from "@/components/layout/AdminLayoute/Orders/AdminOrdersPage";
 import AdminOverviewPage from "@/components/layout/AdminLayoute/Overview/Adminoverviewpage";
 import AdminShipmentsPage from "@/components/layout/AdminLayoute/Shipments/AdminShipmentsPage";
@@ -64,6 +65,7 @@ import {
   // Eye,
   // Database,
   FileBarChart,
+  Sparkles,
   // ShieldCheck,
   // MessageSquare,
   // TrendingUp,
@@ -168,6 +170,13 @@ export const adminSidebarItem: ISidebarItem[] = [
         component: AddProduct,
         icon: PlusCircle,
       },
+      {
+      title: "Brands",
+      url: "/admin/brands",
+      component: BrandManagementPage,
+      icon: Sparkles,
+    },
+
       // {
       //   title: "Categories",
       //   url: "/admin/categories",

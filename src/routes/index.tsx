@@ -18,25 +18,12 @@ import EditProduct from "@/components/layout/AdminLayoute/AddProduct/EditProduct
 import { AdminRouteGuard } from "@/components/RouteGuard/AdminRouteGuard";
 import { UserRouteGuard } from "@/components/RouteGuard/UserRouteGuard";
 import CartPage from "@/components/layout/HomeLayout/Cart/CartPage";
-import FavoritePage from "@/components/layout/HomeLayout/Favorite/FavoritePage";
 import BrandsPage from "@/components/layout/HomeLayout/Brands/BrandsPage";
+import FavoritePage from "@/components/layout/HomeLayout/Favorite/FavoritePage";
 import ProfilePage from "@/components/layout/HomeLayout/Profile/ProfilePage";
 
 
-// c// router/index.tsx - ফিক্সড ভার্সন
-// import App from "@/App";
-// import DashbordLayout from "@/components/layout/DashbordLayout";
-// import { AdminRouteGuard } from "@/components/RouteGuard/AdminRouteGuard";
-// import { UserRouteGuard } from "@/components/RouteGuard/UserRouteGuard";
-// import Home from "@/pages/Home/Home";
-// import Login from "@/pages/Login";
-// import Register from "@/pages/Register";
-// import Veryfy from "@/pages/Veryfy";
-// import { genarateRoutes } from "@/utils/genarateRoutes";
-// import { createBrowserRouter } from "react-router";
-// import { adminSidebarItem } from "./adminSideberitem";
-// import { userSidebarItem } from "./userSIdebarItem";
-// // ... অন্যান্য ইমপোর্ট
+
 
 const router = createBrowserRouter([
   { 
@@ -51,10 +38,10 @@ const router = createBrowserRouter([
       { path: "alldata/:id", Component: ProductDetails },
       { path: "ordertrack", Component: OrderTrack },
       { path: "help", Component: Help },
-      { path: "favorites", Component: FavoritePage},
+    { path: "favorites", Component: FavoritePage},
       { path: "admin/products/edit/:id", Component: EditProduct },
       { path: "brands", Component: BrandsPage },
-      { path: "profile", Component: ProfilePage },
+      {path:"user/profile",Component:ProfilePage}
 
 
     ],

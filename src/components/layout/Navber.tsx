@@ -90,7 +90,7 @@ const bottomNavItems = [
   { label: "Brands", icon: Store, href: "/brands" },
   { label: "Categories", icon: Layers, href: "/shop" },
   { label: "Cart", icon: ShoppingCartIcon, href: "/cart" },
-  { label: "Profile", icon: User, href: "/profile" },
+  { label: "Profile", icon: User, href: "/user/profile" },
 ];
 
 // ============ SALE LABELS ============
@@ -253,6 +253,8 @@ export default function Navbar() {
     return location.pathname === href || location.pathname.startsWith(href);
   };
 
+
+  console.log(userData);
   // ✅ Check if category active
   const isCategoryActive = (categoryName: string) => {
     if (!currentCategory) return false;
@@ -276,11 +278,7 @@ export default function Navbar() {
   return (
     <>
       {/* ===== TOP ANNOUNCEMENT BAR ===== */}
-      <div className="bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 dark:from-rose-950 dark:via-rose-900 dark:to-rose-950 text-stone-100 text-[11px] font-medium py-2.5 px-4 text-center tracking-wider uppercase flex items-center justify-center gap-2 border-b border-white/5">
-        <Sparkles size={12} className="text-rose-400 animate-pulse" />
-        <span>Free Delivery On Orders Above ৳2,000 | 100% Authentic Beauty</span>
-        <Sparkles size={12} className="text-rose-400 animate-pulse" />
-      </div>
+      
 
       {/* ===== MAIN HEADER ===== */}
       <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md border-b border-border/40 shadow-sm">

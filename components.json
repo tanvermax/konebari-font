@@ -18,5 +18,7 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@animateicons": "https://animateicons.in/r/{name}.json"
+  }
 }

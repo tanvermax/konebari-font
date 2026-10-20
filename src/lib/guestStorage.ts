@@ -44,6 +44,9 @@ export interface IGuestCartItem {
   brand?: string;
   images: string[];
   isActive?: boolean;
+  allowCashOnDelivery?: boolean;
+  allowOnlinePayment?: boolean;
+
   nameBn?: string;
   variants?: any[];
 }
@@ -130,16 +133,25 @@ export const clearGuestCart = () => {
   window.dispatchEvent(new CustomEvent("cartUpdated"));
 };
 
+// lib/guestStorage.ts
+
 export const computeGuestCartTotals = () => {
   const items = getGuestCart();
+
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
+
   const subtotal = items.reduce((s, i) => {
-    const p = i.discountPrice && i.discountPrice > 0 ? i.discountPrice : i.price;
-    return s + p * i.quantity;
+    // ✅ Discount Price থাকলে সেটা নিন, না থাকলে Regular Price
+    const price =
+      i.discountPrice && i.discountPrice > 0
+        ? i.discountPrice
+        : i.price || 0;
+
+    return s + price * i.quantity;
   }, 0);
+
   return { totalItems, subtotal, items };
 };
-
 // ============================================
 // ❤️ FAVORITES
 // ============================================

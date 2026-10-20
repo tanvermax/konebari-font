@@ -16,9 +16,7 @@ export default function CartSummary({
   onCheckout,
   disabled,
 }: CartSummaryProps) {
-  const shipping = subtotal > 1000 ? 0 : 60;
-  const total = subtotal + shipping;
-
+  // ✅ Shipping ekhane calculate hobe na — checkout e select korbe
   return (
     <Card className="border-border/40 shadow-sm sticky top-6">
       <CardContent className="p-5 sm:p-6 space-y-4">
@@ -35,26 +33,13 @@ export default function CartSummary({
             <span className="font-medium">৳{subtotal.toLocaleString()}</span>
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Shipping</span>
-            <span className="font-medium">
-              {shipping === 0 ? (
-                <span className="text-emerald-600">Free</span>
-              ) : (
-                `৳${shipping}`
-              )}
-            </span>
-          </div>
-
-          {shipping > 0 && (
-            <p className="text-[11px] text-muted-foreground bg-rose-50 dark:bg-rose-950/30 p-2 rounded-lg">
-              💡 Add ৳{(1000 - subtotal).toLocaleString()} more for free shipping
-            </p>
-          )}
+          <p className="text-[11px] text-muted-foreground bg-stone-50 dark:bg-stone-900 p-2 rounded-lg">
+            🚚 Shipping cost checkout e delivery location onujayi add hobe
+          </p>
 
           <div className="border-t border-border/40 pt-3 flex justify-between text-base font-semibold">
-            <span>Total</span>
-            <span className="text-rose-600">৳{total.toLocaleString()}</span>
+            <span>Subtotal</span>
+            <span className="text-rose-600">৳{subtotal.toLocaleString()}</span>
           </div>
         </div>
 

@@ -4,11 +4,10 @@ import {
   HeartIcon,
   ShoppingBagIcon,
   CrownIcon,
-  SparklesIcon,
+
   GemIcon,
   DiamondIcon,
-  ClockIcon,
-  GiftIcon,
+ 
   StarIcon,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -32,6 +31,7 @@ import { useAppDispatch } from "@/redux/hook"
 import { Link, useLocation } from "react-router"
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
+import { persistor } from "@/redux/store"
 
 export interface IUser {
   _id?: any,
@@ -56,9 +56,27 @@ export default function UserMenu({ userData }: UserMenuProps) {
 
   const handlelogout = async () => {
     setIsLoggingOut(true);
-    await logout(undefined);
+try {
+    // 1. Server theke logout
+    await logout(undefined).unwrap();
+
+    // 2. RTK Query cache clear
     dispatch(authApi.util.resetApiState());
+
+    // 3. Redux-persist storage purge (eita missing chilo)
+    await persistor.purge();
+
+    // 4. Auth slice reset (jodi apnar auth slice e reset action thake)
+    // dispatch(clearUser()); // apnar auth slice er reset action
+
+    // 5. Page reload (optional but safe)
+    window.location.href = "/";
+  } catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
     setIsLoggingOut(false);
+  }
+
   }
 
   // Get initials for avatar fallback
@@ -89,15 +107,7 @@ export default function UserMenu({ userData }: UserMenuProps) {
   // Menu items configuration with beauty & jewelry theme
   const menuItems = {
     user: [
-      {
-        icon: SparklesIcon,
-        label: "My Dashboard",
-        href: "/user/dashboard",
-        description: "Personal overview",
-        color: "text-pink-500",
-        bgColor: "bg-pink-50",
-        hoverColor: "hover:bg-pink-50"
-      },
+      
       {
         icon: ShoppingBagIcon,
         label: "My Orders",
@@ -110,7 +120,7 @@ export default function UserMenu({ userData }: UserMenuProps) {
       {
         icon: HeartIcon,
         label: "Wishlist",
-        href: "/user/wishlist",
+        href: "/user/favorites",
         description: "Saved treasures",
         color: "text-red-500",
         bgColor: "bg-red-50",
@@ -118,31 +128,15 @@ export default function UserMenu({ userData }: UserMenuProps) {
       },
       {
         icon: GemIcon,
-        label: "My Collection",
-        href: "/user/collection",
+        label: "Profile",
+        href: "/user/profile",
         description: "Your jewelry box",
         color: "text-emerald-500",
         bgColor: "bg-emerald-50",
         hoverColor: "hover:bg-emerald-50"
       },
-      {
-        icon: GiftIcon,
-        label: "Loyalty Rewards",
-        href: "/user/rewards",
-        description: `${userData.loyaltyPoints || 0} points`,
-        color: "text-amber-500",
-        bgColor: "bg-amber-50",
-        hoverColor: "hover:bg-amber-50"
-      },
-      {
-        icon: ClockIcon,
-        label: "Recent Views",
-        href: "/user/recent",
-        description: "Your browsing history",
-        color: "text-blue-500",
-        bgColor: "bg-blue-50",
-        hoverColor: "hover:bg-blue-50"
-      }
+     
+      
     ],
     admin: [
       {

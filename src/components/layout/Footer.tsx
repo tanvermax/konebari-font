@@ -1,7 +1,7 @@
 // components/layout/HomeLayout/Footer/Footer.tsx
 
 import { Link } from "react-router";
-import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, ShieldCheck } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, ShieldCheck, Sparkles } from "lucide-react";
 import Logo from "@/assets/icons/logo";
 
 // Image Imports
@@ -48,6 +48,7 @@ const PaymentCard = ({ name, logo }: PaymentCardProps) => {
 export default function Footer() {
   return (
     <footer className="bg-stone-100 dark:bg-stone-900 text-stone-700 dark:text-stone-300 pt-14 pb-8 border-t border-stone-200 dark:border-stone-800 transition-colors duration-300">
+
       <div className="container mx-auto px-4 md:px-8">
 
         {/* Main Footer Grid */}
@@ -183,7 +184,11 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-
+      <div className="bg-gradient-to-r rounded-xl from-slate-900 via-rose-950 to-slate-900 dark:from-rose-950 dark:via-rose-900 dark:to-rose-950 text-stone-100 text-[11px] font-medium py-2.5 px-4 text-center tracking-wider uppercase flex items-center justify-center gap-2 border-b border-white/5">
+        <Sparkles size={12} className="text-rose-400 animate-pulse" />
+        <span>Free Delivery On Orders Above ৳2,000 | 100% Authentic Beauty</span>
+        <Sparkles size={12} className="text-rose-400 animate-pulse" />
+      </div>
         {/* ✅ Reusable Payment Methods Section */}
         <div className="pt-8 pb-6 border-b border-stone-200 dark:border-stone-800/80">
           <div className="flex flex-col gap-4">

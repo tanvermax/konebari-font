@@ -24,6 +24,9 @@ interface AddToCartOptions {
     isActive?: boolean;
     nameBn?: string;
     variants?: any[];
+    allowCashOnDelivery?: boolean;
+    allowOnlinePayment?: boolean;
+
   };
   productName?: string;
 }
@@ -63,6 +66,8 @@ export const useCart = () => {
             isActive: product?.isActive,
             nameBn: product?.nameBn,
             variants: product?.variants || [],
+             allowCashOnDelivery: product?.allowCashOnDelivery,
+    allowOnlinePayment: product?.allowOnlinePayment,
           });
           toast.success(`${product?.title || productName} added to cart 🛒`);
           return true;
