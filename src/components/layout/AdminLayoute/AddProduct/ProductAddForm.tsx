@@ -4,7 +4,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import {
   useCreateProductMutation,
-  useBrandsQuery,
+  
 } from "@/redux/features/product/product.api";
 import {
   Form,
@@ -44,6 +44,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router";
+import BrandSelector from "./BrandSelector";
+import CategorySelector from "./CategorySelector";
 
 // ============================================
 // ✅ TYPES
@@ -76,16 +78,7 @@ interface IProductForm {
   allowOnlinePayment: boolean;
 }
 
-const CATEGORIES = [
-  "Skincare",
-  "Makeup",
-  "Hair Care",
-  "Body Care",
-  "Jewelry",
-  "Perfume",
-  "Accessories",
-  "Combo",
-];
+
 
 export default function ProductAddForm() {
   const navigate = useNavigate();
@@ -95,12 +88,7 @@ export default function ProductAddForm() {
   const isSubmitting = useRef(false);
 
   // ✅ Dynamic brands
-  const { data: brandsData } = useBrandsQuery(undefined);
-  const brands = Array.isArray(brandsData) ? brandsData : [];
-  const brandNames = brands
-    .map((b: any) => (typeof b === "string" ? b : b.name || b._id))
-    .filter(Boolean);
-
+  
   const form = useForm<IProductForm>({
     defaultValues: {
       title: "",
@@ -361,61 +349,46 @@ export default function ProductAddForm() {
                 {/* Category + Brand */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-semibold">
-                          Category *
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="border-pink-200/50">
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {CATEGORIES.map((cat) => (
-                              <SelectItem key={cat} value={cat}>
-                                {cat}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+  control={form.control}
+  name="category"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="font-semibold flex items-center gap-1.5">
+        <Layers className="w-3.5 h-3.5 text-pink-500" />
+        Category *
+      </FormLabel>
+      <FormControl>
+        <CategorySelector
+          value={field.value || ""}
+          onChange={field.onChange}
+          placeholder="Select category..."
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
                   <FormField
-                    control={form.control}
-                    name="brand"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-semibold flex items-center gap-1.5">
-                          <Tag className="w-3.5 h-3.5 text-pink-500" />
-                          Brand
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g. Generic, Glow Beauty"
-                            {...field}
-                            list="brands-list"
-                            className="border-pink-200/50"
-                          />
-                        </FormControl>
-                        <datalist id="brands-list">
-                          {brandNames.map((brand: string) => (
-                            <option key={brand} value={brand} />
-                          ))}
-                        </datalist>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+  control={form.control}
+  name="brand"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="font-semibold flex items-center gap-1.5">
+        <Tag className="w-3.5 h-3.5 text-pink-500" />
+        Brand
+      </FormLabel>
+      <FormControl>
+        <BrandSelector
+          value={field.value || ""}
+          onChange={field.onChange}
+          placeholder="Select brand..."
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
                 </div>
 
                 {/* Description */}

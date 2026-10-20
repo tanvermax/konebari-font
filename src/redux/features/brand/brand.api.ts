@@ -22,7 +22,7 @@ export const brandApi = baseApi.injectEndpoints({
       query: (params) => ({
         url: "/brands",
         method: "GET",
-        params: params ? { activeOnly: "false", ...params } : { activeOnly: "true" },
+        params: params ? { isActive: "false", ...params } : { isActive: "true" },
       }),
       transformResponse: (res: any) => res?.data || res || [],
       providesTags: ["BRAND"],

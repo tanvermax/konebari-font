@@ -1,9 +1,21 @@
-// EditProduct.tsx - আপনার API response অনুযায়ী ফিক্সড
+// EditProduct.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { toast } from "sonner";
-import { ArrowLeft, Sparkles, Image, Plus, Trash2, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Sparkles,
+  Image,
+  Plus,
+  Trash2,
+  Loader2,
+  Star,
+  Truck,
+  CreditCard,
+  Tag as TagIcon,
+  Info,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 
@@ -26,6 +38,8 @@ import {
   usePricestockDetailsQuery,
   useUpdateProductMutation,
 } from "@/redux/features/product/product.api";
+import BrandSelector from "./BrandSelector";
+import CategorySelector from "./CategorySelector";
 
 // ✅ API থেকে আসা ভেরিয়েন্ট টাইপ
 interface IProductVariant {
@@ -34,7 +48,7 @@ interface IProductVariant {
   price: number;
   specialPrice?: number;
   quantity: number;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   image?: string | null;
 }
 
@@ -44,34 +58,42 @@ interface IFormVariant {
   price: number;
   specialPrice?: number;
   quantity: number;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   image?: string;
 }
 
 interface IProductForm {
-  title: string;          // 👈 API response এ 'title', 'name' নয়
+  title: string;
   nameBn: string;
   category: string;
   description: string;
-  shortDescription: string; // 👈 'highlights' নয়
+  shortDescription: string;
   price: number;
   discountPrice: number;
   stock: number;
   brand: string;
   variants: IFormVariant[];
   images: string[];
-  isActive: boolean;      // 👈 'status' নয়
+  isActive: boolean;
+  
+  // ✅ NEW FIELDS ADD KORA HOLO
+  isFeatured: boolean;
+  newproduct: boolean;
+  skinType: string[];
+  allowCashOnDelivery: boolean;
+  allowOnlinePayment: boolean;
+  tags: string; // comma separated string hishebe nicchi
 }
 
 export default function EditProduct() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { 
-    data: product, 
-    isLoading, 
+  const {
+    data: product,
+    isLoading,
     isError,
-  } = usePricestockDetailsQuery(id || '', {
+  } = usePricestockDetailsQuery(id || "", {
     skip: !id,
   });
 
@@ -95,6 +117,14 @@ export default function EditProduct() {
       variants: [],
       images: [],
       isActive: true,
+      
+      // ✅ Default values
+      isFeatured: false,
+      newproduct: true,
+      skinType: [],
+      allowCashOnDelivery: true,
+      allowOnlinePayment: true,
+      tags: "",
     },
   });
 
@@ -103,16 +133,17 @@ export default function EditProduct() {
     if (product) {
       console.log("📝 Populating form with:", product);
 
-      // ✅ API থেকে আসা variants কে ফর্মের variants এ convert করুন
-      const formVariants: IFormVariant[] = (product.variants || []).map((v: IProductVariant) => ({
-        skuId: v.skuId,
-        combo: v.combo || '',
-        price: v.price,
-        specialPrice: v.specialPrice,
-        quantity: v.quantity,
-        status: v.status,
-        image: v.image || '',
-      }));
+      const formVariants: IFormVariant[] = (product.variants || []).map(
+        (v: IProductVariant) => ({
+          skuId: v.skuId,
+          combo: v.combo || "",
+          price: v.price,
+          specialPrice: v.specialPrice,
+          quantity: v.quantity,
+          status: v.status,
+          image: v.image || "",
+        }),
+      );
 
       form.reset({
         title: product.title || "",
@@ -127,89 +158,119 @@ export default function EditProduct() {
         variants: formVariants,
         images: product.images || [],
         isActive: product.isActive ?? true,
+        
+        // ✅ New fields populate
+        isFeatured: product.isFeatured ?? false,
+        newproduct: product.newproduct ?? true,
+        skinType: product.skinType || [],
+        allowCashOnDelivery: product.allowCashOnDelivery ?? true,
+        allowOnlinePayment: product.allowOnlinePayment ?? true,
+        tags: (product.tags || []).join(", "),
       });
-      
+
       setImages(product.images || []);
     }
   }, [product, form]);
 
-// EditProduct.tsx - onSubmit
-const onSubmit = async (data: IProductForm) => {
+  // onSubmit
+  const onSubmit = async (data: IProductForm) => {
     if (!id) {
-        toast.error("Product ID is missing");
-        return;
+      toast.error("Product ID is missing");
+      return;
     }
 
     try {
-        // ✅ updateData তৈরি
-        const updateData = {
-            title: data.title,
-            nameBn: data.nameBn,
-            category: data.category,
-            description: data.description,
-            shortDescription: data.shortDescription,
-            price: Number(data.price) || 0,
-            discountPrice: Number(data.discountPrice) || 0,
-            stock: Number(data.stock) || 0,
-            brand: data.brand,
-            variants: data.variants,
-            images: data.images,
-            isActive: data.isActive,
-        };
+      // ✅ tags string theke array banano hocche
+      const tagsArray = data.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
 
-        console.log('📤 Sending updateData:', updateData);
+      // ✅ updateData তৈরি
+      const updateData = {
+        title: data.title,
+        nameBn: data.nameBn,
+        category: data.category,
+        description: data.description,
+        shortDescription: data.shortDescription,
+        price: Number(data.price) || 0,
+        discountPrice: Number(data.discountPrice) || 0,
+        stock: Number(data.stock) || 0,
+        brand: data.brand,
+        variants: data.variants,
+        images: data.images,
+        isActive: data.isActive,
+        
+        // ✅ New fields added to payload
+        isFeatured: data.isFeatured,
+        newproduct: data.newproduct,
+        skinType: data.skinType,
+        allowCashOnDelivery: data.allowCashOnDelivery,
+        allowOnlinePayment: data.allowOnlinePayment,
+        tags: tagsArray,
+      };
 
-        // ✅ FormData তৈরি করুন
-        const formData = new FormData();
-        formData.append('data', JSON.stringify(updateData));
+      console.log("📤 Sending updateData:", updateData);
 
-        // ✅ FormData চেক করুন
-        console.log('📤 FormData entries:');
-        for (let pair of formData.entries()) {
-            console.log('  -', pair[0], ':', pair[1]);
-        }
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(updateData));
 
-        // ✅ API কল
-        const res = await updateProduct({
-            id,
-            updateData: formData,   // 👈 FormData পাঠান
-        }).unwrap();
+      const res = await updateProduct({
+        id,
+        updateData: formData,
+      }).unwrap();
 
-        console.log('✅ Update Success:', res);
-        toast.success("Product updated successfully ✨");
-        navigate(-1);
-
+      console.log("✅ Update Success:", res);
+      toast.success("Product updated successfully ✨");
+      navigate(-1);
     } catch (error: any) {
-        console.error('❌ Update error:', error);
-        toast.error(error?.data?.message || "Failed to update product");
+      console.error("❌ Update error:", error);
+      toast.error(error?.data?.message || "Failed to update product");
     }
-};
+  };
 
   // ✅ Add variant
   const addVariant = () => {
-    const currentVariants = form.getValues('variants') || [];
+    const currentVariants = form.getValues("variants") || [];
     const newVariant: IFormVariant = {
       skuId: `sku-${Date.now()}`,
-      combo: '',
+      combo: "",
       price: 0,
       quantity: 0,
-      status: 'active',
-      image: '',
+      status: "active",
+      image: "",
     };
-    form.setValue('variants', [...currentVariants, newVariant]);
+    form.setValue("variants", [...currentVariants, newVariant]);
   };
 
   // ✅ Remove variant
   const removeVariant = (index: number) => {
-    const variants = form.getValues('variants') || [];
-    form.setValue('variants', variants.filter((_, i) => i !== index));
+    const currentVariants = form.getValues("variants") || [];
+    form.setValue(
+      "variants",
+      currentVariants.filter((_, i) => i !== index),
+    );
   };
 
   // ✅ Update variant
-  const updateVariant = (index: number, field: keyof IFormVariant, value: any) => {
-    const variants = form.getValues('variants') || [];
-    variants[index] = { ...variants[index], [field]: value };
-    form.setValue('variants', variants);
+  const updateVariant = (
+    index: number,
+    field: keyof IFormVariant,
+    value: any,
+  ) => {
+    const currentVariants = form.getValues("variants") || [];
+    currentVariants[index] = { ...currentVariants[index], [field]: value };
+    form.setValue("variants", currentVariants);
+  };
+
+  // ✅ SkinType Checkbox Handler
+  const toggleSkinType = (type: string) => {
+    const current = form.getValues("skinType") || [];
+    if (current.includes(type)) {
+      form.setValue("skinType", current.filter((t) => t !== type));
+    } else {
+      form.setValue("skinType", [...current, type]);
+    }
   };
 
   if (isLoading) {
@@ -232,11 +293,16 @@ const onSubmit = async (data: IProductForm) => {
           <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
             <span className="text-4xl">😕</span>
           </div>
-          <h2 className="text-2xl font-bold text-red-500 mb-2">Product Not Found</h2>
+          <h2 className="text-2xl font-bold text-red-500 mb-2">
+            Product Not Found
+          </h2>
           <p className="text-muted-foreground mb-6">
             The product you're looking for doesn't exist or has been removed.
           </p>
-          <Button onClick={() => navigate('/admin/products')} className="bg-gradient-to-r from-pink-500 to-rose-500">
+          <Button
+            onClick={() => navigate("/admin/products")}
+            className="bg-gradient-to-r from-pink-500 to-rose-500"
+          >
             Back to Products
           </Button>
         </div>
@@ -259,11 +325,13 @@ const onSubmit = async (data: IProductForm) => {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
             Edit Product
           </h1>
-          <p className="text-sm text-muted-foreground">Update product information</p>
+          <p className="text-sm text-muted-foreground">
+            Update product information
+          </p>
         </div>
         <Badge className="ml-auto bg-gradient-to-r from-pink-500 to-rose-500 text-white border-0">
           <Sparkles className="w-3 h-3 mr-1" />
-          {product.isActive ? 'Active' : 'Inactive'}
+          {product.isActive ? "Active" : "Inactive"}
         </Badge>
       </div>
 
@@ -275,7 +343,7 @@ const onSubmit = async (data: IProductForm) => {
               <div className="space-y-2">
                 <Label className="font-semibold">Product Title *</Label>
                 <Input
-                  {...form.register('title')}
+                  {...form.register("title")}
                   className="border-pink-200/50 focus-visible:ring-pink-400"
                   placeholder="Enter product title"
                 />
@@ -283,7 +351,7 @@ const onSubmit = async (data: IProductForm) => {
               <div className="space-y-2">
                 <Label className="font-semibold">Product Name (Bengali)</Label>
                 <Input
-                  {...form.register('nameBn')}
+                  {...form.register("nameBn")}
                   className="border-pink-200/50 focus-visible:ring-pink-400"
                   placeholder="বাংলা নাম"
                 />
@@ -293,19 +361,19 @@ const onSubmit = async (data: IProductForm) => {
             {/* Category & Brand */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="font-semibold">Category *</Label>
-                <Input
-                  {...form.register('category')}
-                  className="border-pink-200/50 focus-visible:ring-pink-400"
-                  placeholder="e.g. Skincare, Makeup"
+                <Label className="font-semibold">Brand</Label>
+                <BrandSelector
+                  value={form.watch("brand") || ""}
+                  onChange={(value) => form.setValue("brand", value)}
+                  placeholder="Select brand..."
                 />
               </div>
               <div className="space-y-2">
-                <Label className="font-semibold">Brand</Label>
-                <Input
-                  {...form.register('brand')}
-                  className="border-pink-200/50 focus-visible:ring-pink-400"
-                  placeholder="Generic"
+                <Label className="font-semibold">Category</Label>
+                <CategorySelector
+                  value={form.watch("category") || ""}
+                  onChange={(value) => form.setValue("category", value)}
+                  placeholder="Select category..."
                 />
               </div>
             </div>
@@ -316,7 +384,7 @@ const onSubmit = async (data: IProductForm) => {
                 <Label className="font-semibold">Price (৳) *</Label>
                 <Input
                   type="number"
-                  {...form.register('price', { valueAsNumber: true })}
+                  {...form.register("price", { valueAsNumber: true })}
                   className="border-pink-200/50 focus-visible:ring-pink-400"
                 />
               </div>
@@ -324,7 +392,7 @@ const onSubmit = async (data: IProductForm) => {
                 <Label className="font-semibold">Discount Price (৳)</Label>
                 <Input
                   type="number"
-                  {...form.register('discountPrice', { valueAsNumber: true })}
+                  {...form.register("discountPrice", { valueAsNumber: true })}
                   className="border-pink-200/50 focus-visible:ring-pink-400"
                 />
               </div>
@@ -332,7 +400,7 @@ const onSubmit = async (data: IProductForm) => {
                 <Label className="font-semibold">Stock</Label>
                 <Input
                   type="number"
-                  {...form.register('stock', { valueAsNumber: true })}
+                  {...form.register("stock", { valueAsNumber: true })}
                   className="border-pink-200/50 focus-visible:ring-pink-400"
                 />
               </div>
@@ -342,7 +410,7 @@ const onSubmit = async (data: IProductForm) => {
             <div className="space-y-2">
               <Label className="font-semibold">Description</Label>
               <Textarea
-                {...form.register('description')}
+                {...form.register("description")}
                 rows={4}
                 className="border-pink-200/50 focus-visible:ring-pink-400 resize-none"
                 placeholder="Full product description"
@@ -353,11 +421,174 @@ const onSubmit = async (data: IProductForm) => {
             <div className="space-y-2">
               <Label className="font-semibold">Short Description</Label>
               <Textarea
-                {...form.register('shortDescription')}
+                {...form.register("shortDescription")}
                 rows={3}
                 className="border-pink-200/50 focus-visible:ring-pink-400 resize-none"
                 placeholder="Key features and benefits"
               />
+            </div>
+
+            {/* ============================================
+                ✅ NEW FIELDS SECTION
+               ============================================ */}
+            <div className="border-t pt-6 space-y-6">
+              <h3 className="text-sm font-semibold flex items-center gap-2 text-pink-600">
+                <Info className="w-4 h-4" />
+                Extra Product Details
+              </h3>
+
+              {/* Tags & Skin Types */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="font-semibold flex items-center gap-1.5">
+                    <TagIcon className="w-3.5 h-3.5 text-pink-500" />
+                    Tags (Comma separated)
+                  </Label>
+                  <Input
+                    {...form.register("tags")}
+                    className="border-pink-200/50 focus-visible:ring-pink-400"
+                    placeholder="e.g. moisturizer, hydrating, skincare"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="font-semibold">Skin Type (Multiple)</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {["All", "Oily", "Dry", "Combination", "Sensitive"].map((type) => {
+                      const isSelected = form.watch("skinType")?.includes(type);
+                      return (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => toggleSkinType(type)}
+                          className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                            isSelected
+                              ? "bg-pink-500 text-white border-pink-500"
+                              : "bg-background border-border text-muted-foreground hover:border-pink-300"
+                          }`}
+                        >
+                          {type}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Toggles: Featured / New / Payment */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* isFeatured */}
+                <div
+                  onClick={() => form.setValue("isFeatured", !form.watch("isFeatured"))}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    form.watch("isFeatured")
+                      ? "border-amber-500 bg-amber-50 dark:bg-amber-950/20"
+                      : "border-stone-200 dark:border-stone-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Star
+                      className={`w-5 h-5 ${
+                        form.watch("isFeatured") ? "text-amber-500 fill-amber-500" : "text-stone-400"
+                      }`}
+                    />
+                    <div>
+                      <span className="font-semibold text-sm block">
+                        Featured Product
+                      </span>
+                      <p className="text-[10px] text-muted-foreground">
+                        Show on homepage featured section
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* newproduct */}
+                <div
+                  onClick={() => form.setValue("newproduct", !form.watch("newproduct"))}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    form.watch("newproduct")
+                      ? "border-purple-500 bg-purple-50 dark:bg-purple-950/20"
+                      : "border-stone-200 dark:border-stone-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Sparkles
+                      className={`w-5 h-5 ${
+                        form.watch("newproduct") ? "text-purple-500" : "text-stone-400"
+                      }`}
+                    />
+                    <div>
+                      <span className="font-semibold text-sm block">
+                        New Arrival
+                      </span>
+                      <p className="text-[10px] text-muted-foreground">
+                        Show "New" badge on product
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* allowCashOnDelivery */}
+                <div
+                  onClick={() =>
+                    form.setValue("allowCashOnDelivery", !form.watch("allowCashOnDelivery"))
+                  }
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    form.watch("allowCashOnDelivery")
+                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20"
+                      : "border-stone-200 dark:border-stone-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Truck
+                      className={`w-5 h-5 ${
+                        form.watch("allowCashOnDelivery")
+                          ? "text-emerald-600"
+                          : "text-stone-400"
+                      }`}
+                    />
+                    <div>
+                      <span className="font-semibold text-sm block">
+                        Cash on Delivery
+                      </span>
+                      <p className="text-[10px] text-muted-foreground">
+                        Allow COD for this product
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* allowOnlinePayment */}
+                <div
+                  onClick={() =>
+                    form.setValue("allowOnlinePayment", !form.watch("allowOnlinePayment"))
+                  }
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    form.watch("allowOnlinePayment")
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
+                      : "border-stone-200 dark:border-stone-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <CreditCard
+                      className={`w-5 h-5 ${
+                        form.watch("allowOnlinePayment")
+                          ? "text-blue-600"
+                          : "text-stone-400"
+                      }`}
+                    />
+                    <div>
+                      <span className="font-semibold text-sm block">
+                        Online Payment
+                      </span>
+                      <p className="text-[10px] text-muted-foreground">
+                        bKash / Nagad / Card
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Images */}
@@ -368,14 +599,21 @@ const onSubmit = async (data: IProductForm) => {
               </Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {images.map((img, index) => (
-                  <div key={index} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-pink-100/50">
-                    <img src={img} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
+                  <div
+                    key={index}
+                    className="relative group aspect-square rounded-xl overflow-hidden border-2 border-pink-100/50"
+                  >
+                    <img
+                      src={img}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
                     <button
                       type="button"
                       onClick={() => {
                         const newImages = images.filter((_, i) => i !== index);
                         setImages(newImages);
-                        form.setValue('images', newImages);
+                        form.setValue("images", newImages);
                       }}
                       className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
                     >
@@ -396,8 +634,10 @@ const onSubmit = async (data: IProductForm) => {
             <div className="space-y-2">
               <Label className="font-semibold">Status</Label>
               <Select
-                value={form.watch('isActive') ? 'active' : 'inactive'}
-                onValueChange={(value) => form.setValue('isActive', value === 'active')}
+                value={form.watch("isActive") ? "active" : "inactive"}
+                onValueChange={(value) =>
+                  form.setValue("isActive", value === "active")
+                }
               >
                 <SelectTrigger className="border-pink-200/50 focus-visible:ring-pink-400">
                   <SelectValue placeholder="Select status" />
@@ -412,7 +652,9 @@ const onSubmit = async (data: IProductForm) => {
             {/* Variants */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="font-semibold">Variants ({form.watch('variants')?.length || 0})</Label>
+                <Label className="font-semibold">
+                  Variants ({form.watch("variants")?.length || 0})
+                </Label>
                 <Button
                   type="button"
                   size="sm"
@@ -425,8 +667,11 @@ const onSubmit = async (data: IProductForm) => {
                 </Button>
               </div>
 
-              {form.watch('variants')?.map((variant, index) => (
-                <div key={variant.skuId || index} className="p-4 border rounded-xl space-y-3 relative bg-pink-50/10">
+              {form.watch("variants")?.map((variant, index) => (
+                <div
+                  key={variant.skuId || index}
+                  className="p-4 border rounded-xl space-y-3 relative bg-pink-50/10"
+                >
                   <button
                     type="button"
                     onClick={() => removeVariant(index)}
@@ -434,13 +679,15 @@ const onSubmit = async (data: IProductForm) => {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="space-y-1">
                       <Label className="text-xs font-medium">Combo</Label>
                       <Input
-                        value={variant.combo || ''}
-                        onChange={(e) => updateVariant(index, 'combo', e.target.value)}
+                        value={variant.combo || ""}
+                        onChange={(e) =>
+                          updateVariant(index, "combo", e.target.value)
+                        }
                         className="text-sm h-9"
                         placeholder="Variant name"
                       />
@@ -450,16 +697,32 @@ const onSubmit = async (data: IProductForm) => {
                       <Input
                         type="number"
                         value={variant.price || 0}
-                        onChange={(e) => updateVariant(index, 'price', parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          updateVariant(
+                            index,
+                            "price",
+                            parseFloat(e.target.value) || 0,
+                          )
+                        }
                         className="text-sm h-9"
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs font-medium">Special Price</Label>
+                      <Label className="text-xs font-medium">
+                        Special Price
+                      </Label>
                       <Input
                         type="number"
-                        value={variant.specialPrice || ''}
-                        onChange={(e) => updateVariant(index, 'specialPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
+                        value={variant.specialPrice || ""}
+                        onChange={(e) =>
+                          updateVariant(
+                            index,
+                            "specialPrice",
+                            e.target.value
+                              ? parseFloat(e.target.value)
+                              : undefined,
+                          )
+                        }
                         className="text-sm h-9"
                         placeholder="Optional"
                       />
@@ -469,18 +732,26 @@ const onSubmit = async (data: IProductForm) => {
                       <Input
                         type="number"
                         value={variant.quantity || 0}
-                        onChange={(e) => updateVariant(index, 'quantity', parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          updateVariant(
+                            index,
+                            "quantity",
+                            parseInt(e.target.value) || 0,
+                          )
+                        }
                         className="text-sm h-9"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-xs font-medium">Status</Label>
                       <Select
                         value={variant.status}
-                        onValueChange={(value: 'active' | 'inactive') => updateVariant(index, 'status', value)}
+                        onValueChange={(value: "active" | "inactive") =>
+                          updateVariant(index, "status", value)
+                        }
                       >
                         <SelectTrigger className="text-sm h-9">
                           <SelectValue />
@@ -494,8 +765,10 @@ const onSubmit = async (data: IProductForm) => {
                     <div className="space-y-1">
                       <Label className="text-xs font-medium">Image URL</Label>
                       <Input
-                        value={variant.image || ''}
-                        onChange={(e) => updateVariant(index, 'image', e.target.value)}
+                        value={variant.image || ""}
+                        onChange={(e) =>
+                          updateVariant(index, "image", e.target.value)
+                        }
                         className="text-sm h-9"
                         placeholder="Optional"
                       />
@@ -504,10 +777,13 @@ const onSubmit = async (data: IProductForm) => {
                 </div>
               ))}
 
-              {(!form.watch('variants') || form.watch('variants').length === 0) && (
+              {(!form.watch("variants") ||
+                form.watch("variants").length === 0) && (
                 <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-xl">
                   <p className="text-sm">No variants added yet</p>
-                  <p className="text-xs">Click "Add Variant" to add product options</p>
+                  <p className="text-xs">
+                    Click "Add Variant" to add product options
+                  </p>
                 </div>
               )}
             </div>

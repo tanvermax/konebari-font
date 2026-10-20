@@ -3,10 +3,7 @@ import { useAllpstockQuery } from "@/redux/features/product/product.api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { IProductCard } from "@/redux/features/product/Product.types";
-import {
-  ArrowRight,
-
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
 
 export default function HomePage() {
@@ -17,8 +14,9 @@ export default function HomePage() {
     status: "active",
   });
 
-  const products: IProductCard[] = productsData?.data || [];
+  console.log("productsData", productsData);
 
+  const products: IProductCard[] = productsData?.data || [];
 
   // console.log(products);
   // Minimal Elegance Categories
@@ -49,13 +47,10 @@ export default function HomePage() {
     },
   ];
 
- 
-
   return (
     <div className="min-h-screen  text-foreground">
       {/* ===== HERO SECTION (Minimal & Clean) ===== */}
 
-     
       {/* ===== CATEGORIES ===== */}
       <section className="py-14 sm:py-20">
         <div className="container mx-auto px-4 md:px-8">
@@ -127,6 +122,8 @@ export default function HomePage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4 sm:gap-6">
               {products.slice(0, 4).map((product: IProductCard) => (
                 <ProductCard
+                  allowCashOnDelivery={product.allowCashOnDelivery}
+                  allowOnlinePayment={product.allowOnlinePayment}
                   key={product._id}
                   id={product._id}
                   name={product.name}
@@ -149,7 +146,7 @@ export default function HomePage() {
       {/* ===== ELEGANT MINIMAL BANNER ===== */}
       <section className="py-16 sm:py-20">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="bg-stone-900 text-stone-100 rounded-2xl p-8 sm:p-14 text-center max-w-4xl mx-auto space-y-4">
+          <div className="bg-[#192646] text-stone-100 rounded-2xl p-8 sm:p-14 text-center max-w-4xl mx-auto space-y-4">
             <h2 className="text-2xl sm:text-4xl font-serif font-light tracking-wide">
               Experience Authentic Skin Luxury
             </h2>
@@ -161,7 +158,7 @@ export default function HomePage() {
               <input
                 type="email"
                 placeholder="Enter your email address"
-                className="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-full bg-stone-800 text-stone-100 border border-stone-700 text-xs focus:outline-none focus:border-stone-500"
+                className="w-full sm:w-auto flex-1 px-4 py-2.5 rounded-full bg-[#192646] text-stone-100 border border-stone-700 text-xs focus:outline-none focus:border-stone-500"
               />
               <Button className="w-full sm:w-auto rounded-full bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs px-6 h-10 font-medium">
                 Subscribe

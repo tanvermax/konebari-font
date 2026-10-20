@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
-import { Heart, Loader2, ShoppingBag } from "lucide-react";
+import { Heart, Loader2, ShieldCheck, ShoppingBag } from "lucide-react";
 import { useFavorite } from "@/redux/hooks/useFavorite";
 import { useCart } from "@/redux/hooks/useCart";
 
@@ -16,6 +16,8 @@ interface ProductCardProps {
   inStock: boolean;
   image: string;
   slug?: string;
+  allowOnlinePayment?: boolean;
+  allowCashOnDelivery?: boolean;
 }
 // components/HomeLayout/ProductCard/ProductCard.tsx
 // ✅ Discount logic fix
@@ -23,10 +25,11 @@ interface ProductCardProps {
 export default function ProductCard({
   id,
   name,
-  price,           // Regular price (1000)
-  specialPrice,    // Discount price (900)
-
+  price, // Regular price (1000)
+  specialPrice, // Discount price (900)
+  allowCashOnDelivery,
   inStock,
+
   image,
   slug,
 }: ProductCardProps) {
@@ -87,9 +90,9 @@ export default function ProductCard({
     });
   };
 
+  console.log(allowCashOnDelivery);
   return (
     <Card className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-300 hover:shadow-lg hover:border-rose-200/60 dark:hover:border-rose-900/40 flex flex-col">
-
       {/* Image */}
       <Link to={`/alldata/${id || slug}`} className="block relative">
         <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-900 dark:to-stone-950">
@@ -106,6 +109,14 @@ export default function ProductCard({
               -{discountPercent}%
             </span>
           )}
+          {allowCashOnDelivery === false && (
+            <div className="absolute bottom-2.5 left-15 -translate-x-1/2 z-10">
+              <Badge className="bg-amber-500/95 backdrop-blur-sm text-white border-0 text-[9px] px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap">
+                <ShieldCheck className="w-3 h-3" />
+                Advance Payment
+              </Badge>
+            </div>
+          )}
 
           {!inStock && (
             <div className="absolute inset-0 bg-background/55 backdrop-blur-[2px] flex items-center justify-center">
@@ -121,6 +132,7 @@ export default function ProductCard({
       </Link>
 
       {/* Favorite Button */}
+
       <button
         type="button"
         aria-label={favActive ? "Remove from favorites" : "Add to favorites"}
@@ -142,6 +154,9 @@ export default function ProductCard({
           />
         )}
       </button>
+
+
+    
 
       {/* Info */}
       <div className="p-3 sm:p-3.5 space-y-2 flex-1 flex flex-col">

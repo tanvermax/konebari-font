@@ -29,6 +29,7 @@ import {
   CreditCard,
   Truck,
   ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 
 import { clearGuestCart } from "@/lib/guestStorage";
@@ -69,6 +70,31 @@ export default function CheckoutDialog({
   const [initiatePayment, { isLoading: isPaymentLoading }] =
     useInitiatePaymentMutation();
 
+  // ============================================
+  // ✅ Simple Payment Eligibility Check
+  // ============================================
+  let canUseCOD = true;
+  let canUseOnline = true;
+
+  cartItems.forEach((item: any) => {
+    const product =
+      typeof item.productId === "object" ? item.productId : null;
+
+    // Item or product object theke direct value nao, na thakle true
+    const allowCOD =
+      item.allowCashOnDelivery ?? product?.allowCashOnDelivery ?? true;
+    const allowOnline =
+      item.allowOnlinePayment ?? product?.allowOnlinePayment ?? true;
+
+    // Jodi kono ekta product e false thake, puro cart e false
+    if (allowCOD === false) canUseCOD = false;
+    if (allowOnline === false) canUseOnline = false;
+  });
+
+  const defaultPaymentMethod: "COD" | "SSLCOMMERZ" = canUseCOD
+    ? "COD"
+    : "SSLCOMMERZ";
+
   const {
     register,
     handleSubmit,
@@ -84,7 +110,7 @@ export default function CheckoutDialog({
       address: "",
       city: "",
       note: "",
-      paymentMethod: "COD",
+      paymentMethod: defaultPaymentMethod,
       deliveryLocation: "INSIDE_DHAKA",
     },
   });
@@ -92,19 +118,44 @@ export default function CheckoutDialog({
   const paymentMethod = watch("paymentMethod");
   const deliveryLocation = watch("deliveryLocation");
 
-  // ✅ Shipping cost based on delivery location
   const shipping = deliveryLocation === "INSIDE_DHAKA" ? 60 : 120;
   const total = subtotal + shipping;
 
-  useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
-
+  // ✅ Dialog open hole payment method adjust
+// ✅ Force payment method if only one available
+useEffect(() => {
+  if (!open) {
+    reset();
+    return;
+  }
+  
+  // If COD is not allowed, force online
+  if (!canUseCOD && canUseOnline) {
+    setValue("paymentMethod", "SSLCOMMERZ", { shouldValidate: true });
+  }
+  // If online is not allowed, force COD
+  else if (!canUseOnline && canUseCOD) {
+    setValue("paymentMethod", "COD", { shouldValidate: true });
+  }
+  // If neither allowed (shouldn't happen but safety)
+  else if (!canUseCOD && !canUseOnline) {
+    // Show error (handled below)
+  }
+}, [open, canUseCOD, canUseOnline, setValue, reset]);
   // ============================================
   // ✅ SUBMIT HANDLER
   // ============================================
   const onSubmit = async (data: ICheckoutForm) => {
     try {
+      if (data.paymentMethod === "COD" && !canUseCOD) {
+        toast.error("Cash on Delivery is not available for items in your cart.");
+        return;
+      }
+      if (data.paymentMethod === "SSLCOMMERZ" && !canUseOnline) {
+        toast.error("Online payment is not available for items in your cart.");
+        return;
+      }
+
       const totalPrice = subtotal + shipping;
 
       const orderPayload = {
@@ -139,47 +190,23 @@ export default function CheckoutDialog({
         userId: userId || null,
       };
 
-      console.log("📦 Creating order:", orderPayload);
-
-      // ✅ STEP 1: Create Order
       const res = await createOrder(orderPayload).unwrap();
       const orderId = res?.data?._id;
+      if (!orderId) throw new Error("Order creation failed");
 
-      if (!orderId) {
-        throw new Error("Order creation failed");
-      }
-
-      console.log("✅ Order created:", orderId);
-
-      // ✅ STEP 2: Handle Payment
+      // SSLCommerz
       if (data.paymentMethod === "SSLCOMMERZ") {
-        try {
-          const payRes = await initiatePayment({ orderId }).unwrap();
-          const gatewayUrl = payRes?.data?.GatewayPageURL;
+        const payRes = await initiatePayment({ orderId }).unwrap();
+        const gatewayUrl = payRes?.data?.GatewayPageURL;
+        if (!gatewayUrl) throw new Error("Payment initiation failed");
 
-          if (!gatewayUrl) {
-            throw new Error("Payment initiation failed");
-          }
-
-          console.log("🚀 Redirecting to SSLCommerz:", gatewayUrl);
-
-          if (!isLoggedIn) clearGuestCart();
-
-          window.location.href = gatewayUrl;
-          return;
-        } catch (paymentError: any) {
-          console.error("❌ Payment init failed:", paymentError);
-          toast.error(
-            paymentError?.data?.message ||
-              "Payment failed. Please try again."
-          );
-          return;
-        }
+        if (!isLoggedIn) clearGuestCart();
+        window.location.href = gatewayUrl;
+        return;
       }
 
-      // ✅ STEP 3: COD - Success
+      // COD success
       if (!isLoggedIn) clearGuestCart();
-
       toast.success("Order placed successfully! 🎉");
       onClose();
       window.location.href = `/thankyou?orderId=${orderId}`;
@@ -204,7 +231,6 @@ export default function CheckoutDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Guest notice */}
           {!isLoggedIn && (
             <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl p-3 text-xs text-amber-800 dark:text-amber-300">
               💡 আপনি Guest হিসেবে order করছেন। Login করে order করলে history
@@ -290,7 +316,7 @@ export default function CheckoutDialog({
             )}
           </div>
 
-          {/* ✅ Delivery Location (NEW) */}
+          {/* Delivery Location */}
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold flex items-center gap-1.5">
               <Truck className="w-3 h-3 text-rose-500" /> Delivery Location *
@@ -315,39 +341,86 @@ export default function CheckoutDialog({
             </Select>
           </div>
 
-          {/* Payment Method */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold flex items-center gap-1.5">
-              <CreditCard className="w-3 h-3 text-rose-500" /> Payment Method *
-            </Label>
-            <Select
-              value={paymentMethod}
-              onValueChange={(v) => setValue("paymentMethod", v as any)}
-            >
-              <SelectTrigger className="h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="COD">💵 Cash on Delivery</SelectItem>
-                <SelectItem value="SSLCOMMERZ">
-                  💳 Online Payment (bKash/Nagad/Card)
-                </SelectItem>
-              </SelectContent>
-            </Select>
+         {/* ✅ Payment Method — DYNAMIC & CLEAN */}
+<div className="space-y-2">
+  <Label className="text-xs font-semibold flex items-center gap-1.5">
+    <CreditCard className="w-3 h-3 text-rose-500" /> Payment Method *
+  </Label>
 
-            {paymentMethod === "SSLCOMMERZ" && (
-              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 rounded-xl p-3 text-xs text-blue-800 dark:text-blue-300 mt-2 flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold">Secure Payment</p>
-                  <p className="mt-0.5">
-                    You'll be redirected to SSLCommerz to pay via bKash, Nagad,
-                    Rocket, or Card.
-                  </p>
-                </div>
-              </div>
-            )}
+  {/* ✅ Single Option হলে সুন্দর কার্ড দেখাবে */}
+  {(canUseCOD && !canUseOnline) || (!canUseCOD && canUseOnline) ? (
+    <div className="space-y-2">
+      {/* COD only */}
+      {canUseCOD && !canUseOnline && (
+        <div className="flex items-center gap-3 p-3 border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl">
+          <Truck className="w-5 h-5 text-emerald-600" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+              Cash on Delivery
+            </p>
+            <p className="text-[10px] text-emerald-600/70">
+              Pay when you receive
+            </p>
           </div>
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+        </div>
+      )}
+
+      {/* Online only */}
+      {canUseCOD && canUseOnline && (
+        <div className="flex items-center gap-3 p-3 border-2 border-blue-500 bg-blue-50 dark:bg-blue-950/20 rounded-xl">
+          <CreditCard className="w-5 h-5 text-blue-600" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">
+              Online Payment
+            </p>
+            <p className="text-[10px] text-blue-600/70">
+              bKash / Nagad / Card
+            </p>
+          </div>
+          <CheckCircle2 className="w-4 h-4 text-blue-600" />
+        </div>
+      )}
+
+      {/* Warning */}
+      {!canUseCOD && (
+        <p className="text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md flex items-center gap-1">
+          <ShieldCheck className="w-3 h-3" />
+          Advance payment required for items in your cart.
+        </p>
+      )}
+    </div>
+  ) : (
+    /* ✅ Duita option e allowed হলে dropdown দেখাবে */
+    <Select
+      value={paymentMethod}
+      onValueChange={(v) => setValue("paymentMethod", v as any)}
+    >
+      <SelectTrigger className="h-10">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="COD">💵 Cash on Delivery</SelectItem>
+        <SelectItem value="SSLCOMMERZ">
+          💳 Online Payment (bKash/Nagad/Card)
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  )}
+
+  {/* SSLCommerz info — same as before */}
+  {paymentMethod === "SSLCOMMERZ" && canUseOnline && (
+    <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 rounded-xl p-3 text-xs flex items-start gap-2">
+      <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
+      <div>
+        <p className="font-semibold">Secure Payment</p>
+        <p className="mt-0.5">
+          You'll be redirected to SSLCommerz.
+        </p>
+      </div>
+    </div>
+  )}
+</div>
 
           {/* Note */}
           <div className="space-y-1.5">

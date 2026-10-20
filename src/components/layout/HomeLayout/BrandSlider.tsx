@@ -51,11 +51,11 @@ export default function BrandSlider() {
             duration: Math.max(15, brands.length * 2), // ব্র্যান্ড সংখ্যা অনুযায়ী গতি
           }}
         >
-          {duplicatedLogos.map((brand, index) => (
+          {duplicatedLogos.map((brand, index) =>
+           (
             <div
               key={`${brand._id}-${index}`}
-              className="flex items-center justify-center opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-110 cursor-pointer px-4"
-            >
+              className="flex items-center justify-center opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-110 cursor-pointer px-4">
               <img
                 src={brand.logo}
                 alt={brand.name}

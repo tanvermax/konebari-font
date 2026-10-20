@@ -17,11 +17,10 @@ export default function CartPage() {
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
 
 
-  console.log("cart",cart);
-  
   const cartItems = cart.items || [];
   const totalItems = cart.totalItems || 0;
   const subtotal = cart.subtotal || 0;
+
 
   const handleUpdate = async (
     productId: string,
@@ -134,6 +133,7 @@ export default function CartPage() {
 
         <div className="lg:col-span-1">
           <CartSummary
+          
             subtotal={subtotal}
             totalItems={totalItems}
             onCheckout={() => setCheckoutOpen(true)}

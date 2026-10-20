@@ -6,6 +6,7 @@ import Allproduct from "@/components/layout/AdminLayoute/Allproduct";
 import AdminAnalyticsPage from "@/components/layout/AdminLayoute/Analytics/AdminAnalyticsPage";
 import AdminReportsPage from "@/components/layout/AdminLayoute/Analytics/AdminReportsPage";
 import BrandManagementPage from "@/components/layout/AdminLayoute/BrandManagement/BrandManagementPage";
+import CategoryManagementPage from "@/components/layout/AdminLayoute/CategoryManagement/CategoryManagementPage";
 import AdminOrdersPage from "@/components/layout/AdminLayoute/Orders/AdminOrdersPage";
 import AdminOverviewPage from "@/components/layout/AdminLayoute/Overview/Adminoverviewpage";
 import AdminShipmentsPage from "@/components/layout/AdminLayoute/Shipments/AdminShipmentsPage";
@@ -66,6 +67,7 @@ import {
   // Database,
   FileBarChart,
   Sparkles,
+  Layers,
   // ShieldCheck,
   // MessageSquare,
   // TrendingUp,
@@ -120,15 +122,12 @@ export const adminSidebarItem: ISidebarItem[] = [
     title: "Order Management",
     url: "#",
     items: [
-    
-    
       {
-      title: "All Orders",
-      url: "/admin/orders",
-      component: AdminOrdersPage,
-      icon: ClipboardList,
-    },
-
+        title: "All Orders",
+        url: "/admin/orders",
+        component: AdminOrdersPage,
+        icon: ClipboardList,
+      },
     ],
   },
 
@@ -145,11 +144,8 @@ export const adminSidebarItem: ISidebarItem[] = [
         component: AdminShipmentsPage,
         icon: Truck,
       },
-     
     ],
   },
-
-
 
   // ============================================
   // 🏷️ SECTION 5: PRODUCT & INVENTORY
@@ -171,11 +167,17 @@ export const adminSidebarItem: ISidebarItem[] = [
         icon: PlusCircle,
       },
       {
-      title: "Brands",
-      url: "/admin/brands",
-      component: BrandManagementPage,
-      icon: Sparkles,
-    },
+        title: "Brands",
+        url: "/admin/brands",
+        component: BrandManagementPage,
+        icon: Sparkles,
+      },
+      {
+        title: "Categories",
+        url: "/admin/categories",
+        component: CategoryManagementPage,
+        icon: Layers,
+      },
 
       // {
       //   title: "Categories",
@@ -241,7 +243,6 @@ export const adminSidebarItem: ISidebarItem[] = [
   // ============================================
   // 💰 SECTION 7: PAYMENTS & INVOICES
   // ============================================
- 
 
   // ============================================
   // 📊 SECTION 8: REPORTS (ডুপ্লিকেট রিমুভ করা হয়েছে)
@@ -318,6 +319,6 @@ export const adminSidebarItem: ISidebarItem[] = [
   //       component: AdminSecurityPage, // ✅ নতুন
   //       icon: ShieldCheck,
   //     },
-    // ],
+  // ],
   // },
 ];

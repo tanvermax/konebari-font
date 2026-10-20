@@ -12,21 +12,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import image1 from "../../../assets/images/IMG_9845.png";
+import image2 from "../../../assets/images/IMG_9842.png";
+import image3 from "../../../assets/images/IMG_9829.png";
 
 // 5/6 টি উচ্চমানের স্কিনকেয়ার ও বিউটি ব্যানার ইমেজ
 const bannerSlides = [
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1617897903246-719242758050?w=1600&auto=format&fit=crop",
+    image: image1,
     subtitle: "100% Authentic K-Beauty",
     title: "Reveal Your Skin's Natural Radiance",
-    description: "আসল কোরিয়ান স্কিনকেয়ার এবং ডার্মাটোলজিস্ট টেস্টেড সিরাম দিয়ে আপনার ত্বককে করুন সজীব।",
+    description: "আসল কোরিয়ান স্কিনকেয়ার এবং ডার্মাটোলজিস্ট টেস্টেড সিরাম দিয়ে আপনার ত্বককে করুন সজীব।",
     buttonText: "Shop Collection",
     link: "/shop?category=skincare",
   },
   {
     id: 2,
-    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1600&auto=format&fit=crop",
+    image: image2,
     subtitle: "Hydration Mastery",
     title: "Deep Moisture & Barrier Care",
     description: "শুষ্কতা দূর করে ত্বককে আর্দ্র ও কোমল রাখতে বেছে নিন অ্যাডভান্সড হাইড্রেশন সেট।",
@@ -53,7 +56,7 @@ const bannerSlides = [
   },
   {
     id: 5,
-    image: "https://images.unsplash.com/photo-1512290900673-1f198f1a4e10?w=1600&auto=format&fit=crop",
+    image: image3,
     subtitle: "Exclusive Bundles",
     title: "Glass Skin Ritual 3-Step Routine",
     description: "কমপ্লিট স্কিনকেয়ার রুটিন সেটে উপভোগ করুন ২০% পর্যন্ত নিশ্চিত ডিসকাউন্ট।",

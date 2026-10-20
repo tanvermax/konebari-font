@@ -6,16 +6,18 @@ import { Badge } from "@/components/ui/badge";
 
 interface BrandCardProps {
   brand: {
+    _id?: string;
     name: string;
-    count: number;
+    slug?: string;
+    logo?: string;
+    image?: string; // fallback
+    count?: number;
     totalStock?: number;
-    image?: string;
     minPrice?: number;
     maxPrice?: number;
   };
 }
 
-// ✅ Brand name → color gradient
 const getBrandGradient = (name: string) => {
   const gradients = [
     "from-rose-400 to-pink-500",
@@ -27,11 +29,10 @@ const getBrandGradient = (name: string) => {
     "from-pink-400 to-rose-500",
     "from-teal-400 to-cyan-500",
   ];
-  const idx = name.charCodeAt(0) % gradients.length;
+  const idx = (name.charCodeAt(0) || 0) % gradients.length;
   return gradients[idx];
 };
 
-// ✅ Brand name → 2 letter initials
 const getInitials = (name: string) => {
   if (!name) return "?";
   const words = name.trim().split(" ");
@@ -44,25 +45,25 @@ const getInitials = (name: string) => {
 export default function BrandCard({ brand }: BrandCardProps) {
   const gradient = getBrandGradient(brand.name);
   const initials = getInitials(brand.name);
+  const logoUrl = brand.logo || brand.image;
+
+  // ✅ Link e slug use koro jodi thake, na hole name
+  const brandParam = brand.slug || brand.name;
 
   return (
     <Link
-      to={`/shop?brand=${encodeURIComponent(brand.name)}`}
+      to={`/shop?brand=${encodeURIComponent(brandParam)}`}
       className="block group"
     >
       <Card className="overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-300 hover:shadow-lg hover:border-rose-200/60 dark:hover:border-rose-900/40 p-5 flex flex-col items-center text-center">
-
         {/* Logo / Initials */}
         <div className="relative mb-3">
-          {brand.image ? (
-            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-rose-100 dark:border-rose-900/40 bg-white shadow-sm group-hover:scale-105 transition-transform">
+          {logoUrl ? (
+            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-rose-100 dark:border-rose-900/40 bg-white shadow-sm group-hover:scale-105 transition-transform flex items-center justify-center p-2">
               <img
-                src={brand.image}
+                src={logoUrl}
                 alt={brand.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
+                className="w-full h-full object-contain"
               />
             </div>
           ) : (
@@ -73,8 +74,8 @@ export default function BrandCard({ brand }: BrandCardProps) {
             </div>
           )}
 
-          {/* Count badge */}
-          {brand.count > 0 && (
+          {/* Count badge — only if provided */}
+          {typeof brand.count === "number" && brand.count > 0 && (
             <Badge className="absolute -bottom-1 -right-1 bg-rose-500 text-white border-2 border-background rounded-full text-[10px] font-bold px-1.5 min-w-[24px] h-[24px] flex items-center justify-center">
               {brand.count}
             </Badge>
@@ -89,11 +90,13 @@ export default function BrandCard({ brand }: BrandCardProps) {
           {brand.name}
         </h3>
 
-        {/* Product Count */}
-        <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-          <Package className="w-3 h-3" />
-          {brand.count} {brand.count === 1 ? "product" : "products"}
-        </p>
+        {/* Product Count (optional) */}
+        {typeof brand.count === "number" && (
+          <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
+            <Package className="w-3 h-3" />
+            {brand.count} {brand.count === 1 ? "product" : "products"}
+          </p>
+        )}
 
         {/* Price Range (optional) */}
         {brand.minPrice !== undefined && brand.maxPrice !== undefined && (

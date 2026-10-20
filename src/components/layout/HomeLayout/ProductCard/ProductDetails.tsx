@@ -40,7 +40,7 @@ const ProductDetails = () => {
   // ============================================
   const activeVariants = useMemo(
     () => (product?.variants || []).filter((v: any) => v.status === "active"),
-    [product]
+    [product],
   );
 
   const selectedVariant = activeVariants[selectedVariantIdx];
@@ -48,15 +48,13 @@ const ProductDetails = () => {
   // ============================================
   // ✅ PRICE CALCULATION
   // ============================================
-  const regularPrice =
-    Number(selectedVariant?.price ?? product?.price ?? 0);
+  const regularPrice = Number(selectedVariant?.price ?? product?.price ?? 0);
 
   const specialPrice = Number(
-    selectedVariant?.specialPrice ?? product?.discountPrice ?? 0
+    selectedVariant?.specialPrice ?? product?.discountPrice ?? 0,
   );
 
-  const hasDiscount =
-    specialPrice > 0 && specialPrice < regularPrice;
+  const hasDiscount = specialPrice > 0 && specialPrice < regularPrice;
 
   const displayPrice = hasDiscount ? specialPrice : regularPrice;
 
@@ -68,10 +66,7 @@ const ProductDetails = () => {
   // ✅ STOCK
   // ============================================
   const stockCount =
-    selectedVariant?.quantity ??
-    product?.stock ??
-    product?.totalStock ??
-    0;
+    selectedVariant?.quantity ?? product?.stock ?? product?.totalStock ?? 0;
 
   const inStock = stockCount > 0;
 
@@ -107,12 +102,11 @@ const ProductDetails = () => {
   const handleAddToCart = async (redirect = false) => {
     if (!product) return false;
 
-
-      console.log("🛒 Adding to cart with:", {
-    regularPrice,
-    specialPrice,
-    selectedVariantId: selectedVariant?.skuId
-  });
+    console.log("🛒 Adding to cart with:", {
+      regularPrice,
+      specialPrice,
+      selectedVariantId: selectedVariant?.skuId,
+    });
 
     const ok = await addToCart({
       productId: product._id,
@@ -229,7 +223,7 @@ const ProductDetails = () => {
                   className="rounded-full h-8 w-8 sm:h-9 sm:w-9 bg-white/80 dark:bg-black/60 backdrop-blur-md shadow-sm"
                   onClick={() =>
                     setActiveImg((p) =>
-                      p === 0 ? allImages.length - 1 : p - 1
+                      p === 0 ? allImages.length - 1 : p - 1,
                     )
                   }
                 >
@@ -241,7 +235,7 @@ const ProductDetails = () => {
                   className="rounded-full h-8 w-8 sm:h-9 sm:w-9 bg-white/80 dark:bg-black/60 backdrop-blur-md shadow-sm"
                   onClick={() =>
                     setActiveImg((p) =>
-                      p === allImages.length - 1 ? 0 : p + 1
+                      p === allImages.length - 1 ? 0 : p + 1,
                     )
                   }
                 >
@@ -374,15 +368,29 @@ const ProductDetails = () => {
                 </span>
               )}
             </div>
+            {product.allowCashOnDelivery === false && (
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl p-3.5 flex items-start gap-3">
+                <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex-shrink-0">
+                  <ShieldCheck className="w-4 h-4 text-amber-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
+                    Advance Payment Required
+                  </p>
+                  <p className="text-[11px] text-amber-700 dark:text-amber-400/90 mt-0.5 leading-relaxed">
+                    এই প্রোডাক্টটি ক্যাশ অন ডেলিভারিতে পাওয়া যাবে না। অর্ডার
+                    কনফার্ম করতে অনলাইন পেমেন্ট (bKash/Nagad/Card) করতে হবে।
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Stock & Brand */}
             <div className="flex items-center gap-4 text-xs flex-wrap pt-2 border-t border-border/40">
               <div className="flex items-center gap-1.5">
                 <Package className="w-3.5 h-3.5 text-rose-500" />
                 <span
-                  className={
-                    inStock ? "text-emerald-600" : "text-rose-600"
-                  }
+                  className={inStock ? "text-emerald-600" : "text-rose-600"}
                 >
                   {inStock ? `${stockCount} in stock` : "Out of stock"}
                 </span>

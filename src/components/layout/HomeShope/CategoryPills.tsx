@@ -44,17 +44,11 @@ export default function CategoryPills({
             }`}
           >
             {name}
-            {count !== undefined && (
-              <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                  isActive
-                    ? "bg-white/25 text-white"
-                    : "bg-stone-100 dark:bg-stone-800 text-muted-foreground"
-                }`}
-              >
-                {count}
-              </span>
-            )}
+            {count !== undefined && count > 0 && (
+  <span className="...">
+    {count}
+  </span>
+)}
           </button>
         );
       })}

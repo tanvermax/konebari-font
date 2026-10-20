@@ -36,6 +36,8 @@ export interface IProductCard {
   slug?: string;
   totalStock?: number;
   variantCount?: number;
+  allowCashOnDelivery?: boolean;
+  allowOnlinePayment?: boolean;
   status?: 'active' | 'inactive';
 }
 

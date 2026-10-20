@@ -2,6 +2,7 @@
 export interface IUser {
   _id: string;
   name: string;
+  image?: string ;
   email: string;
   role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
   picture?: string | null;
