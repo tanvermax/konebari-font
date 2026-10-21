@@ -8,7 +8,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import {
   Heart,
   ShoppingCartIcon,
-  Sparkles,
+  // Sparkles,
   Search,
   LogIn,
   Menu,
@@ -771,7 +771,7 @@ export default function Navbar() {
       </div>
 
       {/* ===== FAB ===== */}
-      <motion.div
+      {/* <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 20 }}
@@ -785,7 +785,7 @@ export default function Navbar() {
         >
           <Sparkles className="size-5 fill-current" />
         </motion.button>
-      </motion.div>
+      </motion.div> */}
 
       <style>{`
         .h-safe-bottom {

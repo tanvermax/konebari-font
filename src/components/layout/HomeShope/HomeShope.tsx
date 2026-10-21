@@ -15,9 +15,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
-import { useAllpstockQuery } from "@/redux/features/product/product.api";
-// ✅ Notun Category API theke data
-import { useGetCategoriesQuery } from "@/redux/features/category/category.api";
+import {
+  useAllpstockQuery,
+  useCategoriesQuery,
+} from "@/redux/features/product/product.api";
 import ProductSearch from "./ProductSearch";
 import type { IProductCard } from "@/redux/features/product/Product.types";
 import CategoryPills from "./CategoryPills";
@@ -35,17 +36,19 @@ const ProductSkeleton = () => (
 const PAGE_SIZE = 40;
 
 export default function HomeShope() {
+  // ✅ URL params
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategory = searchParams.get("category") || "All";
-  const urlBrand = searchParams.get("brand") || "";
+  const urlBrand = searchParams.get("brand") || "";        // 👈 NEW
   const urlSearch = searchParams.get("search") || "";
 
+  // ================== STATE ==================
   const [page, setPage] = useState(1);
   const [allProducts, setAllProducts] = useState<IProductCard[]>([]);
   const [searchTerm, setSearchTerm] = useState(urlSearch);
   const [sortBy, setSortBy] = useState("default");
   const [selectedCategory, setSelectedCategory] = useState(urlCategory);
-  const [selectedBrand, setSelectedBrand] = useState(urlBrand);
+  const [selectedBrand, setSelectedBrand] = useState(urlBrand);   // 👈 NEW
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // ✅ Sync state with URL
@@ -55,7 +58,7 @@ export default function HomeShope() {
       setPage(1);
       setAllProducts([]);
     }
-    if (selectedBrand !== urlBrand) {
+    if (selectedBrand !== urlBrand) {          // 👈 NEW
       setSelectedBrand(urlBrand);
       setPage(1);
       setAllProducts([]);
@@ -65,22 +68,12 @@ export default function HomeShope() {
     }
   }, [urlCategory, urlBrand, urlSearch]);
 
-  // ================== CATEGORIES (✅ Dynamic) ==================
-  // Apnar `useGetCategoriesQuery` static data return kore category API theke.
-  // Jodi product count o dorkar hoy, backend theke `count` pathate hobe.
-  const { data: categoriesData } = useGetCategoriesQuery();
+  // ================== CATEGORIES ==================
+  const { data: categoriesData } = useCategoriesQuery(undefined);
 
   const categories = useMemo(() => {
     const list = Array.isArray(categoriesData) ? categoriesData : [];
-    // ✅ Category model er name e `name` field thake
-    return list
-      .filter((c: any) => c && c.name)
-      .map((c: any) => ({
-        name: c.name,
-        count: c.count ?? 0, // backend count na pathale 0
-        image: c.image,
-        slug: c.slug,
-      }));
+    return list.filter((c: any) => c && (c.name || c._id || c.title));
   }, [categoriesData]);
 
   // ✅ Update URL when category changes
@@ -113,7 +106,7 @@ export default function HomeShope() {
     setSearchParams(params, { replace: true });
   };
 
-  // ✅ Remove brand filter
+  // ✅ Remove brand filter                  // 👈 NEW
   const handleRemoveBrand = () => {
     setSelectedBrand("");
     setPage(1);
@@ -137,7 +130,7 @@ export default function HomeShope() {
       limit: PAGE_SIZE,
       search: searchTerm || undefined,
       category: selectedCategory === "All" ? undefined : selectedCategory,
-      brand: selectedBrand ? selectedBrand : undefined,
+      brand: selectedBrand ? selectedBrand : undefined,   // 👈 NEW
       sort: sortParam,
       status: "all",
     }),
@@ -154,11 +147,13 @@ export default function HomeShope() {
     refetchOnMountOrArgChange: true,
   });
 
+  // ================== RESET ON FILTER CHANGE ==================
   useEffect(() => {
     setAllProducts([]);
     setPage(1);
-  }, [searchTerm, selectedCategory, selectedBrand, sortBy]);
+  }, [searchTerm, selectedCategory, selectedBrand, sortBy]);   // 👈 selectedBrand যোগ
 
+  // ================== ACCUMULATE DATA ==================
   useEffect(() => {
     if (data?.data) {
       setAllProducts((prev) => {
@@ -176,6 +171,7 @@ export default function HomeShope() {
   const totalProducts = data?.meta?.total || 0;
   const hasMore = allProducts.length < totalProducts;
 
+  // ================== INFINITE SCROLL ==================
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -185,15 +181,18 @@ export default function HomeShope() {
       },
       { threshold: 0.5 }
     );
+
     if (loadMoreRef.current) observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
   }, [hasMore, isFetching]);
 
   const isInitialLoading = isLoading && allProducts.length === 0;
 
+  // ✅ Check if any filter active
   const hasActiveFilters =
     searchTerm || selectedCategory !== "All" || selectedBrand;
 
+  // ✅ Reset all filters
   const handleResetAll = () => {
     setSearchTerm("");
     setSelectedCategory("All");
@@ -204,23 +203,29 @@ export default function HomeShope() {
 
   return (
     <div className="container mx-auto px-3 md:px-4 py-4 md:py-8 max-w-7xl">
-      {/* <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-rose-600 to-purple-600 bg-clip-text text-transparent">
-          Shop Collection
-        </h1>
-        <p className="text-xs md:text-sm text-muted-foreground mt-1">
-          {totalProducts > 0
-            ? `Discover ${totalProducts}+ authentic beauty products`
-            : "Explore our collection"}
-        </p>
-      </div> */}
+      {/* Header */}
+      
 
-      <CategoryPills
+      {/* ✅ Categories (URL-synced) */}
+      <div className="flex justify-between">
+        <CategoryPills
         categories={categories}
         selected={selectedCategory}
         onSelect={handleCategoryChange}
       />
+      <div className="mb-6">
+        <h1 className="text-md text-right md:text-xl font-bold bg-gradient-to-r from-rose-600 to-purple-600 bg-clip-text text-transparent">
+          Shop Collection
+        </h1>
+        <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
+          {totalProducts > 0
+            ? `Discover ${totalProducts}+ authentic beauty products`
+            : "Explore our collection"}
+        </p>
+      </div>
 
+      </div>
+      {/* ✅ Brand Filter Banner (only shows when brand is selected) */}
       {selectedBrand && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -254,6 +259,7 @@ export default function HomeShope() {
         </motion.div>
       )}
 
+      {/* Search + Sort */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full mb-6">
         <ProductSearch
           onSearch={handleSearchChange}
@@ -273,6 +279,7 @@ export default function HomeShope() {
         </Select>
       </div>
 
+      {/* Active Filters */}
       {hasActiveFilters && (
         <div className="flex items-center gap-2 flex-wrap mb-4">
           <span className="text-xs text-muted-foreground">Active filters:</span>
@@ -312,6 +319,7 @@ export default function HomeShope() {
         </div>
       )}
 
+      {/* Results Count */}
       {!isInitialLoading && allProducts.length > 0 && (
         <p className="text-xs text-muted-foreground mb-3">
           Showing{" "}
@@ -333,6 +341,7 @@ export default function HomeShope() {
         </p>
       )}
 
+      {/* Product Grid */}
       {isInitialLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
           {Array.from({ length: 10 }).map((_, i) => (
@@ -395,6 +404,7 @@ export default function HomeShope() {
         </motion.div>
       )}
 
+      {/* Load More */}
       {allProducts.length > 0 && (
         <div ref={loadMoreRef} className="mt-12 flex justify-center">
           {hasMore ? (
