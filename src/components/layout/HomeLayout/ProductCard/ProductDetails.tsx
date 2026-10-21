@@ -14,7 +14,7 @@ import {
   Truck,
   CheckCircle2,
 } from "lucide-react";
-  import {
+import {
   useGetProductReviewsQuery,
   useCreateReviewMutation,
 } from "@/redux/features/review/review.api";
@@ -44,47 +44,46 @@ const ProductDetails = () => {
 
   const { data: product, isLoading } = usePricestockDetailsQuery(id) as any;
 
+  // ... ProductDetails component er vitor
+  const { isLoggedIn } = useSessionId();
+  const { data: reviews = [] } = useGetProductReviewsQuery(product?._id || "", {
+    skip: !product?._id,
+  });
+  const [createReview, { isLoading: isReviewSubmitting }] =
+    useCreateReviewMutation();
 
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState("");
 
-// ... ProductDetails component er vitor
-const { isLoggedIn } = useSessionId();
-const { data: reviews = [] } = useGetProductReviewsQuery(product?._id || "", {
-  skip: !product?._id,
-});
-const [createReview, { isLoading: isReviewSubmitting }] = useCreateReviewMutation();
+  const handleSubmitReview = async () => {
+    if (!isLoggedIn) {
+      toast.error("Please login to submit a review");
+      return;
+    }
+    if (!product?._id) return;
+    if (!newComment.trim()) {
+      toast.error("Please write a comment");
+      return;
+    }
 
-const [newRating, setNewRating] = useState(5);
-const [newComment, setNewComment] = useState("");
+    try {
+      await createReview({
+        productId: product._id,
+        rating: newRating,
+        comment: newComment.trim(),
+      }).unwrap();
+      toast.success("Review submitted! 🎉");
+      setNewComment("");
+      setNewRating(5);
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to submit review");
+    }
+  };
 
-const handleSubmitReview = async () => {
-  if (!isLoggedIn) {
-    toast.error("Please login to submit a review");
-    return;
-  }
-  if (!product?._id) return;
-  if (!newComment.trim()) {
-    toast.error("Please write a comment");
-    return;
-  }
-
-  try {
-    await createReview({
-      productId: product._id,
-      rating: newRating,
-      comment: newComment.trim(),
-    }).unwrap();
-    toast.success("Review submitted! 🎉");
-    setNewComment("");
-    setNewRating(5);
-  } catch (err: any) {
-    toast.error(err?.data?.message || "Failed to submit review");
-  }
-};
-
-const avgRating =
-  reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : 0;
+  const avgRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
   // ============================================
   // ✅ VARIANTS
   // ============================================
@@ -385,7 +384,6 @@ const avgRating =
                     favActive ? "fill-rose-500 text-rose-500" : "text-stone-500"
                   }`}
                 />
-                
               </button>
             </div>
 
@@ -583,15 +581,15 @@ const avgRating =
                   </>
                 )}
               </Button>
+              <ShareButton
+                url={`/alldata/${product.slug || product._id}`}
+                title={product.title}
+                description={product.shortDescription}
+                image={allImages[0]}
+                variant="button"
+                className="h-11"
+              />
             </div>
-            <ShareButton
-    url={`/alldata/${product.slug || product._id}`}
-    title={product.title}
-    description={product.shortDescription}
-    image={allImages[0]}
-    variant="button"
-    className="h-11"
-  />
 
             {/* Buy Now */}
             <Button
@@ -651,105 +649,118 @@ const avgRating =
             </div>
           )}
           {/* Reviews Section */}
-<div className="space-y-4 border-t border-border/40 pt-5">
-  <div className="flex items-center justify-between">
-    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-      <Star className="w-4 h-4 text-amber-500" />
-      Reviews ({reviews.length})
-    </h3>
-    {avgRating > 0 && (
-      <div className="flex items-center gap-1 text-xs">
-        <span className="font-bold text-amber-500">{avgRating.toFixed(1)}</span>
-        <div className="flex">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <Star
-              key={s}
-              className={`w-3 h-3 ${
-                s <= Math.round(avgRating)
-                  ? "fill-amber-400 text-amber-400"
-                  : "text-stone-300"
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
+          <div className="space-y-4 border-t border-border/40 pt-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Star className="w-4 h-4 text-amber-500" />
+                Reviews ({reviews.length})
+              </h3>
+              {avgRating > 0 && (
+                <div className="flex items-center gap-1 text-xs">
+                  <span className="font-bold text-amber-500">
+                    {avgRating.toFixed(1)}
+                  </span>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={`w-3 h-3 ${
+                          s <= Math.round(avgRating)
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-stone-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
-  {/* Review Form */}
-  {isLoggedIn ? (
-    <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-900/50 space-y-3">
-      <div className="flex items-center gap-1">
-        <span className="text-xs font-medium mr-2">Your rating:</span>
-        {[1, 2, 3, 4, 5].map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => setNewRating(s)}
-            className="p-0.5"
-          >
-            <Star
-              className={`w-5 h-5 ${
-                s <= newRating
-                  ? "fill-amber-400 text-amber-400"
-                  : "text-stone-300"
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-      <Textarea
-        placeholder="Write your review..."
-        value={newComment}
-        onChange={(e) => setNewComment(e.target.value)}
-        rows={3}
-        className="text-sm resize-none"
-      />
-      <Button
-        onClick={handleSubmitReview}
-        disabled={isReviewSubmitting || !newComment.trim()}
-        className="bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs"
-      >
-        {isReviewSubmitting ? "Submitting..." : "Submit Review"}
-      </Button>
-    </div>
-  ) : (
-    <p className="text-xs text-muted-foreground bg-stone-50 dark:bg-stone-900/50 p-3 rounded-xl">
-      Please <a href="/login" className="text-rose-500 font-medium">login</a> to write a review.
-    </p>
-  )}
-
-  {/* Review List */}
-  <div className="space-y-2">
-    {reviews.length === 0 ? (
-      <p className="text-xs text-muted-foreground text-center py-4">
-        No reviews yet. Be the first to review!
-      </p>
-    ) : (
-      reviews.map((r) => (
-        <div key={r._id} className="p-3 border border-border/40 rounded-xl">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold">{r.userName}</span>
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star
-                  key={s}
-                  className={`w-3 h-3 ${
-                    s <= r.rating ? "fill-amber-400 text-amber-400" : "text-stone-300"
-                  }`}
+            {/* Review Form */}
+            {isLoggedIn ? (
+              <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-900/50 space-y-3">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-medium mr-2">Your rating:</span>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setNewRating(s)}
+                      className="p-0.5"
+                    >
+                      <Star
+                        className={`w-5 h-5 ${
+                          s <= newRating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-stone-300"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <Textarea
+                  placeholder="Write your review..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  rows={3}
+                  className="text-sm resize-none"
                 />
-              ))}
+                <Button
+                  onClick={handleSubmitReview}
+                  disabled={isReviewSubmitting || !newComment.trim()}
+                  className="bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs"
+                >
+                  {isReviewSubmitting ? "Submitting..." : "Submit Review"}
+                </Button>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground bg-stone-50 dark:bg-stone-900/50 p-3 rounded-xl">
+                Please{" "}
+                <a href="/login" className="text-rose-500 font-medium">
+                  login
+                </a>{" "}
+                to write a review.
+              </p>
+            )}
+
+            {/* Review List */}
+            <div className="space-y-2">
+              {reviews.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  No reviews yet. Be the first to review!
+                </p>
+              ) : (
+                reviews.map((r) => (
+                  <div
+                    key={r._id}
+                    className="p-3 border border-border/40 rounded-xl"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold">
+                        {r.userName}
+                      </span>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star
+                            key={s}
+                            className={`w-3 h-3 ${
+                              s <= r.rating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-stone-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{r.comment}</p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-1">
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">{r.comment}</p>
-          <p className="text-[10px] text-muted-foreground/60 mt-1">
-            {new Date(r.createdAt).toLocaleDateString()}
-          </p>
-        </div>
-      ))
-    )}
-  </div>
-</div>
         </div>
       </div>
     </div>
