@@ -29,6 +29,7 @@ import { useNavigate, useParams } from "react-router";
 import { useCart } from "@/redux/hooks/useCart";
 import { useFavorite } from "@/redux/hooks/useFavorite";
 import { toast } from "sonner";
+import ShareButton from "@/components/shared/ShareButton";
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -384,6 +385,7 @@ const avgRating =
                     favActive ? "fill-rose-500 text-rose-500" : "text-stone-500"
                   }`}
                 />
+                
               </button>
             </div>
 
@@ -582,6 +584,14 @@ const avgRating =
                 )}
               </Button>
             </div>
+            <ShareButton
+    url={`/alldata/${product.slug || product._id}`}
+    title={product.title}
+    description={product.shortDescription}
+    image={allImages[0]}
+    variant="button"
+    className="h-11"
+  />
 
             {/* Buy Now */}
             <Button

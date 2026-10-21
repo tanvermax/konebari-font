@@ -6,6 +6,7 @@ import { Link } from "react-router";
 import { Heart, Loader2, ShieldCheck, ShoppingBag } from "lucide-react";
 import { useFavorite } from "@/redux/hooks/useFavorite";
 import { useCart } from "@/redux/hooks/useCart";
+import ShareButton from "@/components/shared/ShareButton";
 
 interface ProductCardProps {
   id: string;
@@ -153,6 +154,14 @@ export default function ProductCard({
             }`}
           />
         )}
+        <ShareButton
+  url={`/alldata/${id || slug}`}
+  title={name}
+  image={image}
+  variant="icon"
+  className="absolute top-12 "
+/>
+
       </button>
 
 
