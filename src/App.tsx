@@ -3,6 +3,7 @@ import { Outlet, ScrollRestoration, useLocation } from "react-router"
 import CommonLayout from "./components/layout/CommoneLayout"
 import { ToastContainer } from 'react-toastify';
 import { useRoleBasedNavigation } from "./components/Navigation/RoleBasedNav";
+import FloatingChat from "./components/shared/FloatingChat";
 
 function App() {
   const location = useLocation();
@@ -37,6 +38,8 @@ function App() {
       <ScrollRestoration />
       <ToastContainer />
       <Outlet />
+            <FloatingChat />
+
     </CommonLayout>
   )
 }

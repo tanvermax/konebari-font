@@ -1,3 +1,5 @@
+// components/layout/home/HomePage.tsx
+import { useEffect } from "react";
 import { Link } from "react-router";
 import { useAllpstockQuery } from "@/redux/features/product/product.api";
 import { Button } from "@/components/ui/button";
@@ -10,16 +12,19 @@ export default function HomePage() {
   const { data: productsData, isLoading: productsLoading } = useAllpstockQuery({
     limit: 8,
     sort: "-createdAt",
-    isFeatured: true,
+    // isFeatured: true,  // ❌ Ei filter remove koro (jodi sob product dekhte chan)
     status: "active",
   });
 
-  console.log("productsData", productsData);
-
   const products: IProductCard[] = productsData?.data || [];
 
-  // console.log(products);
-  // Minimal Elegance Categories
+  // ✅ react-snap er jonno render-event dispatch
+  useEffect(() => {
+    if (!productsLoading && productsData) {
+      window.dispatchEvent(new Event("render-event"));
+    }
+  }, [productsLoading, productsData]);
+
   const categories = [
     {
       name: "Skincare",
@@ -48,10 +53,8 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen  text-foreground">
-      {/* ===== HERO SECTION (Minimal & Clean) ===== */}
-
-      {/* ===== CATEGORIES ===== */}
+    <div className="min-h-screen text-foreground">
+      {/* Categories */}
       <section className="py-14 sm:py-20">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center max-w-md mx-auto mb-10 space-y-1">
@@ -62,7 +65,6 @@ export default function HomePage() {
               Find tailored essentials for your daily care
             </p>
           </div>
-
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {categories.map((cat, idx) => (
               <Link
@@ -89,7 +91,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== RECENT / POPULAR PRODUCTS ===== */}
+      {/* New Arrivals */}
       <section className="py-12 sm:py-16 bg-white dark:bg-[#0D0D0D] border-t border-border/40">
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex items-end justify-between mb-8 pb-3 border-b border-border/30">
@@ -143,7 +145,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== ELEGANT MINIMAL BANNER ===== */}
+      {/* Newsletter */}
       <section className="py-16 sm:py-20">
         <div className="container mx-auto px-4 md:px-8">
           <div className="bg-[#192646] text-stone-100 rounded-2xl p-8 sm:p-14 text-center max-w-4xl mx-auto space-y-4">

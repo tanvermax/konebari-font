@@ -15,7 +15,8 @@
       "/",
       "/about",
       "/products",
-      "/contact"
+      "/contact",
+      "/shop"
     ],
     "exclude": [
       "/admin/*",

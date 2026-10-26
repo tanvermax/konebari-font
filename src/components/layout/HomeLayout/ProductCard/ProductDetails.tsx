@@ -137,7 +137,14 @@ const ProductDetails = () => {
     setActiveImg(0);
     setQuantity(1);
   }, [selectedVariantIdx]);
+// ProductDetails.tsx e useEffect add korun
 
+// ... component er vitor, product load howar por
+useEffect(() => {
+  if (!isLoading && product) {
+    window.dispatchEvent(new Event("render-event"));
+  }
+}, [isLoading, product]);
   // ============================================
   // ✅ FAVORITE STATUS
   // ============================================

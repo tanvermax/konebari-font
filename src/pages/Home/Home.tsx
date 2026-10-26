@@ -2,38 +2,47 @@ import HomePage from "@/components/layout/home/HomePage";
 import HeroBanner from "@/components/layout/HomeLayout/Banners";
 import BrandSlider from "@/components/layout/HomeLayout/BrandSlider";
 import LookbookReviews from "@/components/layout/HomeLayout/LookbookReviews/LookbookReviews";
+import {
+  HomeSkeleton,
+  ReviewsSkeleton,
+} from "@/components/layout/HomeLayout/Skeletons";
 import SkinGoals from "@/components/layout/HomeLayout/SkinGoals/SkinGoals";
 import SkinPhilosophy from "@/components/layout/HomeLayout/SkinPhilosophy/SkinPhilosophy";
 import { useAllpstockQuery } from "@/redux/features/product/product.api";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
 export default function Home() {
-  const { data, isLoading } = useAllpstockQuery({ limit: 8, sort: "-createdAt" });
+  const { data, isLoading } = useAllpstockQuery({
+    limit: 8,
+    sort: "-createdAt",
+  });
 
   useEffect(() => {
     // ✅ Data load complete হলে event fire করুন
     if (!isLoading && data) {
       // React-snap wait করছে এই event এর জন্য
-      window.dispatchEvent(new Event('render-event'));
+      window.dispatchEvent(new Event("render-event"));
       // console.log('✅ HomePage data loaded — render-event dispatched');
     }
   }, [isLoading, data]);
   return (
     <div>
-       <HeroBanner />
+      <HeroBanner />
 
       {/* ===== FEATURES ===== */}
-    
-      <BrandSlider />
-      <HomePage />
-    
+      <Suspense fallback={<HomeSkeleton />}>
+        <BrandSlider />
+        <HomePage />
+      </Suspense>
       {/* <TrendingOffers /> */}
       <SkinPhilosophy />
       <SkinGoals />
-      <LookbookReviews />
+      <Suspense fallback={<ReviewsSkeleton />}>
+        <LookbookReviews />
+      </Suspense>
+
       {/* <RoutineBundles /> */}
       {/* <FeaturedCatalog /> */}
-      
     </div>
   );
 }

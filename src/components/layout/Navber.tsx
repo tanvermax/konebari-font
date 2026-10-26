@@ -80,8 +80,8 @@ const DEFAULT_ICON = "🛍️";
 const quickActions = [
   { label: "Wishlist", icon: Heart, href: "/favorites" },
   { label: "Chat", icon: MessageCircle, href: "/chat" },
-  { label: "Orders", icon: PackageSearch, href: "/orders" },
-  { label: "Support", icon: HelpCircle, href: "/support" },
+  { label: "Orders", icon: PackageSearch, href: "/user/profile" },
+  { label: "Support", icon: HelpCircle, href: "/" },
 ];
 
 // ============ BOTTOM NAV ============
