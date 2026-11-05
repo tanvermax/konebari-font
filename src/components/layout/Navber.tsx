@@ -17,12 +17,13 @@ import {
 
   Home,
   Layers,
-  MessageCircle,
+
   Store,
   User,
   HelpCircle,
   PackageSearch,
   ArrowRight,
+  AlignHorizontalDistributeEndIcon,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -79,9 +80,9 @@ const DEFAULT_ICON = "🛍️";
 // ============ QUICK ACTIONS ============
 const quickActions = [
   { label: "Wishlist", icon: Heart, href: "/favorites" },
-  { label: "Chat", icon: MessageCircle, href: "/chat" },
+  { label: "About", icon: AlignHorizontalDistributeEndIcon, href: "/about" },
   { label: "Orders", icon: PackageSearch, href: "/user/profile" },
-  { label: "Support", icon: HelpCircle, href: "/" },
+  { label: "Support", icon: HelpCircle, href: "/help" },
 ];
 
 // ============ BOTTOM NAV ============

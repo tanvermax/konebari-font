@@ -1,557 +1,528 @@
-// pages/About.tsx
-import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+// pages/About/About.tsx
+"use client";
+
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Link } from "react-router";
 import {
   Sparkles,
-  Heart,
   ShieldCheck,
+  Heart,
   Truck,
-  Award,
-
-  ArrowRight,
-  Smile,
-
   Star,
+  ArrowRight,
+  Award,
   Users,
-  Gem,
-
-  Instagram,
-  Facebook,
-  Twitter,
-  Youtube,
-
-  Eye,
-  Target,
-  Lightbulb,
+  Package,
+  Globe,
+  Leaf,
+  CheckCircle2,
 } from "lucide-react";
-import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 
-// Animation Variants
-const fadeIn = {
-  initial: { opacity: 0, y: 30 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-100px" },
-  transition: { duration: 0.6, ease: "easeOut" },
-};
+// ============================================
+// ✅ DATA
+// ============================================
+const stats = [
+  { value: "50K+", label: "Happy Customers", icon: Users },
+  { value: "500+", label: "Premium Products", icon: Package },
+  { value: "4.9", label: "Average Rating", icon: Star },
+  { value: "99%", label: "Satisfaction Rate", icon: Heart },
+];
 
-const fadeInLeft = {
-  initial: { opacity: 0, x: -50 },
-  whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.6, ease: "easeOut" },
-};
+const values = [
+  {
+    icon: ShieldCheck,
+    title: "100% Authentic",
+    description:
+      "Every product is sourced directly from official brands and verified before it reaches you.",
+  },
+  {
+    icon: Leaf,
+    title: "Clean Beauty",
+    description:
+      "We curate products free from harmful chemicals — dermatologist-tested and safe for every skin type.",
+  },
+  {
+    icon: Heart,
+    title: "Customer First",
+    description:
+      "From ordering to delivery, your satisfaction is our priority. Real human support, always.",
+  },
+  {
+    icon: Globe,
+    title: "Global Standards",
+    description:
+      "We bring world-class K-beauty and luxury skincare from Korea, France, and the USA to Bangladesh.",
+  },
+];
 
-const fadeInRight = {
-  initial: { opacity: 0, x: 50 },
-  whileInView: { opacity: 1, x: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.6, ease: "easeOut" },
-};
+const milestones = [
+  { year: "2020", title: "The Beginning", description: "Started with just 10 products and a dream to make authentic beauty accessible." },
+  { year: "2022", title: "Growing Community", description: "Reached 10,000+ happy customers across Bangladesh and expanded our collection." },
+  { year: "2024", title: "Authorized Partner", description: "Became an official partner for multiple international beauty and jewelry brands." },
+  { year: "2026", title: "The Future", description: "Aiming to become Bangladesh's most trusted online beauty destination." },
+];
+
+// ============================================
+// ✅ ANIMATION VARIANTS
+// ============================================
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+} as any;
 
 const staggerContainer = {
-  initial: {},
-  whileInView: { transition: { staggerChildren: 0.15 } },
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12 } },
 };
 
-export default function AboutUs() {
+export default function AboutPage() {
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  // ✅ Parallax effects
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-pink-50/20 to-purple-50/10">
-      <div className="py-12 md:py-20 px-4 container mx-auto max-w-7xl space-y-20">
-        
-        {/* ========== HERO SECTION ========== */}
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-          className="relative text-center"
+    <div className="bg-white dark:bg-[#0A0A0A] text-foreground overflow-x-hidden">
+
+      {/* ============================================
+          HERO SECTION — Apple-style fullscreen
+         ============================================ */}
+      <section
+        ref={heroRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      >
+        {/* Animated background gradient */}
+        <motion.div
+          style={{ y: heroY, scale: heroScale }}
+          className="absolute inset-0"
         >
-          {/* Background Effects */}
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-r from-pink-400/10 via-rose-400/10 to-purple-400/10 blur-[150px] rounded-full -z-10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-stone-100 via-rose-50 to-purple-100 dark:from-stone-950 dark:via-rose-950/20 dark:to-purple-950/30" />
           
-          <Badge className="inline-flex items-center gap-2 bg-pink-100 text-pink-600 border-none px-5 py-2 rounded-full text-xs font-semibold tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
-            Welcome to Our Story
-          </Badge>
+          {/* Floating orbs */}
+          <motion.div
+            animate={{ x: [0, 40, 0], y: [0, -30, 0] }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-rose-300/20 dark:bg-rose-500/10 blur-3xl"
+          />
+          <motion.div
+            animate={{ x: [0, -50, 0], y: [0, 40, 0] }}
+            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-purple-300/20 dark:bg-purple-500/10 blur-3xl"
+          />
+        </motion.div>
+
+        <motion.div
+          style={{ opacity: heroOpacity }}
+          className="relative z-10 container mx-auto px-4 text-center max-w-4xl"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 text-xs font-medium mb-8"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-rose-500" />
+            <span>Our Story</span>
+          </motion.div>
 
           <motion.h1
-            className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mt-6 leading-[1.1]"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-serif font-medium tracking-tighter leading-[0.95] mb-6"
           >
-            <span className="bg-gradient-to-r from-pink-600 via-rose-500 to-purple-600 bg-clip-text text-transparent">
-              Where Beauty
+            Beauty,{" "}
+            <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 bg-clip-text text-transparent italic font-light">
+              redefined.
             </span>
-            <br />
-            <span className="text-foreground">Meets Authenticity</span>
           </motion.h1>
 
           <motion.p
-            className="text-muted-foreground text-sm md:text-lg max-w-2xl mx-auto mt-6 leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4 }}
+            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light"
           >
-            We're on a mission to bring you premium beauty products that are 100% authentic, 
-            carefully curated, and loved by thousands of women just like you.
+            We're on a mission to make 100% authentic, world-class beauty
+            accessible to every person in Bangladesh — no compromises, no fakes.
           </motion.p>
 
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-4 mt-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            className="mt-10 flex flex-col sm:flex-row gap-3 justify-center"
           >
             <Link to="/shop">
-              <Button className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 rounded-full px-8 py-6">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Explore Products
+              <Button className="h-12 px-8 rounded-full bg-foreground hover:bg-foreground/90 text-background text-sm font-medium gap-2 group">
+                Explore Collection
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Link to="/contact">
-              <Button variant="outline" className="rounded-full px-8 py-6 border-pink-300/50 hover:bg-pink-50">
-                <Heart className="w-4 h-4 mr-2" />
-                Get in Touch
+            <Link to="/help">
+              <Button
+                variant="outline"
+                className="h-12 px-8 rounded-full text-sm font-medium border-border/60 hover:bg-accent"
+              >
+                Talk to Us
               </Button>
             </Link>
           </motion.div>
-        </motion.section>
+        </motion.div>
 
-        {/* ========== OUR MISSION & VISION ========== */}
-        <motion.section
-          variants={staggerContainer}
-          initial="initial"
-          whileInView="whileInView"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 1 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
-          {[
-            {
-              icon: <Target className="w-8 h-8 text-pink-500" />,
-              title: "Our Mission",
-              description: "To empower every woman to feel confident and beautiful by providing access to authentic, high-quality beauty products that nurture and enhance natural radiance.",
-              color: "pink",
-            },
-            {
-              icon: <Eye className="w-8 h-8 text-purple-500" />,
-              title: "Our Vision",
-              description: "To become the most trusted beauty destination where authenticity meets affordability, and every woman finds her perfect beauty routine.",
-              color: "purple",
-            },
-            {
-              icon: <Lightbulb className="w-8 h-8 text-amber-500" />,
-              title: "Our Values",
-              description: "Authenticity, Quality, Customer-Centricity, Transparency, and Inclusivity - these pillars define everything we do.",
-              color: "amber",
-            },
-          ].map((item, index) => (
-            <motion.div
-              key={index}
-              variants={fadeIn}
-              whileHover={{ y: -6 }}
-              className={`p-8 rounded-2xl border-2 border-${item.color}-200/50 bg-white/60 backdrop-blur-sm hover:shadow-xl transition-all duration-300`}
-            >
-              <div className={`w-16 h-16 rounded-2xl bg-${item.color}-100 flex items-center justify-center mb-4`}>
-                {item.icon}
-              </div>
-              <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-            </motion.div>
-          ))}
-        </motion.section>
-
-        {/* ========== OUR STORY ========== */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <motion.div
-            variants={fadeInLeft}
-            initial="initial"
-            whileInView="whileInView"
-            viewport={{ once: true }}
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2"
+          >
+            <div className="w-1 h-2 rounded-full bg-muted-foreground/60" />
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ============================================
+          STATS SECTION
+         ============================================ */}
+      <section className="py-20 md:py-32 bg-stone-50 dark:bg-stone-950/50 border-y border-border/40">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8"
+          >
+            {stats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <motion.div
+                  key={stat.label}
+                  variants={fadeUp}
+                  className="text-center group"
+                >
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-rose-500/10 to-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Icon className="w-5 h-5 text-rose-500" />
+                  </div>
+                  <p className="text-3xl sm:text-4xl md:text-5xl font-serif font-medium tracking-tight mb-1">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    {stat.label}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ============================================
+          STORY SECTION — Big Typography
+         ============================================ */}
+      <section className="py-24 md:py-40 relative">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="space-y-8"
+          >
+            <motion.span
+              variants={fadeUp}
+              className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-rose-500"
+            >
+              The Beginning
+            </motion.span>
+
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium tracking-tight leading-[1.05]"
+            >
+              We started with a{" "}
+              <span className="italic font-light text-muted-foreground">
+                simple belief
+              </span>{" "}
+              — that authentic beauty should never be a luxury.
+            </motion.h2>
+
+            <motion.div
+              variants={fadeUp}
+              className="grid md:grid-cols-2 gap-8 md:gap-12 pt-8"
+            >
+              <p className="text-base md:text-lg leading-relaxed text-muted-foreground font-light">
+                In a market flooded with fakes and counterfeit products, we saw
+                people losing trust in the beauty industry. Skincare routines
+                ruined. Money wasted. Hope lost.
+              </p>
+              <p className="text-base md:text-lg leading-relaxed text-muted-foreground font-light">
+                So we built something different. A place where every single
+                product is verified, every brand is authorized, and every
+                customer is treated like family.
+              </p>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ============================================
+          VALUES SECTION
+         ============================================ */}
+      <section className="py-24 md:py-32 bg-stone-50 dark:bg-stone-950/50 border-y border-border/40">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="text-center mb-16"
+          >
+            <motion.span
+              variants={fadeUp}
+              className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-rose-500 mb-4"
+            >
+              What We Stand For
+            </motion.span>
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl sm:text-5xl md:text-6xl font-serif font-medium tracking-tight"
+            >
+              Our core values
+            </motion.h2>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
+          >
+            {values.map((value) => {
+              const Icon = value.icon;
+              return (
+                <motion.div
+                  key={value.title}
+                  variants={fadeUp}
+                  whileHover={{ y: -4 }}
+                  className="group p-8 md:p-10 rounded-3xl bg-white dark:bg-stone-900/50 border border-border/40 hover:border-rose-200/60 dark:hover:border-rose-900/40 hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-serif font-medium mb-2">
+                    {value.title}
+                  </h3>
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-light">
+                    {value.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ============================================
+          TIMELINE SECTION
+         ============================================ */}
+      <section className="py-24 md:py-40">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="text-center mb-16"
+          >
+            <motion.span
+              variants={fadeUp}
+              className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-rose-500 mb-4"
+            >
+              Our Journey
+            </motion.span>
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl sm:text-5xl md:text-6xl font-serif font-medium tracking-tight"
+            >
+              Milestones that shaped us
+            </motion.h2>
+          </motion.div>
+
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-rose-500 via-pink-500 to-purple-500 opacity-30" />
+
+            <div className="space-y-10 md:space-y-16">
+              {milestones.map((milestone, idx) => (
+                <motion.div
+                  key={milestone.year}
+                  initial={{ opacity: 0, x: idx % 2 === 0 ? -40 : 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.7, delay: 0.1 }}
+                  className={`relative flex items-start gap-6 md:gap-0 ${
+                    idx % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                  }`}
+                >
+                  {/* Dot */}
+                  <div className="absolute left-4 md:left-1/2 -translate-x-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 ring-4 ring-background z-10" />
+
+                  {/* Content */}
+                  <div className={`pl-12 md:pl-0 md:w-1/2 ${idx % 2 === 0 ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
+                    <div className="inline-block px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 text-[11px] font-bold uppercase tracking-wider mb-2">
+                      {milestone.year}
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-serif font-medium mb-2">
+                      {milestone.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed font-light">
+                      {milestone.description}
+                    </p>
+                  </div>
+
+                  {/* Spacer for alternate */}
+                  <div className="hidden md:block md:w-1/2" />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          MISSION QUOTE SECTION
+         ============================================ */}
+      <section className="py-24 md:py-40 bg-gradient-to-br from-stone-100 via-rose-50 to-purple-100 dark:from-stone-950 dark:via-rose-950/20 dark:to-purple-950/30 border-y border-border/40 relative overflow-hidden">
+        <motion.div
+          animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 right-0 w-96 h-96 rounded-full bg-rose-300/20 dark:bg-rose-500/5 blur-3xl"
+        />
+
+        <div className="container mx-auto px-4 max-w-4xl relative z-10">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="text-center space-y-8"
+          >
+            <motion.div variants={fadeUp} className="flex justify-center">
+              <Award className="w-16 h-16 text-rose-500" />
+            </motion.div>
+
+            <motion.blockquote
+              variants={fadeUp}
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-medium tracking-tight leading-tight"
+            >
+              "Our mission is simple:{" "}
+              <span className="italic font-light text-rose-600">
+                no fake products, no false promises, no compromise on quality.
+              </span>{" "}
+              Just authentic beauty — delivered with love."
+            </motion.blockquote>
+
+            <motion.div variants={fadeUp} className="pt-4">
+              <p className="text-sm font-semibold">The Konnebari Team</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Founder & CEO
+              </p>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ============================================
+          FINAL CTA
+         ============================================ */}
+      <section className="py-24 md:py-32">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
             className="space-y-6"
           >
-            <Badge className="bg-pink-100 text-pink-600 border-none">Our Story</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">
-              How It All <br />
-              <span className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-                Began
-              </span>
-            </h2>
-            <div className="h-1 w-20 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full" />
-
-            <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>
-                Founded in 2020 with a simple belief - every woman deserves access to authentic, 
-                premium beauty products without the worry of counterfeits or inflated prices.
-              </p>
-              <p className="border-l-4 border-pink-400/40 pl-4 italic text-foreground/80">
-                "We started this journey because we saw too many women struggling to find genuine 
-                products. We wanted to create a space where trust and beauty go hand in hand."
-              </p>
-              <p>
-                Today, we've grown into a community of thousands of happy customers who trust us 
-                for their daily beauty needs. Our curated collection features products from over 
-                200+ premium brands worldwide.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-6 pt-2">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold"
-                  >
-                    {String.fromCharCode(64 + i)}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-semibold">5,000+ Happy Customers</p>
-                <p className="text-xs text-muted-foreground">And growing every day</p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            variants={fadeInRight}
-            initial="initial"
-            whileInView="whileInView"
-            viewport={{ once: true }}
-            className="relative"
-          >
-            <div className="relative group">
-              <div className="absolute -inset-4 bg-gradient-to-r from-pink-400/20 to-purple-400/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all" />
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=1000"
-                  alt="About us story"
-                  className="w-full h-[400px] object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <p className="text-sm font-medium">Est. 2020</p>
-                  <h3 className="text-xl font-bold">Built with Passion</h3>
-                </div>
-              </div>
-            </div>
+            <motion.h2
+              variants={fadeUp}
+              className="text-3xl sm:text-5xl md:text-6xl font-serif font-medium tracking-tight"
+            >
+              Ready to glow?
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto font-light"
+            >
+              Explore our curated collection of authentic beauty products —
+              trusted by 50,000+ customers across Bangladesh.
+            </motion.p>
+            <motion.div variants={fadeUp} className="pt-4">
+              <Link to="/shop">
+                <Button className="h-14 px-10 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-base font-medium gap-2 group shadow-xl shadow-rose-500/25">
+                  Shop Collection
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </motion.div>
           </motion.div>
         </div>
+      </section>
 
-        {/* ========== WHAT MAKES US DIFFERENT ========== */}
-        <motion.section
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="space-y-8"
-        >
-          <div className="text-center space-y-3">
-            <Badge className="bg-pink-100 text-pink-600 border-none">Why Choose Us</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              What Makes Us <span className="text-pink-500">Different</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              We go the extra mile to ensure you get nothing but the best
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* ============================================
+          FEATURES STRIP
+         ============================================ */}
+      <section className="py-12 border-t border-border/40 bg-stone-50 dark:bg-stone-950/30">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          >
             {[
-              {
-                icon: <ShieldCheck className="w-6 h-6" />,
-                title: "100% Authentic",
-                description: "Every product is genuine and sourced directly from authorized brands",
-                color: "pink",
-              },
-              {
-                icon: <Truck className="w-6 h-6" />,
-                title: "Fast & Secure Delivery",
-                description: "Tracked shipping with real-time updates and insurance",
-                color: "blue",
-              },
-              {
-                icon: <Award className="w-6 h-6" />,
-                title: "Premium Quality",
-                description: "Carefully curated products that meet international standards",
-                color: "amber",
-              },
-              {
-                icon: <Heart className="w-6 h-6" />,
-                title: "Customer Love",
-                description: "Thousands of happy customers with 4.9★ average rating",
-                color: "rose",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                variants={fadeIn}
-                whileHover={{ scale: 1.03 }}
-                className="p-6 text-center rounded-2xl border bg-white/60 backdrop-blur-sm hover:shadow-lg transition-all"
-              >
-                <div className={`w-14 h-14 rounded-full bg-${item.color}-100 flex items-center justify-center text-${item.color}-500 mx-auto mb-3`}>
-                  {item.icon}
-                </div>
-                <h3 className="font-bold text-sm">{item.title}</h3>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* ========== STATISTICS ========== */}
-        <motion.section
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-        >
-          {[
-            { number: "10K+", label: "Happy Customers", icon: <Smile className="w-6 h-6" /> },
-            { number: "200+", label: "Premium Brands", icon: <Gem className="w-6 h-6" /> },
-            { number: "100%", label: "Authentic Products", icon: <ShieldCheck className="w-6 h-6" /> },
-            { number: "4.9★", label: "Average Rating", icon: <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" /> },
-          ].map((stat, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ y: -4 }}
-              className="text-center space-y-2 p-6 rounded-2xl border bg-white/60 backdrop-blur-sm hover:shadow-lg transition-all"
-            >
-              <div className="flex justify-center text-pink-500">{stat.icon}</div>
-              <h3 className="text-2xl md:text-3xl font-extrabold">{stat.number}</h3>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.section>
-
-        {/* ========== TEAM SECTION ========== */}
-        <motion.section
-          variants={staggerContainer}
-          initial="initial"
-          whileInView="whileInView"
-          viewport={{ once: true }}
-          className="space-y-8"
-        >
-          <div className="text-center space-y-3">
-            <Badge className="bg-pink-100 text-pink-600 border-none">Meet the Team</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              The Faces Behind <span className="text-pink-500">The Brand</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Sarah Johnson",
-                role: "Founder & CEO",
-                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-                bio: "Passionate about authentic beauty products and empowering women worldwide.",
-                social: { instagram: "#", linkedin: "#" },
-              },
-              {
-                name: "Emily Chen",
-                role: "Head of Product Curation",
-                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=400",
-                bio: "Expert in skincare and beauty trends with 10+ years of industry experience.",
-                social: { instagram: "#", linkedin: "#" },
-              },
-              {
-                name: "Maria Rodriguez",
-                role: "Customer Experience Lead",
-                image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&q=80&w=400",
-                bio: "Committed to ensuring every customer has an exceptional experience.",
-                social: { instagram: "#", linkedin: "#" },
-              },
-            ].map((member, index) => (
-              <motion.div
-                key={index}
-                variants={fadeIn}
-                whileHover={{ y: -4 }}
-                className="text-center p-6 rounded-2xl border bg-white/60 backdrop-blur-sm hover:shadow-xl transition-all"
-              >
-                <div className="w-24 h-24 rounded-full mx-auto overflow-hidden border-2 border-pink-200 mb-4">
-                  <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                </div>
-                <h3 className="font-bold text-lg">{member.name}</h3>
-                <p className="text-sm text-pink-500 font-medium">{member.role}</p>
-                <p className="text-xs text-muted-foreground mt-2">{member.bio}</p>
-                <div className="flex items-center justify-center gap-2 mt-4">
-                  <a href={member.social.instagram} className="p-2 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-100 transition">
-                    <Instagram className="w-4 h-4" />
-                  </a>
-                  <a href={member.social.linkedin} className="p-2 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-100 transition">
-                    <Users className="w-4 h-4" />
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* ========== BRANDS WE PARTNER WITH ========== */}
-        <motion.section
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="space-y-6"
-        >
-          <div className="text-center space-y-3">
-            <Badge className="bg-pink-100 text-pink-600 border-none">Our Partners</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              Trusted <span className="text-pink-500">Global Brands</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { name: "L'Oréal", logo: "https://via.placeholder.com/150x80?text=L'Oréal" },
-              { name: "Estée Lauder", logo: "https://via.placeholder.com/150x80?text=Estée+Lauder" },
-              { name: "MAC", logo: "https://via.placeholder.com/150x80?text=MAC" },
-              { name: "NARS", logo: "https://via.placeholder.com/150x80?text=NARS" },
-            ].map((brand, i) => (
-              <motion.div
-                key={i}
-                variants={fadeIn}
-                whileHover={{ scale: 1.05 }}
-                className="p-4 rounded-xl border bg-white/60 backdrop-blur-sm flex items-center justify-center h-24 hover:shadow-lg transition-all"
-              >
-                <p className="font-bold text-muted-foreground/60">{brand.name}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* ========== TESTIMONIALS ========== */}
-        <motion.section
-          variants={staggerContainer}
-          initial="initial"
-          whileInView="whileInView"
-          viewport={{ once: true }}
-          className="space-y-8"
-        >
-          <div className="text-center space-y-3">
-            <Badge className="bg-pink-100 text-pink-600 border-none">Testimonials</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              What Our <span className="text-pink-500">Customers Say</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              {
-                name: "Jennifer M.",
-                text: "I've been buying my skincare from this store for over a year. The products are always authentic and the delivery is super fast!",
-                rating: 5,
-              },
-              {
-                name: "Lisa K.",
-                text: "Finally found a place where I can trust the products. The customer service team is amazing and always helpful.",
-                rating: 5,
-              },
-              {
-                name: "Amanda R.",
-                text: "Love the variety of brands available. Every product I've ordered has exceeded my expectations.",
-                rating: 4.9,
-              },
-              {
-                name: "Priya S.",
-                text: "The best beauty store online! Their curated collections make shopping so easy and enjoyable.",
-                rating: 5,
-              },
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                variants={fadeIn}
-                whileHover={{ y: -4 }}
-                className="p-6 rounded-2xl border bg-white/60 backdrop-blur-sm hover:shadow-lg transition-all"
-              >
-                <div className="flex gap-1 text-yellow-400 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 ${i < Math.floor(testimonial.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">"{testimonial.text}"</p>
-                <div className="flex items-center gap-3 mt-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-400 flex items-center justify-center text-white font-bold text-sm">
-                    {testimonial.name.charAt(0)}
+              { icon: Truck, title: "Fast Delivery", desc: "1-3 days nationwide" },
+              { icon: ShieldCheck, title: "100% Authentic", desc: "Brand authorized" },
+              { icon: CheckCircle2, title: "7-Day Returns", desc: "No questions asked" },
+              { icon: Heart, title: "Real Support", desc: "9AM - 9PM daily" },
+            ].map((f) => {
+              const Icon = f.icon;
+              return (
+                <motion.div
+                  key={f.title}
+                  variants={fadeUp}
+                  className="flex items-center gap-3"
+                >
+                  <div className="p-2.5 rounded-full bg-white dark:bg-stone-800 text-rose-500 flex-shrink-0">
+                    <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">{testimonial.name}</p>
-                    <p className="text-xs text-muted-foreground">Verified Buyer</p>
+                    <p className="text-xs sm:text-sm font-medium">{f.title}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">{f.desc}</p>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* ========== CALL TO ACTION ========== */}
-        <motion.section
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative overflow-hidden bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 text-white rounded-3xl p-10 md:p-16 text-center shadow-2xl shadow-pink-500/20"
-        >
-          {/* <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-10" /> */}
-          
-          <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-            <Sparkles className="w-12 h-12 mx-auto text-white/80" />
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">
-              Ready to Start Your <br />
-              <span className="underline decoration-white/30">Beauty Journey</span>?
-            </h2>
-            <p className="text-sm md:text-base opacity-90 max-w-md mx-auto">
-              Join thousands of happy customers who've found their perfect beauty routine with us
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 pt-2">
-              <Link to="/shop">
-                <Button className="bg-white text-pink-600 hover:bg-pink-50 shadow-lg shadow-white/20 hover:shadow-white/30 px-8 py-6 rounded-full text-sm font-bold">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Shop Now
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-              <Link to="/contact">
-                <Button variant="ghost" className="text-white hover:bg-white/20 rounded-full px-6 py-6">
-                  <Heart className="w-4 h-4 mr-2" />
-                  Contact Us
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* ========== FOOTER ========== */}
-        <div className="text-center space-y-4 pt-4 border-t">
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <Link to="/about" className="hover:text-pink-500 transition">About</Link>
-            <Link to="/shop" className="hover:text-pink-500 transition">Shop</Link>
-            <Link to="/contact" className="hover:text-pink-500 transition">Contact</Link>
-            <Link to="/help" className="hover:text-pink-500 transition">Help</Link>
-            <Link to="/privacy" className="hover:text-pink-500 transition">Privacy Policy</Link>
-          </div>
-          <div className="flex justify-center gap-4">
-            <a href="#" className="p-2 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-100 transition">
-              <Instagram className="w-5 h-5" />
-            </a>
-            <a href="#" className="p-2 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-100 transition">
-              <Facebook className="w-5 h-5" />
-            </a>
-            <a href="#" className="p-2 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-100 transition">
-              <Twitter className="w-5 h-5" />
-            </a>
-            <a href="#" className="p-2 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-100 transition">
-              <Youtube className="w-5 h-5" />
-            </a>
-          </div>
-          <p className="text-xs text-muted-foreground/60">
-            © {new Date().getFullYear()} Glamour & Elegance. All rights reserved.
-          </p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

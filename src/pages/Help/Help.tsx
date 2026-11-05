@@ -1,261 +1,447 @@
-"use client";
-
-import React from "react";
+// pages/Help/Help.tsx
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  Mail, 
-  Phone, 
-  MessageSquare, 
-  Truck, 
-  ShieldCheck, 
-  HelpCircle, 
-  Facebook,
-  ExternalLink,
-  ChevronRight,
-  Clock
+  Search, HelpCircle, Mail, Phone, MessageCircle,
+  ChevronDown, ChevronUp, Truck, RotateCcw,
+  CreditCard, User, Package, Send, Facebook,
+  Clock, MapPin, Sparkles,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+// import { useCreateMessageMutation } from "@/redux/features/contact/contact.api";
 
-// --- SEO SCHEMA DATA ---
-const FAQ_SCHEMA = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "How do I install the Solar-Powered Helicopter Perfume?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Simply peel the adhesive film at the base and place it on a flat dashboard. Ensure solar panels face direct sunlight for automatic spinning."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is the shipping cost in Dhaka, Bangladesh?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Shipping is 60৳ inside Dhaka (2-3 business days) and 120৳ outside Dhaka (3-5 business days)."
-      }
-    }
-  ]
-};
+// ========== FAQ DATA ==========
+const faqCategories = [
+  {
+    id: "orders",
+    label: "Orders & Tracking",
+    icon: Package,
+    faqs: [
+      { q: "How do I track my order?", a: "After placing an order, you'll receive a tracking ID via SMS/email. You can also track it from your Profile → Orders page." },
+      { q: "Can I cancel my order?", a: "Yes, you can cancel before the order is shipped. Go to Profile → Orders → select order → Cancel. After shipping, cancellation is not possible." },
+      { q: "How long does delivery take?", a: "Inside Dhaka: 1-2 days. Outside Dhaka: 3-5 days." },
+    ],
+  },
+  {
+    id: "shipping",
+    label: "Shipping & Delivery",
+    icon: Truck,
+    faqs: [
+      { q: "What is the shipping cost?", a: "Inside Dhaka: ৳60. Outside Dhaka: ৳120. Free shipping on orders above ৳1000." },
+      { q: "Do you deliver outside Bangladesh?", a: "Currently we only deliver inside Bangladesh." },
+    ],
+  },
+  {
+    id: "returns",
+    label: "Returns & Refunds",
+    icon: RotateCcw,
+    faqs: [
+      { q: "What is your return policy?", a: "You can return any product within 7 days of delivery if it's unused, sealed, and with original packaging." },
+      { q: "How do I get a refund?", a: "Once we receive the returned product and verify it, refunds are processed within 3-5 working days to your original payment method or as store credit." },
+    ],
+  },
+  {
+    id: "payment",
+    label: "Payment",
+    icon: CreditCard,
+    faqs: [
+      { q: "What payment methods are available?", a: "We accept Cash on Delivery, bKash, Nagad, Rocket, and all major credit/debit cards via SSLCommerz." },
+      { q: "Is it safe to pay online?", a: "Yes! All online payments are processed through SSLCommerz with bank-level encryption." },
+    ],
+  },
+  {
+    id: "account",
+    label: "Account & Profile",
+    icon: User,
+    faqs: [
+      { q: "How do I reset my password?", a: "Click 'Forgot Password' on the login page and follow the email link to reset." },
+      { q: "Do I need an account to order?", a: "No, you can order as a guest. But logging in lets you track orders, save favorites, and earn coins." },
+    ],
+  },
+];
 
-export default function Help() {
-  const faqs = [
-    {
-      question: "How do I install the Solar-Powered Helicopter Perfume?",
-      answer: "Peel the high-quality adhesive film at the base and place it on a flat dashboard surface. For maximum efficiency, ensure the solar panels are exposed to direct sunlight. The rotor spins automatically without any battery or wiring required."
-    },
-    {
-      question: "What are your delivery charges across Bangladesh?",
-      answer: "We provide reliable shipping nationwide. Inside Dhaka: 60৳ (Delivery in 2-3 business days). Outside Dhaka: 120৳ (Delivery in 3-5 business days)."
-    },
-    {
-      question: "Do the JDM Racing Pendants include scent refills?",
-      answer: "Yes! Every JDM-style pendant comes pre-scented and includes a complementary 10ml concentrated essential oil bottle, ensuring your car stays fresh for months."
-    },
-    {
-      question: "What is your return policy for accessories?",
-      answer: "JCS Trading provides a 7-day replacement warranty for manufacturing defects. To be eligible, please keep the original packaging intact."
+export default function HelpPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeCategory, setActiveCategory] = useState("orders");
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
+  // const [createMessage, { isLoading: isSubmitting }] = useCreateMessageMutation();
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues: { name: "", email: "", phone: "", subject: "", message: "" },
+  });
+
+  // ✅ Filter FAQs by search
+  const filteredFaqs = searchTerm.trim()
+    ? faqCategories
+        .flatMap((c) => c.faqs.map((f) => ({ ...f, category: c.label })))
+        .filter(
+          (f) =>
+            f.q.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            f.a.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    : faqCategories.find((c) => c.id === activeCategory)?.faqs.map((f) => ({
+        ...f,
+        category: activeCategory,
+      })) || [];
+
+  const onSubmit = async (
+    data: any
+  ) => {
+    try {
+      // await createMessage(data).unwrap();
+      toast.success("Feature will coming  soon 🎉",data);
+      reset();
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to send message");
     }
-  ];
+  };
 
   return (
-    <main className="min-h-screen  dark:bg-black py-20 px-4 relative overflow-hidden">
-      {/* 1. SEO Schema Injection */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
-      />
-
-      {/* Background Decorative Gradients */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-
-      <div className="container mx-auto max-w-6xl relative z-10">
-        
-        {/* 2. Professional Hero Section */}
-        <section className="text-center mb-24 space-y-6">
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
+    <div className="bg-background backdrop-blur-3xl min-h-screen">
+      {/* ============ HERO ============ */}
+      <section className="relative overflow-hidden bg-gradient-to-br   via-[#E06D9F] to-[purple-100] text-white py-16 md:py-24">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-white blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-white blur-3xl" />
+        </div>
+        <div className="container mx-auto px-4 relative z-10 text-center max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-semibold uppercase tracking-wider mb-4"
           >
-            <Badge variant="outline" className="px-4 py-1.5 border-primary/20 bg-primary/5 text-primary rounded-full uppercase tracking-tighter text-xs font-bold">
-              JCS Trading Support Hub
-            </Badge>
+            <Sparkles className="w-3 h-3" />
+            We're here to help
           </motion.div>
-
-          <motion.h1 
-            className="text-5xl md:text-7xl font-black tracking-tight italic uppercase"
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
+            className="text-3xl md:text-5xl font-serif font-medium mb-3"
           >
-            Resolution <span className="text-primary">Center</span>
-          </motion.h1 >
-          
-          <motion.p 
-            className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            How can we help you?
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            className="text-white/90 text-sm md:text-base mb-6"
           >
-            Search our comprehensive database for installation guides, shipping rates in Dhaka, and product care instructions.
+            Search our FAQs or contact our support team — we reply within minutes!
           </motion.p>
-          
-          <motion.div 
-            className="relative max-w-2xl mx-auto mt-10 group"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+
+          {/* Search bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            className="relative max-w-xl mx-auto"
           >
-            <div className="absolute -inset-1 bg-primary/20 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-500" />
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-primary w-5 h-5 z-20" />
-            <Input 
-              placeholder="Search guides (e.g. 'helicopter installation')..." 
-              className="pl-14 h-16 rounded-2xl border-none bg-white dark:bg-zinc-900 shadow-2xl focus-visible:ring-2 focus-visible:ring-primary text-lg"
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              placeholder="Search for help... (e.g. 'track order')"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 h-14 rounded-2xl border-0 text-foreground bg-white shadow-2xl text-sm"
             />
           </motion.div>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-12 md:py-16 max-w-6xl">
+
+        {/* ============ QUICK CONTACT CARDS ============ */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-14">
+          <a
+            href="https://wa.me/8801700000000?text=Hello%20I%20need%20help"
+            target="_blank"
+            rel="noreferrer"
+            className="group p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 hover:shadow-lg hover:-translate-y-1 transition-all text-center"
+          >
+            <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+              <MessageCircle className="w-6 h-6 text-white" />
+            </div>
+            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">WhatsApp</p>
+            <p className="text-[10px] text-emerald-600/70">Chat instantly</p>
+          </a>
+
+          <a
+            href="https://m.me/yourpage"
+            target="_blank"
+            rel="noreferrer"
+            className="group p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 hover:shadow-lg hover:-translate-y-1 transition-all text-center"
+          >
+            <div className="w-12 h-12 mx-auto rounded-full bg-blue-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+              <Facebook className="w-6 h-6 text-white" />
+            </div>
+            <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Messenger</p>
+            <p className="text-[10px] text-blue-600/70">Message us</p>
+          </a>
+
+          <a
+            href="tel:+8801700000000"
+            className="group p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 hover:shadow-lg hover:-translate-y-1 transition-all text-center"
+          >
+            <div className="w-12 h-12 mx-auto rounded-full bg-rose-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+              <Phone className="w-6 h-6 text-white" />
+            </div>
+            <p className="text-sm font-semibold text-rose-700 dark:text-rose-400">Call Us</p>
+            <p className="text-[10px] text-rose-600/70">9AM - 9PM</p>
+          </a>
+
+          <a
+            href="mailto:support@yourdomain.com"
+            className="group p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 hover:shadow-lg hover:-translate-y-1 transition-all text-center"
+          >
+            <div className="w-12 h-12 mx-auto rounded-full bg-purple-500 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+              <Mail className="w-6 h-6 text-white" />
+            </div>
+            <p className="text-sm font-semibold text-purple-700 dark:text-purple-400">Email</p>
+            <p className="text-[10px] text-purple-600/70">Reply in 24h</p>
+          </a>
         </section>
 
-        {/* 3. High-Contrast Contact Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
-          <ContactCard 
-            icon={<Phone />} 
-            title="Call Support" 
-            detail="+8801674986600" 
-            subDetail="Available 10:00 - 20:00"
-          />
-          <ContactCard 
-            icon={<Mail />} 
-            title="Email Support" 
-            detail="jcstrading2022@gmail.com" 
-            subDetail="Official inquiries"
-          />
-          <ContactCard 
-            icon={<MessageSquare />} 
-            title="WhatsApp" 
-            detail="Message Us" 
-            subDetail="Instant assistance"
-          />
-          <SocialCard />
-        </div>
+        {/* ============ FAQ + CONTACT FORM ============ */}
+        <div className="grid lg:grid-cols-5 gap-6 md:gap-8">
 
-        {/* 4. Elegant FAQ Accordion */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-          <div className="lg:col-span-4 space-y-6">
-            <div className="inline-flex p-4 rounded-3xl bg-primary text-primary-foreground shadow-xl shadow-primary/20">
-              <HelpCircle className="w-8 h-8" />
+          {/* ============ FAQ SECTION ============ */}
+          <section className="lg:col-span-3">
+            <div className="mb-5">
+              <h2 className="text-xl md:text-2xl font-serif mb-1 flex items-center gap-2">
+                <HelpCircle className="w-5 h-5 text-rose-500" />
+                Frequently Asked Questions
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {searchTerm
+                  ? `${filteredFaqs.length} result(s) for "${searchTerm}"`
+                  : "Browse by category"}
+              </p>
             </div>
-            <h2 className="text-4xl font-bold tracking-tighter uppercase italic">Common <br />Questions</h2>
-            <p className="text-muted-foreground text-lg italic border-l-2 pl-4 border-primary/30">
-              Everything you need to know about Bangladesh&apos;s #1 car accessories shop.
-            </p>
-          </div>
 
-          <div className="lg:col-span-8 space-y-4">
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ x: 5 }}
-                className="bg-white dark:bg-zinc-900 border border-muted rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all"
+            {/* Category tabs */}
+            {!searchTerm && (
+              <div className="flex gap-2 overflow-x-auto pb-3 mb-5 scrollbar-hide">
+                {faqCategories.map((cat) => {
+                  const Icon = cat.icon;
+                  const isActive = activeCategory === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`flex items-center gap-1.5 px-3 h-9 rounded-full whitespace-nowrap text-xs font-medium transition-all ${
+                        isActive
+                          ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md"
+                          : "bg-card border border-border/60 hover:border-rose-300 text-muted-foreground"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* FAQ list */}
+            <div className="space-y-2">
+              {filteredFaqs.length === 0 ? (
+                <Card className="border-border/40">
+                  <CardContent className="py-12 text-center">
+                    <HelpCircle className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">
+                      No results found. Try another keyword or contact us below.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredFaqs.map((faq, idx) => {
+                  const faqId = `${idx}-${faq.q}`;
+                  const isOpen = openFaq === faqId;
+                  return (
+                    <Card
+                      key={faqId}
+                      className={`border-border/40 transition-all ${isOpen ? "border-rose-300 shadow-md" : ""}`}
+                    >
+                      <button
+                        onClick={() => setOpenFaq(isOpen ? null : faqId)}
+                        className="w-full text-left p-4 flex items-center justify-between gap-3"
+                      >
+                        <span className="text-sm font-medium flex-1">{faq.q}</span>
+                        {isOpen ? (
+                          <ChevronUp className="w-4 h-4 text-rose-500 flex-shrink-0" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        )}
+                      </button>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="px-4 pb-4 text-xs text-muted-foreground leading-relaxed"
+                        >
+                          {faq.a}
+                        </motion.div>
+                      )}
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+          </section>
+
+          {/* ============ CONTACT FORM ============ */}
+          <section className="lg:col-span-2">
+            <Card className="border-border/40 sticky top-6">
+              <CardContent className="p-5 md:p-6 space-y-4">
+                <div>
+                  <h2 className="text-xl font-serif mb-1 flex items-center gap-2">
+                    <Send className="w-5 h-5 text-rose-500" />
+                    Still need help?
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Fill the form below and we'll get back to you within 24 hours.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">Name *</Label>
+                    <Input
+                      {...register("name", { required: "Name is required" })}
+                      placeholder="Your name"
+                      className="h-10 text-sm"
+                    />
+                    {errors.name && (
+                      <p className="text-[10px] text-red-500">{errors.name.message as string}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">Email *</Label>
+                    <Input
+                      type="email"
+                      {...register("email", { required: "Email is required" })}
+                      placeholder="you@example.com"
+                      className="h-10 text-sm"
+                    />
+                    {errors.email && (
+                      <p className="text-[10px] text-red-500">{errors.email.message as string}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">Phone *</Label>
+                    <Input
+                      {...register("phone", { required: "Phone is required" })}
+                      placeholder="01XXXXXXXXX"
+                      className="h-10 text-sm"
+                    />
+                    {errors.phone && (
+                      <p className="text-[10px] text-red-500">{errors.phone.message as string}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">Subject *</Label>
+                    <Input
+                      {...register("subject", { required: "Subject is required" })}
+                      placeholder="What's this about?"
+                      className="h-10 text-sm"
+                    />
+                    {errors.subject && (
+                      <p className="text-[10px] text-red-500">{errors.subject.message as string}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">Message *</Label>
+                    <Textarea
+                      {...register("message", { required: "Message is required" })}
+                      placeholder="Tell us how we can help..."
+                      rows={4}
+                      className="text-sm resize-none"
+                    />
+                    {errors.message && (
+                      <p className="text-[10px] text-red-500">{errors.message.message as string}</p>
+                    )}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    // disabled={isSubmitting}
+                    className="w-full h-11 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl gap-2"
+                  >
+                    {/* {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <> */}
+                        <Send className="w-4 h-4" />
+                        Send Message
+                      {/* </>
+                    )} */}
+                  </Button>
+                </form>
+
+                {/* Info section */}
+                <div className="pt-3 border-t border-border/40 space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Support hours: 9 AM - 9 PM (Sat-Thu)</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <MapPin className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Dhaka, Bangladesh</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        </div>
+
+        {/* ============ BOTTOM CTA ============ */}
+        <section className="mt-16 text-center p-8 rounded-3xl bg-gradient-to-br from-stone-100 to-rose-50 dark:from-stone-900 dark:to-rose-950/30 border border-border/40">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold text-rose-500 uppercase tracking-wider mb-2">
+            <Sparkles className="w-3 h-3" />
+            Still curious?
+          </div>
+          <h3 className="text-xl md:text-2xl font-serif mb-2">
+            Chat with us directly
+          </h3>
+          <p className="text-xs md:text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+            Our support team is online now. Get instant answers on WhatsApp or Messenger.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+            <a
+              href="https://wa.me/8801700000000?text=Hello%20I%20need%20help"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl gap-2">
+                <MessageCircle className="w-4 h-4" />
+                Chat on WhatsApp
+              </Button>
+            </a>
+            <a href="https://m.me/yourpage" target="_blank" rel="noreferrer">
+              <Button
+                variant="outline"
+                className="rounded-xl gap-2 border-blue-300 text-blue-600 hover:bg-blue-50"
               >
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value={`item-${index}`} className="border-none">
-                    <AccordionTrigger className="px-6 py-6 font-bold hover:no-underline hover:text-primary transition-colors text-left">
-                      {faq.question}
-                    </AccordionTrigger>
-                    <AccordionContent className="px-6 pb-6 text-muted-foreground leading-relaxed text-[15px]">
-                      {faq.answer}
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </motion.div>
-            ))}
+                <Facebook className="w-4 h-4" />
+                Message on Facebook
+              </Button>
+            </a>
           </div>
-        </div>
-
-        {/* 5. Utility Footprint */}
-        <div className="mt-32 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <ActionItem 
-            icon={<Truck className="w-6 h-6" />} 
-            title="National Delivery Tracking" 
-            desc="Track your package from Sonirakhra to any corner of Bangladesh." 
-          />
-          <ActionItem 
-            icon={<ShieldCheck className="w-6 h-6" />} 
-            title="Authenticity Guarantee" 
-            desc="Verify your JCS Trading serial numbers and warranty certificates." 
-          />
-        </div>
+        </section>
       </div>
-    </main>
-  );
-}
-
-/* --- UI COMPONENTS --- */
-
-function ContactCard({ icon, title, detail, subDetail }: any) {
-  return (
-    <motion.div whileHover={{ y: -5 }} className="group">
-      <Card className="h-full rounded-2xl p-6 shadow-lg bg-white dark:bg-zinc-900/50 backdrop-blur-xl">
-        <CardHeader className="pb-4">
-          <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-            {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6" } as any)}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{title}</CardTitle>
-          <p className="text-lg font-black truncate">{detail}</p>
-          <div className="flex items-center gap-1.5 text-xs text-primary font-medium bg-primary/5 w-fit px-2 py-0.5 rounded-full">
-            <Clock className="w-3 h-3" /> {subDetail}
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
-
-function SocialCard() {
-  return (
-    <a href="https://www.facebook.com/share/1SDTmgM62M/" target="_blank" rel="noreferrer">
-      <motion.div whileHover={{ y: -5 }}>
-        <Card className="h-full rounded-2xl p-6 shadow-lg bg-blue-600 text-white overflow-hidden relative group">
-          <Facebook className="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 rotate-12 group-hover:scale-110 transition-transform" />
-          <CardHeader>
-             <Facebook className="w-8 h-8 fill-current" />
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <CardTitle className="text-lg font-bold">Facebook Shop</CardTitle>
-            <p className="text-sm opacity-80 flex items-center gap-1">
-              DM for quick support <ExternalLink className="w-3 h-3" />
-            </p>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </a>
-  );
-}
-
-function ActionItem({ icon, title, desc }: any) {
-  return (
-    <div className="group flex gap-6 p-8 bg-white dark:bg-zinc-900 border-2 border-transparent hover:border-primary/20 rounded-[2.5rem] items-center transition-all cursor-pointer shadow-sm">
-      <div className="bg-primary/10 p-5 rounded-2xl text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-        {icon}
-      </div>
-      <div>
-        <h3 className="font-black text-xl uppercase italic tracking-tighter mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground font-medium leading-snug">{desc}</p>
-      </div>
-      <ChevronRight className="ml-auto w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-2 transition-all" />
     </div>
   );
 }
