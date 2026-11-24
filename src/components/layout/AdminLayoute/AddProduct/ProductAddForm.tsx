@@ -2,10 +2,7 @@
 "use client";
 
 import { useForm, useFieldArray } from "react-hook-form";
-import {
-  useCreateProductMutation,
-  
-} from "@/redux/features/product/product.api";
+import { useCreateProductMutation } from "@/redux/features/product/product.api";
 import {
   Form,
   FormControl,
@@ -45,7 +42,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router";
 import BrandSelector from "./BrandSelector";
-import CategorySelector from "./CategorySelector";
+// ✅ Notun Imports
+import { useGetCategoriesQuery, useGetSubCategoriesByCategoryQuery } from "@/redux/features/category/category.api";
 
 // ============================================
 // ✅ TYPES
@@ -64,7 +62,9 @@ interface IVariant {
 interface IProductForm {
   title: string;
   nameBn: string;
-  category: string;
+  categoryId: string; // ✅ _id track korar jonno
+  category: string; // ✅ Name track korar jonno (backend e jabe)
+  subCategory: string; // ✅ NEW
   brand: string;
   description: string;
   shortDescription: string;
@@ -78,8 +78,6 @@ interface IProductForm {
   allowOnlinePayment: boolean;
 }
 
-
-
 export default function ProductAddForm() {
   const navigate = useNavigate();
   const [addProduct, { isLoading }] = useCreateProductMutation();
@@ -87,13 +85,17 @@ export default function ProductAddForm() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const isSubmitting = useRef(false);
 
-  // ✅ Dynamic brands
-  
+  // ✅ Fetch Categories
+  const { data: categoriesData } = useGetCategoriesQuery();
+  const categories = Array.isArray(categoriesData) ? categoriesData : [];
+
   const form = useForm<IProductForm>({
     defaultValues: {
       title: "",
       nameBn: "",
+      categoryId: "",
       category: "",
+      subCategory: "",
       brand: "",
       description: "",
       shortDescription: "",
@@ -108,6 +110,19 @@ export default function ProductAddForm() {
     },
   });
 
+  // ✅ Watch selected Category ID
+  const selectedCategoryId = form.watch("categoryId");
+
+  // ✅ Fetch SubCategories based on selected Main Category
+  const { data: subCategoriesData, isLoading: isSubLoading } =
+    useGetSubCategoriesByCategoryQuery(
+      selectedCategoryId,
+      { skip: !selectedCategoryId }, // Category select na korle API call hobe na
+    );
+  const subCategories = Array.isArray(subCategoriesData)
+    ? subCategoriesData
+    : [];
+
   // ✅ Variants array management
   const {
     fields: variantFields,
@@ -118,7 +133,6 @@ export default function ProductAddForm() {
     name: "variants",
   });
 
-  // ✅ Watch for live preview
   const watchPrice = form.watch("price");
   const watchDiscount = form.watch("discountPrice");
   const hasDiscount = watchDiscount > 0 && watchDiscount < watchPrice;
@@ -126,10 +140,7 @@ export default function ProductAddForm() {
     ? Math.round(((watchPrice - watchDiscount) / watchPrice) * 100)
     : 0;
 
-  // ============================================
-  // ✅ IMAGE HANDLERS
-  // ============================================
-
+  // ✅ Image Handlers
   const handleImageUpload = useCallback((file: File | null) => {
     if (!file) return;
     setImageFiles((prev) => [...prev, file]);
@@ -142,9 +153,6 @@ export default function ProductAddForm() {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  // ============================================
-  // ✅ ADD VARIANT
-  // ============================================
   const addVariant = () => {
     append({
       skuId: `sku-${Date.now()}`,
@@ -157,32 +165,24 @@ export default function ProductAddForm() {
     });
   };
 
-  // ============================================
-  // ✅ SUBMIT
-  // ============================================
-
+  // ✅ SUBMIT HANDLER
   const onSubmit = async (data: IProductForm) => {
     if (isSubmitting.current) return;
 
-    if (!data.title) {
-      toast.error("Product title is required");
-      return;
-    }
+    if (!data.title) return toast.error("Product title is required");
+    if (!data.category) return toast.error("Main Category is required");
 
     if (data.variants.length === 0 && (!data.price || data.price <= 0)) {
-      toast.error("Product price is required (or add variants)");
-      return;
+      return toast.error("Product price is required");
     }
 
     if (!data.allowCashOnDelivery && !data.allowOnlinePayment) {
-      toast.error("At least one payment method must be enabled");
-      return;
+      return toast.error("At least one payment method must be enabled");
     }
 
     isSubmitting.current = true;
 
     try {
-      // ✅ Prepare variants
       const apiVariants = data.variants.map((v) => ({
         skuId: v.skuId || `sku-${Date.now()}`,
         combo: v.combo || null,
@@ -193,20 +193,16 @@ export default function ProductAddForm() {
         image: v.image || null,
       }));
 
-      // ✅ Price calculations
       const variantPrices =
         apiVariants.length > 0
           ? apiVariants.map((v) => v.price)
           : [Number(data.price) || 0];
-
       const minPrice = Math.min(...variantPrices);
       const maxPrice = Math.max(...variantPrices);
-
       const totalStock =
         apiVariants.length > 0
           ? apiVariants.reduce((sum, v) => sum + v.quantity, 0)
           : Number(data.stock) || 0;
-
       const hasDiscountCalc =
         apiVariants.length > 0
           ? apiVariants.some((v) => v.specialPrice && v.specialPrice < v.price)
@@ -218,12 +214,12 @@ export default function ProductAddForm() {
         title: data.title,
         name: data.title,
         nameBn: data.nameBn || data.title,
-        category: data.category || "Uncategorized",
+        category: data.category,
+        subCategory: data.subCategory || null, // ✅ Subcategory payload e add holo
         brand: data.brand || "Generic",
         description: data.description || "",
         shortDescription: data.shortDescription || "",
         highlights: data.shortDescription || "",
-
         price: minPrice,
         discountPrice: Number(data.discountPrice) || 0,
         minPrice,
@@ -231,42 +227,26 @@ export default function ProductAddForm() {
         stock: totalStock,
         totalStock,
         hasDiscount: hasDiscountCalc,
-
         variants: apiVariants,
-
         status: data.isActive ? "active" : "inactive",
         isActive: data.isActive,
-
-        // ✅ Payment options
         allowCashOnDelivery: data.allowCashOnDelivery,
         allowOnlinePayment: data.allowOnlinePayment,
-
         images: [],
       };
 
-      console.log("📝 Payload:", payload);
-
-      // ✅ FormData
       const formData = new FormData();
       formData.append("data", JSON.stringify(payload));
+      imageFiles.forEach((file) => formData.append("files", file));
 
-      imageFiles.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      // ✅ API call
-      const result = await addProduct(formData).unwrap();
-      console.log("✅ Success:", result);
-
+      await addProduct(formData).unwrap();
       toast.success("Product created successfully! ✨");
 
-      // Reset
       form.reset();
       setImageFiles([]);
       setImagePreviews([]);
       navigate("/admin/products");
     } catch (error: any) {
-      console.error("❌ API Error:", error);
       toast.error(error?.data?.message || "Failed to create product");
     } finally {
       isSubmitting.current = false;
@@ -347,49 +327,102 @@ export default function ProductAddForm() {
                 </div>
 
                 {/* Category + Brand */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-  control={form.control}
-  name="category"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel className="font-semibold flex items-center gap-1.5">
-        <Layers className="w-3.5 h-3.5 text-pink-500" />
-        Category *
-      </FormLabel>
-      <FormControl>
-        <CategorySelector
-          value={field.value || ""}
-          onChange={field.onChange}
-          placeholder="Select category..."
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                {/* ✅ Main Category Selector (Native Select for easier ID tracking) */}
+                <FormField
+                  control={form.control}
+                  name="categoryId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-pink-500" />
+                        Main Category *
+                      </FormLabel>
+                      <Select
+                        onValueChange={(val) => {
+                          field.onChange(val);
+                          // Category name o set kore dicchi
+                          const selectedCat = categories.find((c: any) => c._id === val);
+                          form.setValue("category", selectedCat ? selectedCat.name : "");
+                          // Main category change hole sub-category reset hobe
+                          form.setValue("subCategory", ""); 
+                        }}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="border-pink-200/50 h-10">
+                            <SelectValue placeholder="Select category..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((cat: any) => (
+                            <SelectItem key={cat._id} value={cat._id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-  control={form.control}
-  name="brand"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel className="font-semibold flex items-center gap-1.5">
-        <Tag className="w-3.5 h-3.5 text-pink-500" />
-        Brand
-      </FormLabel>
-      <FormControl>
-        <BrandSelector
-          value={field.value || ""}
-          onChange={field.onChange}
-          placeholder="Select brand..."
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-                </div>
+                {/* ✅ Sub-Category Selector */}
+                <FormField
+                  control={form.control}
+                  name="subCategory"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-purple-500" />
+                        Sub-Category (Optional)
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={!selectedCategoryId || isSubLoading}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="border-pink-200/50 h-10">
+                            <SelectValue placeholder={isSubLoading ? "Loading..." : "Select sub-category..."} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {subCategories.length === 0 ? (
+                            <SelectItem value="none" disabled>No sub-categories found</SelectItem>
+                          ) : (
+                            subCategories.map((sub: any) => (
+                              <SelectItem key={sub._id} value={sub.name}>
+                                {sub.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Brand Selector */}
+                <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold flex items-center gap-1.5">
+                        <Tag className="w-3.5 h-3.5 text-pink-500" />
+                        Brand
+                      </FormLabel>
+                      <FormControl>
+                        <BrandSelector value={field.value || ""} onChange={field.onChange} placeholder="Select brand..." />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
                 {/* Description */}
                 <FormField

@@ -34,6 +34,15 @@ export const categoryApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["CATEGORY", "PRODUCT"],
     }),
+    getSubCategoriesByCategory: builder.query<any[], string>({
+      query: (categoryId) => ({
+        url: `/subcategories/category/${categoryId}`,
+        method: "GET",
+      }),
+      transformResponse: (res: any) => res?.data || res || [],
+      providesTags: ["SUBCATEGORY"],
+    }),
+
 
     // ✅ Admin — update with optional image
     updateCategory: builder.mutation<ICategory, { id: string; formData: FormData }>({
@@ -58,6 +67,8 @@ export const categoryApi = baseApi.injectEndpoints({
 
 export const {
   useGetCategoriesQuery,
+    useGetSubCategoriesByCategoryQuery, // 👈 Export koro
+
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,

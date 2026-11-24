@@ -29,7 +29,7 @@ export default function BrandSlider() {
   if (brands.length === 0) return null;
 
   return (
-    <section className="py-12 bg-stone-50 dark:bg-[#0D0D0D] border-y border-border/40 overflow-hidden">
+    <section className="py-12  dark:bg-[#0D0D0D] border-y border-border/40 overflow-hidden">
       <div className="container mx-auto px-4 mb-6 text-center">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 text-rose-500 text-[11px] font-medium tracking-wider uppercase mb-2">
           <Sparkles size={12} />
@@ -55,11 +55,11 @@ export default function BrandSlider() {
            (
             <div
               key={`${brand._id}-${index}`}
-              className="flex items-center justify-center opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-110 cursor-pointer px-4">
+              className="flex items-center  w-15 md:w-20 h-20    justify-center opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300 transform hover:scale-110 cursor-pointer ">
               <img
                 src={brand.logo}
                 alt={brand.name}
-                className="h-7 sm:h-9 w-auto max-w-[120px] object-contain dark:invert"
+                className="  dark:invert"
                 loading="lazy"
               />
             </div>

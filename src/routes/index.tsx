@@ -21,6 +21,7 @@ import CartPage from "@/components/layout/HomeLayout/Cart/CartPage";
 import BrandsPage from "@/components/layout/HomeLayout/Brands/BrandsPage";
 import FavoritePage from "@/components/layout/HomeLayout/Favorite/FavoritePage";
 import ProfilePage from "@/components/layout/HomeLayout/Profile/ProfilePage";
+import CategoriesPage from "@/components/layout/HomeLayout/CategoriesPage/CategoriesPage";
 
 
 
@@ -33,6 +34,8 @@ const router = createBrowserRouter([
       { path: "/", Component: Home },
       { path: "about", Component: About },
       { path: "shop", Component: HomeShope },
+      { path: "categories", Component: CategoriesPage },
+
       { path: "cart", Component: CartPage },
       { path: "thankyou", Component: OrderSuccessPage },
       { path: "alldata/:id", Component: ProductDetails },

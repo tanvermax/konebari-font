@@ -66,6 +66,7 @@ interface IProductForm {
   title: string;
   nameBn: string;
   category: string;
+  subCategory?: string;
   description: string;
   shortDescription: string;
   price: number;
@@ -97,6 +98,7 @@ export default function EditProduct() {
     skip: !id,
   });
 
+
   const [updateProduct, { isLoading: isSaving }] = useUpdateProductMutation();
 
   const [images, setImages] = useState<string[]>([]);
@@ -108,6 +110,7 @@ export default function EditProduct() {
       title: "",
       nameBn: "",
       category: "",
+      subCategory:"",
       description: "",
       shortDescription: "",
       price: 0,
@@ -149,6 +152,7 @@ export default function EditProduct() {
         title: product.title || "",
         nameBn: product.nameBn || "",
         category: product.category || "",
+        subCategory: product.subCategory || "",
         description: product.description || "",
         shortDescription: product.shortDescription || "",
         price: product.price || 0,
@@ -191,6 +195,7 @@ export default function EditProduct() {
         title: data.title,
         nameBn: data.nameBn,
         category: data.category,
+        suCategory: data.subCategory,
         description: data.description,
         shortDescription: data.shortDescription,
         price: Number(data.price) || 0,
@@ -286,6 +291,7 @@ export default function EditProduct() {
     );
   }
 
+
   if (isError || !product) {
     return (
       <div className="container mx-auto p-10 text-center">
@@ -374,6 +380,14 @@ export default function EditProduct() {
                   value={form.watch("category") || ""}
                   onChange={(value) => form.setValue("category", value)}
                   placeholder="Select category..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-semibold">Subcategory</Label>
+                <CategorySelector
+                  value={form.watch("subCategory") || ""}
+                  onChange={(value) => form.setValue("subCategory", value)}
+                  placeholder="Select subcategory..."
                 />
               </div>
             </div>
@@ -788,7 +802,6 @@ export default function EditProduct() {
               )}
             </div>
 
-            {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-pink-100/50">
               <Button
                 type="submit"

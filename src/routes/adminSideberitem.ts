@@ -7,6 +7,7 @@ import AdminAnalyticsPage from "@/components/layout/AdminLayoute/Analytics/Admin
 import AdminReportsPage from "@/components/layout/AdminLayoute/Analytics/AdminReportsPage";
 import BrandManagementPage from "@/components/layout/AdminLayoute/BrandManagement/BrandManagementPage";
 import CategoryManagementPage from "@/components/layout/AdminLayoute/CategoryManagement/CategoryManagementPage";
+import SubCategoryPage from "@/components/layout/AdminLayoute/CategoryManagement/SubCategoryPage";
 import AdminOrdersPage from "@/components/layout/AdminLayoute/Orders/AdminOrdersPage";
 import AdminOverviewPage from "@/components/layout/AdminLayoute/Overview/Adminoverviewpage";
 import AdminShipmentsPage from "@/components/layout/AdminLayoute/Shipments/AdminShipmentsPage";
@@ -178,6 +179,15 @@ export const adminSidebarItem: ISidebarItem[] = [
         component: CategoryManagementPage,
         icon: Layers,
       },
+      
+      // ✅ Notun Sub-Category Add korun
+      {
+        title: "Sub-Categories",
+        url: "/admin/sub-categories",
+        component: SubCategoryPage, 
+        icon: Layers, // Ba onno icon use korte paren
+      },
+
 
       // {
       //   title: "Categories",

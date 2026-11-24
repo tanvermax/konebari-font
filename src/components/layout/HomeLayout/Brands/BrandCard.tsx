@@ -1,8 +1,7 @@
 // components/layout/Brands/BrandCard.tsx
 import { Link } from "react-router";
 import { Package, ArrowRight } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 interface BrandCardProps {
   brand: {
@@ -10,28 +9,13 @@ interface BrandCardProps {
     name: string;
     slug?: string;
     logo?: string;
-    image?: string; // fallback
+    image?: string;
     count?: number;
     totalStock?: number;
     minPrice?: number;
     maxPrice?: number;
   };
 }
-
-const getBrandGradient = (name: string) => {
-  const gradients = [
-    "from-rose-400 to-pink-500",
-    "from-purple-400 to-pink-500",
-    "from-blue-400 to-cyan-500",
-    "from-emerald-400 to-green-500",
-    "from-amber-400 to-orange-500",
-    "from-indigo-400 to-purple-500",
-    "from-pink-400 to-rose-500",
-    "from-teal-400 to-cyan-500",
-  ];
-  const idx = (name.charCodeAt(0) || 0) % gradients.length;
-  return gradients[idx];
-};
 
 const getInitials = (name: string) => {
   if (!name) return "?";
@@ -43,75 +27,65 @@ const getInitials = (name: string) => {
 };
 
 export default function BrandCard({ brand }: BrandCardProps) {
-  const gradient = getBrandGradient(brand.name);
   const initials = getInitials(brand.name);
   const logoUrl = brand.logo || brand.image;
-
-  // ✅ Link e slug use koro jodi thake, na hole name
   const brandParam = brand.slug || brand.name;
 
   return (
     <Link
       to={`/shop?brand=${encodeURIComponent(brandParam)}`}
-      className="block group"
+      className="group block h-full"
     >
-      <Card className="overflow-hidden rounded-2xl border border-border/40 bg-card transition-all duration-300 hover:shadow-lg hover:border-rose-200/60 dark:hover:border-rose-900/40 p-5 flex flex-col items-center text-center">
-        {/* Logo / Initials */}
-        <div className="relative mb-3">
-          {logoUrl ? (
-            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-rose-100 dark:border-rose-900/40 bg-white shadow-sm group-hover:scale-105 transition-transform flex items-center justify-center p-2">
-              <img
-                src={logoUrl}
-                alt={brand.name}
-                className="w-full h-full object-contain"
-              />
-            </div>
-          ) : (
-            <div
-              className={`w-20 h-20 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:scale-105 transition-transform`}
+      <motion.div
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.2 }}
+        className="relative flex flex-col items-center h-full bg-white dark:bg-stone-950 rounded-2xl border border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-md transition-all duration-300 overflow-hidden"
+      >
+        <div className="p-6 w-full flex flex-col items-center flex-1">
+          
+          {/* Logo / Initials Area */}
+          <div className="relative mb-4">
+            {logoUrl ? (
+              <div className="w-20 h-20 rounded-full overflow-hidden border border-stone-100 dark:border-stone-800  dark:bg-stone-900 flex items-center justify-center p-3 group-hover:scale-105 transition-transform duration-300">
+                <img
+                  src={logoUrl}
+                  alt={brand.name}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-full border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 flex items-center justify-center text-stone-700 dark:text-stone-300 font-semibold text-xl group-hover:scale-105 transition-transform duration-300">
+                {initials}
+              </div>
+            )}
+          </div>
+
+          {/* Brand Info */}
+          <div className="text-center flex-1 flex flex-col items-center w-full">
+            <h3
+              className="text-sm font-semibold text-stone-800 dark:text-stone-200 line-clamp-1 leading-snug px-2"
+              title={brand.name}
             >
-              {initials}
-            </div>
-          )}
+              {brand.name}
+            </h3>
 
-          {/* Count badge — only if provided */}
-          {typeof brand.count === "number" && brand.count > 0 && (
-            <Badge className="absolute -bottom-1 -right-1 bg-rose-500 text-white border-2 border-background rounded-full text-[10px] font-bold px-1.5 min-w-[24px] h-[24px] flex items-center justify-center">
-              {brand.count}
-            </Badge>
-          )}
+            {/* Product Count (Minimal text) */}
+            {typeof brand.count === "number" && brand.count > 0 && (
+              <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 flex items-center gap-1">
+                <Package className="w-3 h-3" />
+                {brand.count} Items
+              </p>
+            )}
+          </div>
+
+          {/* Minimal Hover CTA */}
+          <div className="mt-4 flex items-center justify-center gap-1 text-[11px] font-medium text-stone-400 dark:text-stone-500 group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors w-full">
+            <span>View Products</span>
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+          </div>
+          
         </div>
-
-        {/* Brand Name */}
-        <h3
-          className="text-sm font-semibold text-foreground group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors line-clamp-2 min-h-[36px] leading-snug"
-          title={brand.name}
-        >
-          {brand.name}
-        </h3>
-
-        {/* Product Count (optional) */}
-        {typeof brand.count === "number" && (
-          <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-            <Package className="w-3 h-3" />
-            {brand.count} {brand.count === 1 ? "product" : "products"}
-          </p>
-        )}
-
-        {/* Price Range (optional) */}
-        {brand.minPrice !== undefined && brand.maxPrice !== undefined && (
-          <p className="text-[10px] text-muted-foreground mt-0.5">
-            ৳{brand.minPrice.toLocaleString()} - ৳
-            {brand.maxPrice.toLocaleString()}
-          </p>
-        )}
-
-        {/* Hover CTA */}
-        <div className="mt-3 flex items-center gap-1 text-[11px] font-semibold text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
-          <span>Shop Now</span>
-          <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-        </div>
-      </Card>
+      </motion.div>
     </Link>
   );
 }

@@ -1,6 +1,6 @@
 // components/layout/HomeShope/HomeShope.tsx
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams, Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -9,19 +9,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SlidersHorizontal, PackageX, Loader2, RefreshCw, X } from "lucide-react";
+import {
+  SlidersHorizontal,
+  PackageX,
+  Loader2,
+  RefreshCw,
+  X,
+  ArrowLeft,
+  Layers,
+  Grid3X3,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 import ProductCard from "../HomeLayout/ProductCard/ProductCard";
-import {
-  useAllpstockQuery,
-  useCategoriesQuery,
-} from "@/redux/features/product/product.api";
+import { useAllpstockQuery } from "@/redux/features/product/product.api";
 import ProductSearch from "./ProductSearch";
 import type { IProductCard } from "@/redux/features/product/Product.types";
-import CategoryPills from "./CategoryPills";
 
 /* ================== Skeleton ================== */
 const ProductSkeleton = () => (
@@ -39,7 +44,8 @@ export default function HomeShope() {
   // ✅ URL params
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategory = searchParams.get("category") || "All";
-  const urlBrand = searchParams.get("brand") || "";        // 👈 NEW
+  const urlSubCategory = searchParams.get("subcategory") || "";
+  const urlBrand = searchParams.get("brand") || "";
   const urlSearch = searchParams.get("search") || "";
 
   // ================== STATE ==================
@@ -48,7 +54,8 @@ export default function HomeShope() {
   const [searchTerm, setSearchTerm] = useState(urlSearch);
   const [sortBy, setSortBy] = useState("default");
   const [selectedCategory, setSelectedCategory] = useState(urlCategory);
-  const [selectedBrand, setSelectedBrand] = useState(urlBrand);   // 👈 NEW
+  const [selectedSubCategory, setSelectedSubCategory] = useState(urlSubCategory);
+  const [selectedBrand, setSelectedBrand] = useState(urlBrand);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // ✅ Sync state with URL
@@ -58,7 +65,12 @@ export default function HomeShope() {
       setPage(1);
       setAllProducts([]);
     }
-    if (selectedBrand !== urlBrand) {          // 👈 NEW
+    if (selectedSubCategory !== urlSubCategory) {
+      setSelectedSubCategory(urlSubCategory);
+      setPage(1);
+      setAllProducts([]);
+    }
+    if (selectedBrand !== urlBrand) {
       setSelectedBrand(urlBrand);
       setPage(1);
       setAllProducts([]);
@@ -66,30 +78,7 @@ export default function HomeShope() {
     if (searchTerm !== urlSearch) {
       setSearchTerm(urlSearch);
     }
-  }, [urlCategory, urlBrand, urlSearch]);
-
-  // ================== CATEGORIES ==================
-  const { data: categoriesData } = useCategoriesQuery(undefined);
-
-  const categories = useMemo(() => {
-    const list = Array.isArray(categoriesData) ? categoriesData : [];
-    return list.filter((c: any) => c && (c.name || c._id || c.title));
-  }, [categoriesData]);
-
-  // ✅ Update URL when category changes
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setPage(1);
-    setAllProducts([]);
-
-    const params = new URLSearchParams(searchParams);
-    if (category === "All") {
-      params.delete("category");
-    } else {
-      params.set("category", category);
-    }
-    setSearchParams(params, { replace: true });
-  };
+  }, [urlCategory, urlSubCategory, urlBrand, urlSearch]);
 
   // ✅ Update URL when search changes
   const handleSearchChange = (term: string) => {
@@ -106,7 +95,32 @@ export default function HomeShope() {
     setSearchParams(params, { replace: true });
   };
 
-  // ✅ Remove brand filter                  // 👈 NEW
+  // ✅ Remove category filter
+  const handleRemoveCategory = () => {
+    setSelectedCategory("All");
+    // Main category clear hole sub-category o clear hobe
+    setSelectedSubCategory(""); 
+    setPage(1);
+    setAllProducts([]);
+
+    const params = new URLSearchParams(searchParams);
+    params.delete("category");
+    params.delete("subcategory");
+    setSearchParams(params, { replace: true });
+  };
+
+  // ✅ Remove Sub-Category filter
+  const handleRemoveSubCategory = () => {
+    setSelectedSubCategory("");
+    setPage(1);
+    setAllProducts([]);
+
+    const params = new URLSearchParams(searchParams);
+    params.delete("subcategory");
+    setSearchParams(params, { replace: true });
+  };
+
+  // ✅ Remove brand filter
   const handleRemoveBrand = () => {
     setSelectedBrand("");
     setPage(1);
@@ -130,28 +144,25 @@ export default function HomeShope() {
       limit: PAGE_SIZE,
       search: searchTerm || undefined,
       category: selectedCategory === "All" ? undefined : selectedCategory,
-      brand: selectedBrand ? selectedBrand : undefined,   // 👈 NEW
+      subcategory: selectedSubCategory || undefined,
+      brand: selectedBrand ? selectedBrand : undefined,
       sort: sortParam,
       status: "all",
     }),
-    [page, searchTerm, selectedCategory, selectedBrand, sortParam]
+    [page, searchTerm, selectedCategory, selectedSubCategory, selectedBrand, sortParam]
   );
 
   // ================== API ==================
-  const {
-    data,
-    isLoading,
-    isFetching,
-    refetch,
-  } = useAllpstockQuery(queryParams, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data, isLoading, isFetching, refetch } = useAllpstockQuery(
+    queryParams,
+    { refetchOnMountOrArgChange: true }
+  );
 
   // ================== RESET ON FILTER CHANGE ==================
   useEffect(() => {
     setAllProducts([]);
     setPage(1);
-  }, [searchTerm, selectedCategory, selectedBrand, sortBy]);   // 👈 selectedBrand যোগ
+  }, [searchTerm, selectedCategory, selectedSubCategory, selectedBrand, sortBy]);
 
   // ================== ACCUMULATE DATA ==================
   useEffect(() => {
@@ -188,44 +199,66 @@ export default function HomeShope() {
 
   const isInitialLoading = isLoading && allProducts.length === 0;
 
-  // ✅ Check if any filter active
   const hasActiveFilters =
-    searchTerm || selectedCategory !== "All" || selectedBrand;
+    searchTerm || selectedCategory !== "All" || selectedSubCategory || selectedBrand;
 
-  // ✅ Reset all filters
   const handleResetAll = () => {
     setSearchTerm("");
     setSelectedCategory("All");
+    setSelectedSubCategory(""); // ✅ Reset sub-category
     setSelectedBrand("");
     setSearchParams({}, { replace: true });
     refetch();
   };
 
+  // Header Title Logic
+  
+
   return (
     <div className="container mx-auto px-3 md:px-4 py-4 md:py-8 max-w-7xl">
-      {/* Header */}
-      
+      {/* ✅ Selected Category / Sub-Category Header */}
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            to="/categories"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-border/60 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-medium text-muted-foreground hover:text-rose-600 transition-all"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            All Categories
+          </Link>
 
-      {/* ✅ Categories (URL-synced) */}
-      <div className="flex justify-between">
-        <CategoryPills
-        categories={categories}
-        selected={selectedCategory}
-        onSelect={handleCategoryChange}
-      />
-      <div className="mb-6">
-        <h1 className="text-md text-right md:text-xl font-bold bg-gradient-to-r from-rose-600 to-purple-600 bg-clip-text text-transparent">
-          Shop Collection
-        </h1>
-        <p className="text-[10px] md:text-xs text-muted-foreground mt-1">
-          {totalProducts > 0
-            ? `Discover ${totalProducts}+ authentic beauty products`
-            : "Explore our collection"}
-        </p>
+          {selectedCategory !== "All" && (
+            <div className="flex items-center gap-2 h-9 px-4 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-semibold shadow-md">
+              <Layers className="w-3.5 h-3.5" />
+              {selectedCategory}
+              <button
+                onClick={handleRemoveCategory}
+                className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                aria-label="Clear category"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
+          {/* ✅ Sub-Category Pill */}
+          {selectedSubCategory && (
+            <div className="flex items-center gap-2 h-9 px-4 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white text-xs font-semibold shadow-md">
+              <Grid3X3 className="w-3.5 h-3.5" />
+              {selectedSubCategory}
+              <button
+                onClick={handleRemoveSubCategory}
+                className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                aria-label="Clear sub-category"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      </div>
-      {/* ✅ Brand Filter Banner (only shows when brand is selected) */}
+      {/* ✅ Brand Filter Banner */}
       {selectedBrand && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -283,16 +316,43 @@ export default function HomeShope() {
       {hasActiveFilters && (
         <div className="flex items-center gap-2 flex-wrap mb-4">
           <span className="text-xs text-muted-foreground">Active filters:</span>
+          
           {searchTerm && (
             <Badge variant="secondary" className="text-xs gap-1">
               Search: "{searchTerm}"
             </Badge>
           )}
+          
           {selectedCategory !== "All" && (
-            <Badge variant="secondary" className="text-xs gap-1">
+            <Badge
+              variant="secondary"
+              className="text-xs gap-1 bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300"
+            >
               Category: {selectedCategory}
+              <button
+                onClick={handleRemoveCategory}
+                className="ml-1 hover:bg-rose-200 dark:hover:bg-rose-900/60 rounded-full p-0.5"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
             </Badge>
           )}
+
+          {selectedSubCategory && (
+            <Badge
+              variant="secondary"
+              className="text-xs gap-1 bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300"
+            >
+              Sub: {selectedSubCategory}
+              <button
+                onClick={handleRemoveSubCategory}
+                className="ml-1 hover:bg-purple-200 dark:hover:bg-purple-900/60 rounded-full p-0.5"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
+            </Badge>
+          )}
+
           {selectedBrand && (
             <Badge
               variant="secondary"
@@ -307,6 +367,7 @@ export default function HomeShope() {
               </button>
             </Badge>
           )}
+
           <Button
             variant="ghost"
             size="sm"
@@ -359,6 +420,8 @@ export default function HomeShope() {
           <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
             {searchTerm
               ? `No products matched "${searchTerm}". Try another keyword.`
+              : selectedSubCategory
+              ? `No products available in "${selectedSubCategory}" sub-category.`
               : selectedBrand
               ? `No products available for "${selectedBrand}" brand.`
               : "No products available in this category."}
